@@ -1,51 +1,20 @@
-import { Typography, Box } from "@mui/material";
-import { motion } from "framer-motion";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LandingPage from "./LandingPage";
+import AuthPage from "./signuplogin";
 function App() {
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #021524, #023, #034, #056)",
-        backgroundSize: "400% 400%",
-        animation: "gradientAnimation 10s ease infinite",
-        color: "white",
-        textAlign: "center",
-        overflow: "hidden",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 100, scale: 0.8 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-      >
-        <Typography variant="h3" component="h1" sx={{ color: "#00e5ff" }} gutterBottom>
-        Tabriz Injector Presents
-        </Typography>
-      </motion.div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signuplogin" element={< AuthPage/>} />
 
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
-      >
-        <Typography variant="h5" component="h2" sx={{ color: "#b0bec5" }}>
-        Main Page - Still in Early Stage
-        </Typography>
-      </motion.div>
-    </Box>
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
+
 
 
 
