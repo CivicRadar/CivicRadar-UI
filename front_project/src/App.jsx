@@ -1,19 +1,29 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./LandingPage";
 import AuthPage from "./signuplogin";
+import { CitizenProvider } from "./context/CitizenContext";
+import { MayorProvider } from "./context/MayorContext";
+import { AdminProvider } from "./context/AdminContext";
+import "./App.css"
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/signuplogin" element={< AuthPage/>} />
-
-      </Routes>
-    </Router>
+          <Router>
+    <CitizenProvider> {/* ✅ حالا کل برنامه داخل CitizenProvider قرار گرفته است */}
+      <MayorProvider>
+        <AdminProvider>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/signuplogin" element={<AuthPage />} />
+            </Routes>
+        </AdminProvider>
+      </MayorProvider>
+    </CitizenProvider>
+          </Router>
   );
 }
 
 export default App;
+
 
 
 
