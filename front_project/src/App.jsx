@@ -4,6 +4,12 @@ import AuthPage from "./signuplogin";
 import { CitizenProvider } from "./context/CitizenContext";
 import { MayorProvider } from "./context/MayorContext";
 import { AdminProvider } from "./context/AdminContext";
+import CitizenDashboard from "./Dashboard/CitizenDashboard"; // صفحه داشبورد
+import MayorDashboard from  "./Dashboard/MayorDashboard"
+import AdminDashboard from "./Dashboard/AdminDashboard"
+import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن PrivateRoute
+
+
 import "./App.css"
 function App() {
   return (
@@ -14,6 +20,33 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/signuplogin" element={<AuthPage />} />
+              <Route 
+            path="/CitizenDashboard" 
+            element={
+              <PrivateRoute role="Citizen">
+                <CitizenDashboard />
+              </PrivateRoute>
+              
+            } 
+          />
+             <Route 
+            path="/MayorDashboard" 
+            element={
+              <PrivateRoute role="Mayor">
+                <MayorDashboard />
+              </PrivateRoute>
+              
+            } 
+          />
+           <Route 
+            path="/AdminDashboard" 
+            element={
+              <PrivateRoute role="Admin">
+                <AdminDashboard />
+              </PrivateRoute>
+              
+            } 
+          />
             </Routes>
         </AdminProvider>
       </MayorProvider>

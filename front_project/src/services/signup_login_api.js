@@ -16,21 +16,32 @@ export const signupCitizen = async (citizenData) => {
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", 
+            credentials: "include",
             body: JSON.stringify(citizenData),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData?.message || "Signup failed!");
+            console.log("Signup Error Response:", errorData);
+
+            // بررسی اگر پاسخ آبجکت شامل لیست ارورها باشد
+            let errorMessage = "Signup failed!";
+            if (errorData.Email) {
+                errorMessage = errorData.Email[0]; // نمایش اولین پیام ارور ایمیل
+            } else if (typeof errorData === "string") {
+                errorMessage = errorData;
+            }
+
+            throw new Error(errorMessage);
         }
 
         return await response.json();
     } catch (error) {
-        console.error("Error in Citizen Signup:", error.message);
+        console.error("Error in Citizen Signup:", error);
         throw error;
     }
 };
+
 
 //درود دوستان این  پایین  لاگین
 //  برای همه ی پنل های شهردار
