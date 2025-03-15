@@ -23,11 +23,10 @@ export const signupCitizen = async (citizenData) => {
         if (!response.ok) {
             const errorData = await response.json();
             console.log("Signup Error Response:", errorData);
-
-            // بررسی اگر پاسخ آبجکت شامل لیست ارورها باشد
+            console.log(typeof errorData) ;
             let errorMessage = "Signup failed!";
-            if (errorData.Email) {
-                errorMessage = errorData.Email[0]; // نمایش اولین پیام ارور ایمیل
+            if (errorData.detail) {
+                errorMessage = errorData.detail; 
             } else if (typeof errorData === "string") {
                 errorMessage = errorData;
             }
@@ -62,7 +61,8 @@ export const loginCitizenapi = async (loginData) => {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData?.message || "Login failed!");
+            console.log(errorData) ;
+            throw new Error(errorData?.detail || "Login failed!");
         }
 
         return await response.json();
