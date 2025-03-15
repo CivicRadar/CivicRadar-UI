@@ -40,6 +40,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Backdrop from "@mui/material/Backdrop";
 import LoadingComponent from "./Components/LoadingComponent.jsx"; 
 import { useNavigate } from "react-router-dom"; 
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 
 const AuthPage = () => {
@@ -122,7 +124,7 @@ const AuthPage = () => {
           console.log("Citizen Signup Data:", formData);
           response = await signupCitizen(formData);
           console.log("Citizen Signup Success:", response);
-          alert("ثبت‌نام موفقیت‌آمیز بود! ✅");
+          alert("ثبت‌نام موفقیت‌آمیز بود! ✅ برای تایید اکانت ایمیل فرستاده شده را تایید کنید");
         } else {
           console.log("Citizen Login Data:", formData);
           response = await loginCitizenapi({
@@ -197,6 +199,7 @@ const AuthPage = () => {
         "Authentication Error:",
         error.response?.data || error.message
       );
+      // console.log(error) ;
 
       let errorMessage = "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
 
@@ -204,6 +207,9 @@ const AuthPage = () => {
         errorMessage = "user with this Email already exists.";
       } else if (error.message == "your email or password is incorrect") {
         errorMessage = "your email or password is incorrect";
+      }
+      else if (error.message == "Please verify your account via Email.") {
+        errorMessage = "Please verify your account via Email.";
       }
 
       setErrorMessages((prev) => ({ ...prev, [authType]: errorMessage }));
@@ -251,6 +257,7 @@ const AuthPage = () => {
     "pass fail":
       "تعداد زیادی تلاش ناموفق انجام شده است. لطفاً بعداً دوباره امتحان کنید.",
     "full name eror": ".لطفا نام کامل خود را وارد کنید ",
+    "Please verify your account via Email." : "برای تایید اکانت ایمیل فرستاده شده را تایید کنید"
   };
 
   const errorMessageText = errorMessages[authType]

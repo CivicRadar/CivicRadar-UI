@@ -8,6 +8,7 @@ import CitizenDashboard from "./Dashboard/CitizenDashboard"; // صفحه داش�
 import MayorDashboard from  "./Dashboard/MayorDashboard"
 import AdminDashboard from "./Dashboard/AdminDashboard"
 import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن PrivateRoute
+import VerifyEmail from "./verifyemail";
 
 
 import "./App.css"
@@ -47,6 +48,8 @@ function App() {
               
             } 
           />
+                  <Route path="/verifyemail" element={<VerifyEmail />} />
+
             </Routes>
         </AdminProvider>
       </MayorProvider>
