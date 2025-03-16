@@ -1,19 +1,65 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./LandingPage";
 import AuthPage from "./signuplogin";
+import { CitizenProvider } from "./context/CitizenContext";
+import { MayorProvider } from "./context/MayorContext";
+import { AdminProvider } from "./context/AdminContext";
+import CitizenDashboard from "./Dashboard/CitizenDashboard"; // صفحه داشبورد
+import MayorDashboard from  "./Dashboard/MayorDashboard"
+import AdminDashboard from "./Dashboard/AdminDashboard"
+import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن PrivateRoute
+import VerifyEmail from "./verifyemail";
+
+
+import "./App.css"
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/signuplogin" element={< AuthPage/>} />
+          <Router>
+    <CitizenProvider> {/* ✅ حالا کل برنامه داخل CitizenProvider قرار گرفته است */}
+      <MayorProvider>
+        <AdminProvider>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/signuplogin" element={<AuthPage />} />
+              <Route 
+            path="/CitizenDashboard" 
+            element={
+              <PrivateRoute role="Citizen">
+                <CitizenDashboard />
+              </PrivateRoute>
+              
+            } 
+          />
+             <Route 
+            path="/MayorDashboard" 
+            element={
+              <PrivateRoute role="Mayor">
+                <MayorDashboard />
+              </PrivateRoute>
+              
+            } 
+          />
+           <Route 
+            path="/AdminDashboard" 
+            element={
+              <PrivateRoute role="Admin">
+                <AdminDashboard />
+              </PrivateRoute>
+              
+            } 
+          />
+                  <Route path="/verifyemail" element={<VerifyEmail />} />
 
-      </Routes>
-    </Router>
+            </Routes>
+        </AdminProvider>
+      </MayorProvider>
+    </CitizenProvider>
+          </Router>
   );
 }
 
 export default App;
+
 
 
 

@@ -31,7 +31,7 @@ function LandingPage() {
         transition={{ duration: 1.2, ease: "easeOut" }}
       >
         <Typography variant="h3" component="h1" sx={{ color: "#00e5ff" }} gutterBottom>
-          انژکتور تبریز تقدیم میکند 
+          انژکتور تبریز تقدیم میکند با افتخار 
         </Typography>
       </motion.div>
 
