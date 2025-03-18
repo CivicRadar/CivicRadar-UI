@@ -3,7 +3,7 @@ import { TextField, Button, FormControl, FormGroup, FormLabel, Box, Typography, 
 import { getCity, getProvince, addMayor } from '../../services/admin-api';
 
 const SignUpForm = () => {
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [cities, setCities] = useState([]);
@@ -36,7 +36,7 @@ const SignUpForm = () => {
       try {
         const response = await getProvince();
         setProvinces(response);
-        setLoading(false);
+        // setLoading(false);
       } catch (error) {
         console.error("Error fetching Provinces:", error);
       }
