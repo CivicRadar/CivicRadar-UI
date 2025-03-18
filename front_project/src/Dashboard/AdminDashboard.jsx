@@ -28,6 +28,7 @@ import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
 import SignUpForm from "./Admin-features/SigningMayors";
+import MayorsList from "./Admin-features/MayorsList";
 import TabPanel from "../Components/TabPanel"
 const dashboardData = {
   users: 32,
@@ -140,7 +141,7 @@ export default function CitizenDashboard() {
           textTransform: "none",
           fontSize: "16px",
           "&:hover": {
-            bgcolor: "#005a24",
+            bgcolor: "005a2#4",
           },
           mt: 2,
           mb: 2,
@@ -374,6 +375,9 @@ export default function CitizenDashboard() {
           <SignUpForm/>
           </Paper>
           </Box>
+          </TabPanel>
+          <TabPanel value={selectedItem} index={"registered"}>
+            <MayorsList />
           </TabPanel>
 
         </Box>
