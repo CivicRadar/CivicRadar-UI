@@ -17,7 +17,7 @@ const VerifyEmail = () => {
     const token = searchParams.get("token");
     if (token) {
       axios
-        .get(`http://127.0.0.1:8000/auth/email-verification/${token}/`)
+        .get(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/email-verification/${token}/`)
         .then((res) => {
           setStatus(res.data.success ? "success" : "fail");
         })

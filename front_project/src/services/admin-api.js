@@ -1,8 +1,8 @@
-const API_BASE_URL = "http://127.0.0.1:8000/mayor-registry";
+// const API_BASE_URL = "http://127.0.0.1:8000/mayor-registry";
 
 const getProvince = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/provinces/`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/provinces/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -24,7 +24,7 @@ const getProvince = async () => {
 
 export const getCity = async (ProvinceID) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/cities/`, {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/cities/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export const getCity = async (ProvinceID) => {
 
 export const addMayor = async (MayorData) => {
   try {
-      const response = await fetch(`${API_BASE_URL}/add/`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/add/`, {
           method: "POST",
           headers: {
               "Content-Type": "application/json",
