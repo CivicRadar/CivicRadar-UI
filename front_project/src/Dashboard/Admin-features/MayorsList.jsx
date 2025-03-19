@@ -15,22 +15,29 @@ import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-
+import Autocomplete from "@mui/material/Autocomplete";
+import { getProvince, getCity } from "../../services/admin-api";
+import IconButton from "@mui/material/IconButton";
 const MayorsList = () => {
   const [mayors, setMayors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setcities] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState(null);
+  const [selectedcities, setSelectedcities] = useState([]);
   const [selectedMayor, setSelectedMayor] = useState({
     id: "",
     FullName: "",
     Email: "",
     Password: "",
+    cities: [],
   });
 
   const fetchMayors = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/mayor-registry/list/", {
+      const response = await fetch("http://127.0.0.1:8000/mayor-registry/mayor-complex-list/", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -49,13 +56,9 @@ const MayorsList = () => {
     }
   };
 
-  useEffect(() => {
-    fetchMayors();
-  }, []);
-
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/mayor-registry/delete/`, {
+      const response = await fetch("http://127.0.0.1:8000/mayor-registry/delete/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -74,51 +77,197 @@ const MayorsList = () => {
   };
 
   const handleEditClick = (mayor) => {
-    setSelectedMayor({
-      id: mayor.id,
-      FullName: `${mayor.FirstName} ${mayor.LastName}`,
-      Email: mayor.Email,
-      Password: "",
-    });
-    setOpen(true);
+    // Find the mayor in the mayors list by ID
+    const selectedMayorFromList = mayors.find((m) => m.id === mayor.id);
+  
+    if (selectedMayorFromList) {
+      setSelectedMayor({
+        id: selectedMayorFromList.id,
+        FullName: selectedMayorFromList.FullName,
+        Email: selectedMayorFromList.Email,
+        Password: "", // Password remains empty for editing
+        cities: selectedMayorFromList.cities || [], // Use cities directly from the found mayor object
+      });
+      setSelectedcities(selectedMayorFromList.cities || []); // Keep cities intact for adding/removing
+      setOpen(true);
+    } else {
+      alert("خطا: مسئول موردنظر یافت نشد");
+    }
   };
+  
 
   const handleInputChange = (e) => {
-    setSelectedMayor({ ...selectedMayor, [e.target.name]: e.target.value });
+    setSelectedMayor({ ...selectedMayor, [e.target.Name]: e.target.value });
   };
 
-const handleUpdate = async () => {
-  // Validate FullName field
-  if (!selectedMayor.FullName.includes(" ") || selectedMayor.FullName.trim().split(" ").length < 2) {
-    alert("نام و نام خانوادگی باید شامل دو بخش باشد");
-    return; // Stop execution if validation fails
-  }
+  const handleAddCity = async (city) => {
+    console.log(selectedMayor.id);
+    console.log(city.id);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/mayor-registry/add-mayor-city/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          MayorID: selectedMayor.id,
+          CityID: city.id,
+        }),
+      });
 
-  try {
-    const response = await fetch("http://127.0.0.1:8000/mayor-registry/update/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        id: selectedMayor.id,
-        FullName: selectedMayor.FullName,
-        Email: selectedMayor.Email,
-        Password: selectedMayor.Password,
-      }),
-    });
+      if (!response.ok) {
+        throw new Error("خطا در افزودن شهر به مسئول");
+      }
 
-    if (!response.ok) {
-      throw new Error("خطا در ویرایش اطلاعات مسئول");
+      setSelectedcities((prevcities) => [...prevcities, city]);
+      alert("شهر با موفقیت اضافه شد");
+    } catch (error) {
+      alert(`خطا در افزودن شهر: ${error.message}`);
     }
+  };
 
-    alert("اطلاعات مسئول با موفقیت ویرایش شد");
-    setOpen(false);
+  const handleRemoveCity = async (city) => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/mayor-registry/remove-mayor-city/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          MayorID: selectedMayor.id,
+          CityID: city.id, // Use city id for deletion
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("خطا در حذف شهر از مسئول");
+      }
+  
+      setSelectedcities((prevcities) => prevcities.filter((c) => c.id !== city.id)); // Update state to remove city
+      alert("شهر با موفقیت حذف شد");
+    } catch (error) {
+      alert(`خطا در حذف شهر: ${error.message}`);
+    }
+  };
+
+  const handleProvinceChange = async (event, newValue) => {
+    setSelectedProvince(newValue);
+    if (newValue) {
+      try {
+        const data = await getCity(newValue.id);
+        setcities(data);
+      } catch (error) {
+        alert("خطا در دریافت شهرها");
+      }
+    } else {
+      setcities([]);
+    }
+  };
+
+  useEffect(() => {
     fetchMayors();
-  } catch (err) {
-    alert(`خطا در ویرایش: ${err.message}`);
-  }
-};
+  }, []);
 
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const data = await getProvince();
+        setProvinces(data);
+      } catch (error) {
+        alert("خطا در دریافت استان‌ها");
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+
+  const columns = [
+    { field: "FullName", headerName: "نام و نام خانوادگی", flex: 2, headerAlign: "right" },
+    { field: "Email", headerName: "ایمیل", flex: 1, headerAlign: "right" },
+    {
+      field: "cities",
+      headerName: "شهرها",
+      flex: 2,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.row.cities}</Typography>
+      ),
+    },
+    {
+      field: "LastCooperation",
+      headerName: "آخرین همکاری",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">
+          {params.value ? new Date(params.value).toLocaleDateString() : "N/A"}
+        </Typography>
+      ),
+    },
+    {
+      field: "MonthlyReportCheck",
+      headerName: "گزارش ماهانه بررسی",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.value || 0}</Typography>
+      ),
+    },
+    {
+      field: "MonthlyReportCheckPercentage",
+      headerName: "درصد بررسی گزارش ماهانه",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">
+          {`${params.value || 0}%`}
+        </Typography>
+      ),
+    },
+    {
+      field: "MaximumMonthlyReportCheck",
+      headerName: "حداکثر بررسی گزارش ماهانه",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.value || "N/A"}</Typography>
+      ),
+    },
+    {
+      field: "Actions",
+      headerName: "عملیات",
+      flex: 0.5, // Thinner column for actions
+      minWidth: 50,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: "8px" }}>
+          <DeleteIcon
+            sx={{ color: "black", cursor: "pointer", "&:hover": { color: "#005a24" } }}
+            onClick={() => handleDelete(params.row.id)}
+          />
+          <EditIcon
+            sx={{ color: "black", cursor: "pointer", "&:hover": { color: "#005a24" } }}
+            onClick={() => handleEditClick(params.row)}
+          />
+        </Box>
+      ),
+    },
+  ];
+  
+
+  const rows = mayors.map((mayor) => {
+    return {
+      id: mayor.id,
+      FullName: mayor.FullName,
+      Email: mayor.Email,
+      cities: mayor.cities ? mayor.cities.map((city) => city.Name).join(", ") : "", // Display city names
+      LastCooperation: mayor.LastCooperation || "N/A", // Default to "N/A" if null
+      MonthlyReportCheck: mayor.monthly_report_check || 0, // Default to 0
+      MonthlyReportCheckPercentage: mayor.monthly_report_check_percentage || 0, // Default to 0
+      MaximumMonthlyReportCheck: mayor.maximum_monthly_report_check || "N/A", // Default to "N/A" if null
+    };
+  });
+  
 
   if (loading) {
     return (
@@ -135,40 +284,6 @@ const handleUpdate = async () => {
       </Box>
     );
   }
-
-  const columns = [
-    { field: "FirstName", headerName: "نام", flex: 1, headerAlign: "right" },
-    { field: "LastName", headerName: "نام خانوادگی", flex: 1, headerAlign: "right" },
-    { field: "Email", headerName: "ایمیل", flex: 1, headerAlign: "right" },
-    {
-      field: "Actions",
-      headerName: "عملیات",
-      flex: 1,
-      headerAlign: "right",
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: "8px" }}>
-          <DeleteIcon
-            sx={{ color: "black", cursor: "pointer", "&:hover": { color: "#005a24" } }}
-            onClick={() => handleDelete(params.row.id)}
-          />
-          <EditIcon
-            sx={{ color: "black", cursor: "pointer", "&:hover": { color: "#005a24" } }}
-            onClick={() => handleEditClick(params.row)}
-          />
-        </Box>
-      ),
-    },
-  ];
-
-  const rows = mayors.map((mayor) => {
-    const [firstName, lastName] = mayor.FullName.split(" ");
-    return {
-      id: mayor.id,
-      FirstName: firstName || "",
-      LastName: lastName || "",
-      Email: mayor.Email,
-    };
-  });
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
@@ -198,41 +313,124 @@ const handleUpdate = async () => {
         />
       </Box>
 
-      {/* Dialog برای ویرایش اطلاعات */}
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle
-          sx={{
-            textAlign: "center",
-            fontWeight: "bold",
-          }}
-        >
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           ویرایش مسئول
         </DialogTitle>
         <DialogContent>
-          <TextField label="نام و نام خانوادگی" name="FullName" fullWidth margin="dense" value={selectedMayor.FullName} onChange={handleInputChange} />
-          <TextField label="ایمیل" name="Email" fullWidth margin="dense" value={selectedMayor.Email} onChange={handleInputChange} />
-          <TextField label="رمز عبور جدید" name="Password" type="Password" fullWidth margin="dense" value={selectedMayor.Password} onChange={handleInputChange} />
+          <TextField
+            label="نام و نام خانوادگی"
+            Name="FullName"
+            fullWidth
+            margin="dense"
+            value={selectedMayor.FullName}
+            onChange={handleInputChange}
+          />
+          <TextField
+            label="ایمیل"
+            Name="Email"
+            fullWidth
+            margin="dense"
+            value={selectedMayor.Email}
+            onChange={handleInputChange}
+          />
+          <TextField
+            label="رمز عبور جدید"
+            Name="Password"
+            type="Password"
+            fullWidth
+            margin="dense"
+            value={selectedMayor.Password}
+            onChange={handleInputChange}
+          />
+          {/* Current cities */}
+          <Typography variant="body2" sx={{ marginTop: "10px" }}>
+            شهرهای فعلی:
+          </Typography>
+          <Box
+            display="flex"
+            flexWrap="wrap"
+            gap="8px"
+            sx={{ marginTop: "8px" }}
+          >
+            {selectedcities.map((city) => (
+              <Box
+                key={city.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "4px 8px",
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: "20px",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  {city.Name} {/* Display city name */}
+                </Typography>
+                <IconButton
+                  onClick={() => handleRemoveCity(city)} // Call the remove function
+                  size="small"
+                  sx={{
+                    color: "red",
+                    "&:hover": {
+                      backgroundColor: "#ffe5e5",
+                    },
+                  }}
+                >
+                  <DeleteIcon fontSize="small" /> {/* Red trash icon */}
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+          {/* Province Dropdown */}
+          <Autocomplete
+            options={provinces}
+            getOptionLabel={(option) => option.Name}
+            value={selectedProvince}
+            onChange={handleProvinceChange}
+            renderInput={(params) => (
+              <TextField {...params} label="استان" fullWidth margin="dense" />
+            )}
+          />
+
+          {/* cities Dropdown */}
+          <Autocomplete
+            options={cities}
+            getOptionLabel={(option) => option.Name} // Use city.Name for dropdown
+            value={null} // Reset after each add
+            onChange={(event, newCity) => {
+              if (newCity) handleAddCity(newCity);
+            }}
+            renderInput={(params) => (
+              <TextField {...params} label="افزودن شهر جدید" fullWidth margin="dense" />
+            )}
+          />
         </DialogContent>
         <DialogActions>
-            <Button 
-              onClick={() => setOpen(false)} 
-              sx={{ color: "#005a24", fontWeight: "bold" }}
-            >
-              لغو
-            </Button>
-            <Button
-              onClick={handleUpdate}
-              sx={{
-                backgroundColor: "#005a24",
-                color: "white",
-                "&:hover": { backgroundColor: "#003d19" },
-              }}
-              variant="contained"
-            >
-              ذخیره
-            </Button>
-          </DialogActions>
-
+          <Button
+            onClick={() => setOpen(false)}
+            sx={{ color: "#005a24", fontWeight: "bold" }}
+          >
+            لغو
+          </Button>
+          <Button
+            onClick={fetchMayors}
+            sx={{
+              backgroundColor: "#005a24",
+              color: "white",
+              "&:hover": { backgroundColor: "#003d19" },
+            }}
+            variant="contained"
+          >
+            ذخیره
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
