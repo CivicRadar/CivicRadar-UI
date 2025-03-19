@@ -24,9 +24,11 @@ const MayorsList = () => {
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
   const [provinces, setProvinces] = useState([]);
-  const [cities, setcities] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [selectedcities, setSelectedcities] = useState([]);
+  const [cities, setcities] = useState([]);
+  const [citiesToAdd, setcitiesToAdd] = useState([]);
+  const [citiesToRemove, setcitiesToRemove] = useState([]);
   const [selectedMayor, setSelectedMayor] = useState({
     id: "",
     FullName: "",
@@ -34,6 +36,8 @@ const MayorsList = () => {
     Password: "",
     cities: [],
   });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Controls the warning dialog
+  const [mayorToDelete, setMayorToDelete] = useState(null); // Tracks the mayor selected for deletion
 
   const fetchMayors = async () => {
     try {
@@ -54,6 +58,11 @@ const MayorsList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteIconClick = (id) => {
+    setMayorToDelete(id); // Set the mayor to delete
+    setDeleteDialogOpen(true); // Open confirmation dialog
   };
 
   const handleDelete = async (id) => {
@@ -100,55 +109,68 @@ const MayorsList = () => {
     setSelectedMayor({ ...selectedMayor, [e.target.Name]: e.target.value });
   };
 
-  const handleAddCity = async (city) => {
-    console.log(selectedMayor.id);
-    console.log(city.id);
-    try {
-      const response = await fetch("http://127.0.0.1:8000/mayor-registry/add-mayor-city/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          MayorID: selectedMayor.id,
-          CityID: city.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("خطا در افزودن شهر به مسئول");
-      }
-
-      setSelectedcities((prevcities) => [...prevcities, city]);
-      alert("شهر با موفقیت اضافه شد");
-    } catch (error) {
-      alert(`خطا در افزودن شهر: ${error.message}`);
+  const handleAddCity = (city) => {
+    // Avoid duplicates: check if the city is already in selectedcities or citiesToAdd
+    if (
+      !selectedcities.some((c) => c.id === city.id) &&
+      !citiesToAdd.some((c) => c.id === city.id)
+    ) {
+      setcitiesToAdd([...citiesToAdd, city]); // Add to citiesToAdd
+      setSelectedcities([...selectedcities, city]); // Update UI
     }
   };
-
-  const handleRemoveCity = async (city) => {
-    try {
-      const response = await fetch("http://127.0.0.1:8000/mayor-registry/remove-mayor-city/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          MayorID: selectedMayor.id,
-          CityID: city.id, // Use city id for deletion
-        }),
-      });
+  const handleRemoveCity = (city) => {
+    // Check if the city is in citiesToAdd (i.e., undo the add action)
+    if (citiesToAdd.some((c) => c.id === city.id)) {
+      setcitiesToAdd(citiesToAdd.filter((c) => c.id !== city.id)); // Remove from citiesToAdd
+    } else {
+      setcitiesToRemove([...citiesToRemove, city]); // Add to citiesToRemove
+    }
   
-      if (!response.ok) {
-        throw new Error("خطا در حذف شهر از مسئول");
+    // Update the UI
+    setSelectedcities(selectedcities.filter((c) => c.id !== city.id));
+  };
+    
+  const handleUpdate = async () => {
+    try {
+      // Handle additions
+      for (const city of citiesToAdd) {
+        await fetch("http://127.0.0.1:8000/mayor-registry/add-mayor-city/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            MayorID: selectedMayor.id,
+            CityID: city.id,
+          }),
+        });
       }
   
-      setSelectedcities((prevcities) => prevcities.filter((c) => c.id !== city.id)); // Update state to remove city
-      alert("شهر با موفقیت حذف شد");
+      // Handle removals
+      for (const city of citiesToRemove) {
+        await fetch("http://127.0.0.1:8000/mayor-registry/remove-mayor-city/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            MayorID: selectedMayor.id,
+            CityID: city.id,
+          }),
+        });
+      }
+  
+      alert("اطلاعات با موفقیت بروزرسانی شد");
+      setOpen(false); // Close the dialog
+      fetchMayors(); // Refresh the list
     } catch (error) {
-      alert(`خطا در حذف شهر: ${error.message}`);
+      alert(`خطا در بروزرسانی اطلاعات: ${error.message}`);
     }
   };
+  
 
   const handleProvinceChange = async (event, newValue) => {
     setSelectedProvince(newValue);
@@ -243,7 +265,7 @@ const MayorsList = () => {
         <Box sx={{ display: "flex", gap: "8px" }}>
           <DeleteIcon
             sx={{ color: "black", cursor: "pointer", "&:hover": { color: "#005a24" } }}
-            onClick={() => handleDelete(params.row.id)}
+            onClick={() => handleDeleteIconClick(params.row.id)}
           />
           <EditIcon
             sx={{ color: "black", cursor: "pointer", "&:hover": { color: "#005a24" } }}
@@ -420,7 +442,7 @@ const MayorsList = () => {
             لغو
           </Button>
           <Button
-            onClick={fetchMayors}
+            onClick={handleUpdate}
             sx={{
               backgroundColor: "#005a24",
               color: "white",
@@ -429,6 +451,38 @@ const MayorsList = () => {
             variant="contained"
           >
             ذخیره
+          </Button>
+        </DialogActions>
+      </Dialog>
+        <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)} // Close dialog if user cancels
+      >
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+          هشدار
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            آیا مطمئن هستید که می‌خواهید مسئول {mayorToDelete?.FullName} را حذف کنید؟
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)} // Close dialog without deleting
+            sx={{ color: "gray", fontWeight: "bold" }}
+          >
+            لغو
+          </Button>
+          <Button
+            onClick={() => handleDelete(mayorToDelete.id)} // Proceed with deletion
+            sx={{
+              backgroundColor: "red",
+              color: "white",
+              "&:hover": { backgroundColor: "#cc0000" },
+            }}
+            variant="contained"
+          >
+            حذف
           </Button>
         </DialogActions>
       </Dialog>
