@@ -372,7 +372,7 @@ export default function CitizenDashboard() {
                   </Typography>
                 </Box>
           
-          <SignUpForm/>
+          <SignUpForm gotoregisted={() => setSelectedItem("registered")}/>
           </Paper>
           </Box>
           </TabPanel>

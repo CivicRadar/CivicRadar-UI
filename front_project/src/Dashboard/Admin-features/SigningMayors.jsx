@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, FormControl, FormGroup, FormLabel, Box, Typography, Autocomplete } from '@mui/material';
 import { getCity, getProvince, addMayor } from '../../services/admin-api';
 
-const SignUpForm = () => {
+const SignUpForm = ({gotoregisted}) => {
   // const [loading, setLoading] = useState(true);
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
@@ -120,15 +120,31 @@ const SignUpForm = () => {
       console.log("Form submitted successfully:", response);
       alert("ثبت نام با موفقیت انجام شد!");
     } catch (error) {
-      console.error("Error submitting form:", error);
-
-      // Handle specific server-side error messages
-      let errorMessage =
-        error.response?.data?.message || "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
+      console.error(
+        "Authentication Error:",
+        error.response?.data || error.message
+      );
+      // console.log(error) ;
+      //let errorMessage = "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
       setErrorMessages((prev) => ({
         ...prev,
-        api: errorMessage,
-      }));
+        email: "فرمت این ایمیل استاندار نیست یا تکراری است ❌",
+      }))
+    }س
+  };
+
+  const handleProvinceChange = async (event, newValue) => {
+    setSelectedCity(null)
+    setSelectedProvince(newValue);
+    if (newValue) {
+      try {
+        const data = await getCity(newValue.id);
+        setCities(data);
+      } catch (error) {
+        alert("خطا در دریافت شهرها");
+      }
+    } else {
+      setCities([]);
     }
   };
 
@@ -189,11 +205,12 @@ const SignUpForm = () => {
         }}
       >
         <FormGroup>
+        <FormLabel>اطلاعات سازمانی</FormLabel>
           <Autocomplete
             options={provinces}
             getOptionLabel={(option) => option.Name}
             value={selectedProvince}
-            onChange={(e, newValue) => setSelectedProvince(newValue)}
+            onChange={handleProvinceChange}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -246,6 +263,14 @@ const SignUpForm = () => {
         <Button variant="contained" color="success" type="submit">
           ثبت
         </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={gotoregisted}
+        >
+          لیست مسئولین ثبت شده
+        </Button>
+
         <Button
         variant="outlined"
         color="error"
