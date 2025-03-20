@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, FormControl, FormGroup, FormLabel, Box, Typography, Autocomplete } from '@mui/material';
 import { getCity, getProvince, addMayor } from '../../services/admin-api';
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
 
 const SignUpForm = ({gotoregisted}) => {
   // const [loading, setLoading] = useState(true);
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [cities, setCities] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCities, setSelectedCities] = useState([]); // For multiple cities
 
   // Form data state
   const [fullName, setFullName] = useState("");
@@ -62,11 +64,16 @@ const SignUpForm = ({gotoregisted}) => {
   // Form submission handler with enhanced error handling
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Clear previous error messages
     setErrorMessages({});
 
-    // Validation checks
+    if (selectedCities.length === 0) {
+      setErrorMessages((prev) => ({
+        ...prev,
+        city: "لطفاً حداقل یک شهر انتخاب کنید ❌",
+      }));
+      return;
+    }
+
     if (fullName.trim() === "") {
       setErrorMessages((prev) => ({
         ...prev,
@@ -100,19 +107,11 @@ const SignUpForm = ({gotoregisted}) => {
       return;
     }
 
-    if (!selectedCity) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        city: "لطفاً شهر خود را انتخاب کنید ❌",
-      }));
-      return;
-    }
-
     const MayorData = {
       FullName: fullName,
       Email: email,
       Password: password,
-      CityID: selectedCity?.id,
+      cities: selectedCities.map((city) => ({ id: city.id })),
     };
 
     try {
@@ -124,17 +123,25 @@ const SignUpForm = ({gotoregisted}) => {
         "Authentication Error:",
         error.response?.data || error.message
       );
-      // console.log(error) ;
-      //let errorMessage = "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
       setErrorMessages((prev) => ({
         ...prev,
         email: "فرمت این ایمیل استاندار نیست یا تکراری است ❌",
       }))
-    }س
+    }
   };
 
+  const handleCitySelect = (event, newValue) => {
+    if (newValue && !selectedCities.find((city) => city.id === newValue.id)) {
+      setSelectedCities((prev) => [...prev, newValue]);
+    }
+  };
+
+  const handleCityRemove = (id) => {
+    setSelectedCities((prev) => prev.filter((city) => city.id !== id));
+  };
+
+
   const handleProvinceChange = async (event, newValue) => {
-    setSelectedCity(null)
     setSelectedProvince(newValue);
     if (newValue) {
       try {
@@ -227,8 +234,7 @@ const SignUpForm = ({gotoregisted}) => {
           <Autocomplete
             options={cities}
             getOptionLabel={(option) => option.Name}
-            value={selectedCity}
-            onChange={(e, newValue) => setSelectedCity(newValue)}
+            onChange={handleCitySelect}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -236,12 +242,37 @@ const SignUpForm = ({gotoregisted}) => {
                 variant="outlined"
                 fullWidth
                 margin="normal"
-                disabled={!selectedProvince}
-                error={!!errorMessages.city}
-                helperText={errorMessages.city}
               />
             )}
           />
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, marginTop: 2 }}>
+          {selectedCities.map((city) => (
+            <Box
+              key={city.id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#e0e0e0",
+                borderRadius: "16px",
+                padding: "0 8px",
+              }}
+            >
+              <Typography variant="body2">{city.Name}</Typography>
+              <IconButton
+                  onClick={() => handleCityRemove(city.id)} // Call the remove function
+                  size="small"
+                  sx={{
+                    color: "red",
+                    "&:hover": {
+                      backgroundColor: "#ffe5e5",
+                    },
+                  }}
+                >
+                  <DeleteIcon fontSize="small" /> {/* Red trash icon */}
+                </IconButton>
+            </Box>
+          ))}
+        </Box>
         </FormGroup>
       </Box>
 
@@ -264,12 +295,13 @@ const SignUpForm = ({gotoregisted}) => {
           ثبت
         </Button>
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
+          color="success" // Same color as the submit button
           onClick={gotoregisted}
         >
           لیست مسئولین ثبت شده
         </Button>
+
 
         <Button
         variant="outlined"
@@ -280,8 +312,8 @@ const SignUpForm = ({gotoregisted}) => {
           setEmail("");
           setPassword("");
           setSelectedProvince(null);
-          setCities([]); // Clear cities when province is reset
-          setSelectedCity(null);
+          setSelectedCities([]);
+          setCities([]);
           setErrorMessages({});
         }}
       >

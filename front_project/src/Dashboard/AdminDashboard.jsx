@@ -22,6 +22,7 @@ import {
   Add,
   Menu as MenuIcon,
   AccountCircle,
+  Campaign,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/lgo.png";
@@ -129,42 +130,44 @@ export default function CitizenDashboard() {
 
       <Button
       onClick={() => setSelectedItem("registerform")}
-        sx={{
-          bgcolor: "#007E33",
-          color: "white",
-          fontWeight: "bold",
-          borderRadius: "25px",
-          padding: "10px 24px",
-          minWidth: "240px",
-          display: "flex",
-          alignItems: "center",
-          textTransform: "none",
-          fontSize: "16px",
-          "&:hover": {
-            bgcolor: "005a2#4",
-          },
-          mt: 2,
-          mb: 2,
-        }}
-      >
-        ثبت نام مسئولین
-        {
-          <span style={{ position: "relative", display: "inline-block" }}>
-            <Person sx={{ fontSize: 24 }} />
-            <Add
-              sx={{
-                fontSize: 14,
-                position: "absolute",
-                top: 0,
-                left: -5,
-                backgroundColor: "white",
-                borderRadius: "50%",
-                color: "green",
-              }}
-            />
-          </span>
-        }
-      </Button>
+      sx={{
+        bgcolor: selectedItem === "registerform" ? "transparent" : "#007E33",
+        color: selectedItem === "registerform" ? "#007E33" : "white",
+        fontWeight: "bold",
+        border: selectedItem === "registerform" ? "2px solid #007E33" : "none",
+        borderRadius: "25px",
+        padding: "10px 24px",
+        minWidth: "240px",
+        display: "flex",
+        alignItems: "center",
+        textTransform: "none",
+        fontSize: "16px",
+        "&:hover": {
+          bgcolor: selectedItem === "registerform" ? "rgba(0, 126, 51, 0.1)" : "#005a24",
+        },
+        mt: 2,
+        mb: 2,
+      }}
+    >
+      ثبت نام مسئولین
+      {
+        <span style={{ position: "relative", display: "inline-block" }}>
+          <Person sx={{ fontSize: 24 }} />
+          <Add
+            sx={{
+              fontSize: 14,
+              position: "absolute",
+              top: 0,
+              left: -5,
+              backgroundColor: "white",
+              borderRadius: "50%",
+              color: "green",
+            }}
+          />
+        </span>
+      }
+    </Button>
+
 
       {menuItems.map((item) => (
         <Button
@@ -297,7 +300,7 @@ export default function CitizenDashboard() {
                   title: "تعداد کل کاربران",
                   value: dashboardData.users,
                   icon: <Person color="success" />,
-                  color: "#E3F2FD",
+                  color: "#E8F5E9",
                 },
                 {
                   title: "تعداد کل مسئولین",
@@ -308,8 +311,8 @@ export default function CitizenDashboard() {
                 {
                   title: "تعداد گزارشات امروز",
                   value: dashboardData.reportsToday,
-                  icon: <Notifications color="primary" />,
-                  color: "#E8F5E9",
+                  icon: <Campaign color="primary" />,
+                  color: "#E3F2FD",
                 },
               ].map((item, index) => (
                 <Grid item xs={12} sm={4} key={index}>
