@@ -83,6 +83,7 @@ const MayorsList = () => {
     } catch (err) {
       alert(`خطا در حذف: ${err.message}`);
     }
+    setDeleteDialogOpen(false);
   };
 
   const handleEditClick = (mayor) => {
@@ -463,7 +464,7 @@ const MayorsList = () => {
         </DialogTitle>
         <DialogContent>
           <Typography variant="body2">
-            آیا مطمئن هستید که می‌خواهید مسئول {mayorToDelete?.FullName} را حذف کنید؟
+            آیا مطمئن هستید که می‌خواهید مسئول را حذف کنید؟
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -474,7 +475,7 @@ const MayorsList = () => {
             لغو
           </Button>
           <Button
-            onClick={() => handleDelete(mayorToDelete.id)} // Proceed with deletion
+            onClick={() => handleDelete(mayorToDelete)} // Proceed with deletion
             sx={{
               backgroundColor: "red",
               color: "white",
