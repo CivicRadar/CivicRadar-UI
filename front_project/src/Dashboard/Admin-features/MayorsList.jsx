@@ -152,7 +152,7 @@ const MayorsList = () => {
   const [rowId, setRowId] = useState(null);
   const fetchMayors = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/mayor-registry/mayor-complex-list/", {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/mayor-complex-list/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -178,7 +178,7 @@ const MayorsList = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/mayor-registry/delete/", {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/delete/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -247,7 +247,7 @@ const MayorsList = () => {
     try {
       // Handle additions
       for (const city of citiesToAdd) {
-        await fetch("http://127.0.0.1:8000/mayor-registry/add-mayor-city/", {
+        await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/add-mayor-city/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -262,7 +262,7 @@ const MayorsList = () => {
   
       // Handle removals
       for (const city of citiesToRemove) {
-        await fetch("http://127.0.0.1:8000/mayor-registry/remove-mayor-city/", {
+        await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/remove-mayor-city/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -1,5 +1,3 @@
-// const API_BASE_URL = "http://127.0.0.1:8000/mayor-registry";
-
 const getProvince = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/provinces/`, {
