@@ -60,7 +60,7 @@ export const addMayor = async (MayorData) => {
             FullName: MayorData.FullName,
             Email: MayorData.Email,
             Password: MayorData.Password,
-            CityID: MayorData.CityID
+            cities: MayorData.cities
           }),
       });
 

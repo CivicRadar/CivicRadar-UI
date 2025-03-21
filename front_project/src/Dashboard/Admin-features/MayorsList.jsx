@@ -128,7 +128,6 @@ const faIR = {
       `${from}-${to} از ${count !== -1 ? count : `بیش از ${to}`}`,
   }
 };
-
 const MayorsList = () => {
   const [mayors, setMayors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -151,7 +150,6 @@ const MayorsList = () => {
   const [mayorToDelete, setMayorToDelete] = useState(null); // Tracks the mayor selected for deletion
   const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
-
   const fetchMayors = async () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/mayor-registry/mayor-complex-list/", {
@@ -349,6 +347,55 @@ const MayorsList = () => {
       headerName: "گزارش ماهانه",
       width: 130,
       editable: false,
+    },
+    {
+      field: "cities",
+      headerName: "شهرها",
+      flex: 2,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.row.cities}</Typography>
+      ),
+    },
+    {
+      field: "LastCooperation",
+      headerName: "آخرین همکاری",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">
+          {params.value ? new Date(params.value).toLocaleDateString() : "N/A"}
+        </Typography>
+      ),
+    },
+    {
+      field: "MonthlyReportCheck",
+      headerName: "گزارش ماهانه بررسی",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.value || 0}</Typography>
+      ),
+    },
+    {
+      field: "MonthlyReportCheckPercentage",
+      headerName: "درصد بررسی گزارش ماهانه",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">
+          {`${params.value || 0}%`}
+        </Typography>
+      ),
+    },
+    {
+      field: "MaximumMonthlyReportCheck",
+      headerName: "حداکثر بررسی گزارش ماهانه",
+      flex: 1,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.value || "N/A"}</Typography>
+      ),
     },
     {
       field: "Actions",

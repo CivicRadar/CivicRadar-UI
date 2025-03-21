@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, FormControl, FormGroup, FormLabel, Box, Typography, Autocomplete } from '@mui/material';
 import { getCity, getProvince, addMayor } from '../../services/admin-api';
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
 
-const SignUpForm = () => {
+const SignUpForm = ({gotoregisted}) => {
   // const [loading, setLoading] = useState(true);
   const [provinces, setProvinces] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [cities, setCities] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCities, setSelectedCities] = useState([]); // For multiple cities
 
   // Form data state
   const [fullName, setFullName] = useState("");
@@ -62,11 +64,16 @@ const SignUpForm = () => {
   // Form submission handler with enhanced error handling
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Clear previous error messages
     setErrorMessages({});
 
-    // Validation checks
+    if (selectedCities.length === 0) {
+      setErrorMessages((prev) => ({
+        ...prev,
+        city: "لطفاً حداقل یک شهر انتخاب کنید ❌",
+      }));
+      return;
+    }
+
     if (fullName.trim() === "") {
       setErrorMessages((prev) => ({
         ...prev,
@@ -100,19 +107,11 @@ const SignUpForm = () => {
       return;
     }
 
-    if (!selectedCity) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        city: "لطفاً شهر خود را انتخاب کنید ❌",
-      }));
-      return;
-    }
-
     const MayorData = {
       FullName: fullName,
       Email: email,
       Password: password,
-      CityID: selectedCity?.id,
+      cities: selectedCities.map((city) => ({ id: city.id })),
     };
 
     try {
@@ -120,15 +119,39 @@ const SignUpForm = () => {
       console.log("Form submitted successfully:", response);
       alert("ثبت نام با موفقیت انجام شد!");
     } catch (error) {
-      console.error("Error submitting form:", error);
-
-      // Handle specific server-side error messages
-      let errorMessage =
-        error.response?.data?.message || "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
+      console.error(
+        "Authentication Error:",
+        error.response?.data || error.message
+      );
       setErrorMessages((prev) => ({
         ...prev,
-        api: errorMessage,
-      }));
+        email: "فرمت این ایمیل استاندار نیست یا تکراری است ❌",
+      }))
+    }
+  };
+
+  const handleCitySelect = (event, newValue) => {
+    if (newValue && !selectedCities.find((city) => city.id === newValue.id)) {
+      setSelectedCities((prev) => [...prev, newValue]);
+    }
+  };
+
+  const handleCityRemove = (id) => {
+    setSelectedCities((prev) => prev.filter((city) => city.id !== id));
+  };
+
+
+  const handleProvinceChange = async (event, newValue) => {
+    setSelectedProvince(newValue);
+    if (newValue) {
+      try {
+        const data = await getCity(newValue.id);
+        setCities(data);
+      } catch (error) {
+        alert("خطا در دریافت شهرها");
+      }
+    } else {
+      setCities([]);
     }
   };
 
@@ -189,11 +212,12 @@ const SignUpForm = () => {
         }}
       >
         <FormGroup>
+        <FormLabel>اطلاعات سازمانی</FormLabel>
           <Autocomplete
             options={provinces}
             getOptionLabel={(option) => option.Name}
             value={selectedProvince}
-            onChange={(e, newValue) => setSelectedProvince(newValue)}
+            onChange={handleProvinceChange}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -210,8 +234,7 @@ const SignUpForm = () => {
           <Autocomplete
             options={cities}
             getOptionLabel={(option) => option.Name}
-            value={selectedCity}
-            onChange={(e, newValue) => setSelectedCity(newValue)}
+            onChange={handleCitySelect}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -219,12 +242,37 @@ const SignUpForm = () => {
                 variant="outlined"
                 fullWidth
                 margin="normal"
-                disabled={!selectedProvince}
-                error={!!errorMessages.city}
-                helperText={errorMessages.city}
               />
             )}
           />
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, marginTop: 2 }}>
+          {selectedCities.map((city) => (
+            <Box
+              key={city.id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#e0e0e0",
+                borderRadius: "16px",
+                padding: "0 8px",
+              }}
+            >
+              <Typography variant="body2">{city.Name}</Typography>
+              <IconButton
+                  onClick={() => handleCityRemove(city.id)} // Call the remove function
+                  size="small"
+                  sx={{
+                    color: "red",
+                    "&:hover": {
+                      backgroundColor: "#ffe5e5",
+                    },
+                  }}
+                >
+                  <DeleteIcon fontSize="small" /> {/* Red trash icon */}
+                </IconButton>
+            </Box>
+          ))}
+        </Box>
         </FormGroup>
       </Box>
 
@@ -247,6 +295,15 @@ const SignUpForm = () => {
           ثبت
         </Button>
         <Button
+          variant="outlined"
+          color="success" // Same color as the submit button
+          onClick={gotoregisted}
+        >
+          لیست مسئولین ثبت شده
+        </Button>
+
+
+        <Button
         variant="outlined"
         color="error"
         onClick={() => {
@@ -255,8 +312,8 @@ const SignUpForm = () => {
           setEmail("");
           setPassword("");
           setSelectedProvince(null);
-          setCities([]); // Clear cities when province is reset
-          setSelectedCity(null);
+          setSelectedCities([]);
+          setCities([]);
           setErrorMessages({});
         }}
       >
