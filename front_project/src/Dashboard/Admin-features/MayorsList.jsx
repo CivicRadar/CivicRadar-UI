@@ -417,7 +417,7 @@ const MayorsList = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+    <Box display="flex" flexDirection="column" alignItems="center" mt={4}  width="100%">
       <Typography
         variant="h3"
         component="h3"
@@ -428,13 +428,34 @@ const MayorsList = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          paddingLeft: { xs: '60px', sm: 0 }, // Add padding to the right for mobile
+
           gap: "10px",
+          fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' }, // استایل ریسپانسیو برای تایتل
+          flexWrap: { xs: 'wrap', sm: 'nowrap' } // در موبایل آیکون‌ها و متن در خط جدید قرار بگیرند
         }}
       >
         <EngineeringIcon sx={{ color: "green" }} />
         <FormatListBulletedIcon sx={{ color: "green" }} />
         لیست مسئولین ثبت‌شده
       </Typography>
+      <Box 
+      sx={{ 
+        width: '90%',
+        overflow: 'auto', // اضافه کردن اسکرول افقی
+        maxWidth: '100vw', // حداکثر عرض برابر با عرض ویوپورت
+        '&::-webkit-scrollbar': {
+          height: '8px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,90,36,0.5)',
+          borderRadius: '4px',
+        }
+      }}
+    >
+       <Box sx={{ 
+        minWidth: { xs: '800px', sm: '100%' , md: '100%'  }, 
+      }}>
 
       <DataGrid
         rows={rows}
@@ -447,6 +468,7 @@ const MayorsList = () => {
           top: params.isFirstVisible ? 0 : 5,
           bottom: params.isLastVisible ? 0 : 5,
         })}
+        autoHeight 
         sx={{
           direction: "rtl",
           border: 'none',
@@ -458,7 +480,7 @@ const MayorsList = () => {
             backgroundColor: "#f5f5f5",
             borderBottom: '2px solid #005a24',
             direction: 'rtl',
-            fontSize: '1rem',
+            fontSize: { xs: '0.9rem', md: '1rem' }, // فونت ریسپانسیو برای هدر
             fontWeight: 'bold',
           },
           '& .MuiDataGrid-columnHeaderTitle': {
@@ -469,18 +491,24 @@ const MayorsList = () => {
           '& .MuiDataGrid-cell': {
             textAlign: 'right',
             direction: 'rtl',
-            fontSize: '0.9rem',
+            fontSize: { xs: '0.8rem', md: '0.9rem' }, // فونت ریسپانسیو برای سلول‌ها
             padding: '10px',
           },
           '& .MuiDataGrid-footerContainer': {
             borderTop: '1px solid rgba(224, 224, 224, 1)',
-          }
+            fontSize: { xs: '0.8rem', md: '0.9rem' }, // فونت ریسپانسیو برای فوتر
+          },
+          '& .MuiTablePagination-root': {
+              fontSize: { xs: '0.8rem', md: '0.9rem' }, // سایز فونت ریسپانسیو برای پیجینیشن
+            }
         }}
         onCellEditCommit={(params) => setRowId(params.id)}
         localeText={faIR}
       />
+      </Box>
+  </Box>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth   maxWidth="sm" >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           ویرایش مسئول
         </DialogTitle>
@@ -620,6 +648,8 @@ const MayorsList = () => {
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)} // Close dialog if user cancels
+        fullWidth
+        maxWidth="xs" // تنظیم حداکثر عرض دیالوگ برای هشدار
       >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           هشدار
