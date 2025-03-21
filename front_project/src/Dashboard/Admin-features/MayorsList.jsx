@@ -18,6 +18,116 @@ import EditIcon from "@mui/icons-material/Edit";
 import Autocomplete from "@mui/material/Autocomplete";
 import { getProvince, getCity } from "../../services/admin-api";
 import IconButton from "@mui/material/IconButton";
+import { gridClasses } from '@mui/x-data-grid';
+import { grey } from '@mui/material/colors';
+import moment from 'moment';
+
+const faIR = {
+  // Root
+  noRowsLabel: 'سطری موجود نیست',
+  noResultsOverlayLabel: 'نتیجه‌ای یافت نشد.',
+  
+  // Density selector toolbar button text
+  toolbarDensity: 'تراکم',
+  toolbarDensityLabel: 'تراکم',
+  toolbarDensityCompact: 'فشرده',
+  toolbarDensityStandard: 'استاندارد',
+  toolbarDensityComfortable: 'راحت',
+
+  // Columns selector toolbar button text
+  toolbarColumns: 'ستون‌ها',
+  toolbarColumnsLabel: 'ستون‌ها را انتخاب کنید',
+
+  // Filters toolbar button text
+  toolbarFilters: 'فیلترها',
+  toolbarFiltersLabel: 'نمایش فیلترها',
+  toolbarFiltersTooltipHide: 'مخفی کردن فیلترها',
+  toolbarFiltersTooltipShow: 'نمایش فیلترها',
+  toolbarFiltersTooltipActive: (count) =>
+    count !== 1 ? `${count} فیلتر فعال` : `${count} فیلتر فعال`,
+
+  // Quick filter toolbar field
+  toolbarQuickFilterPlaceholder: 'جستجو...',
+  toolbarQuickFilterLabel: 'جستجو',
+  toolbarQuickFilterDeleteIconLabel: 'پاک کردن',
+
+  // Export selector toolbar button text
+  toolbarExport: 'خروجی',
+  toolbarExportLabel: 'خروجی',
+  toolbarExportCSV: 'دانلود CSV',
+  toolbarExportPrint: 'چاپ',
+
+  // Columns panel text
+  columnsPanelTextFieldLabel: 'پیدا کردن ستون',
+  columnsPanelTextFieldPlaceholder: 'عنوان ستون',
+  columnsPanelDragIconLabel: 'جابجایی ستون',
+  columnsPanelShowAllButton: 'نمایش همه',
+  columnsPanelHideAllButton: 'مخفی کردن همه',
+
+  // Filter panel text
+  filterPanelAddFilter: 'افزودن فیلتر',
+  filterPanelDeleteIconLabel: 'حذف',
+  filterPanelOperators: 'عملگرها',
+  filterPanelOperatorAnd: 'و',
+  filterPanelOperatorOr: 'یا',
+  filterPanelColumns: 'ستون‌ها',
+  filterPanelInputLabel: 'مقدار',
+  filterPanelInputPlaceholder: 'مقدار فیلتر',
+
+  // Filter operators text
+  filterOperatorContains: 'شامل',
+  filterOperatorEquals: 'مساوی',
+  filterOperatorStartsWith: 'شروع با',
+  filterOperatorEndsWith: 'پایان با',
+  filterOperatorIs: 'هست',
+  filterOperatorNot: 'نیست',
+  filterOperatorAfter: 'بعد از',
+  filterOperatorOnOrAfter: 'در یا بعد از',
+  filterOperatorBefore: 'قبل از',
+  filterOperatorOnOrBefore: 'در یا قبل از',
+  filterOperatorIsEmpty: 'خالی است',
+  filterOperatorIsNotEmpty: 'خالی نیست',
+
+  // Filter values text
+  filterValueAny: 'هر',
+  filterValueTrue: 'صحیح',
+  filterValueFalse: 'غلط',
+
+  // Column menu text
+  columnMenuLabel: 'منو',
+  columnMenuShowColumns: 'نمایش ستون‌ها',
+  columnMenuFilter: 'فیلتر',
+  columnMenuHide: 'مخفی',
+  columnMenuUnsort: 'حذف مرتب‌سازی',
+  columnMenuSortAsc: 'مرتب‌سازی صعودی',
+  columnMenuSortDesc: 'مرتب‌سازی نزولی',
+
+  // Column header text
+  columnHeaderFiltersTooltipActive: (count) =>
+    count !== 1 ? `${count} فیلتر فعال` : `${count} فیلتر فعال`,
+  columnHeaderFiltersLabel: 'نمایش فیلترها',
+  columnHeaderSortIconLabel: 'مرتب‌سازی',
+
+  // Rows selected footer text
+  footerRowSelected: (count) =>
+    count !== 1
+      ? `${count.toLocaleString()} سطر انتخاب شده`
+      : `${count.toLocaleString()} سطر انتخاب شده`,
+
+  // Total row amount footer text
+  footerTotalRows: 'تعداد کل سطرها:',
+
+  // Total visible row amount footer text
+  footerTotalVisibleRows: (visibleCount, totalCount) =>
+    `${visibleCount.toLocaleString()} از ${totalCount.toLocaleString()}`,
+
+  // Pagination text
+  MuiTablePagination: {
+    labelRowsPerPage: 'تعداد سطر در هر صفحه:',
+    labelDisplayedRows: ({ from, to, count }) =>
+      `${from}-${to} از ${count !== -1 ? count : `بیش از ${to}`}`,
+  }
+};
 const MayorsList = () => {
   const [mayors, setMayors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +148,8 @@ const MayorsList = () => {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Controls the warning dialog
   const [mayorToDelete, setMayorToDelete] = useState(null); // Tracks the mayor selected for deletion
-
+  const [pageSize, setPageSize] = useState(5);
+  const [rowId, setRowId] = useState(null);
   const fetchMayors = async () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/mayor-registry/mayor-complex-list/", {
@@ -205,8 +316,38 @@ const MayorsList = () => {
   }, []);
 
   const columns = [
-    { field: "FullName", headerName: "نام و نام خانوادگی", flex: 2, headerAlign: "right" },
-    { field: "Email", headerName: "ایمیل", flex: 1, headerAlign: "right" },
+    { 
+      field: "FullName", 
+      headerName: "نام و نام خانوادگی", 
+      width: 180,
+      editable: false,
+    },
+    { 
+      field: "Email", 
+      headerName: "ایمیل", 
+      width: 200,
+      editable: false,
+    },
+    {
+      field: "cities",
+      headerName: "شهرها",
+      width: 250,
+      editable: false,
+    },
+    {
+      field: "LastCooperation",
+      headerName: "آخرین همکاری",
+      width: 150,
+      editable: false,
+      renderCell: (params) =>
+        moment(params.row.LastCooperation).format('YYYY-MM-DD'),
+    },
+    {
+      field: "MonthlyReportCheck",
+      headerName: "گزارش ماهانه",
+      width: 130,
+      editable: false,
+    },
     {
       field: "cities",
       headerName: "شهرها",
@@ -259,9 +400,8 @@ const MayorsList = () => {
     {
       field: "Actions",
       headerName: "عملیات",
-      flex: 0.5, // Thinner column for actions
-      minWidth: 50,
-      headerAlign: "right",
+      type: 'actions',
+      width: 100,
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: "8px" }}>
           <DeleteIcon
@@ -311,30 +451,66 @@ const MayorsList = () => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
       <Typography
-        variant="h5"
-        gutterBottom
-        sx={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "30px" }}
+        variant="h3"
+        component="h3"
+        sx={{ 
+          textAlign: 'center', 
+          mt: 3, 
+          mb: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "10px",
+        }}
       >
         <EngineeringIcon sx={{ color: "green" }} />
         <FormatListBulletedIcon sx={{ color: "green" }} />
         لیست مسئولین ثبت‌شده
       </Typography>
 
-      <Box sx={{ height: 400, width: "86%", backgroundColor: "white", boxShadow: "0 0 20px 4px #005a24", borderRadius: "12px" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={17}
-          rowsPerPageOptions={[5]}
-          disableSelectionOnClick
-          sx={{
-            direction: "rtl",
-            "& .MuiDataGrid-columnHeaders": { backgroundColor: "#f5f5f5", justifyContent: "flex-end", textAlign: "right" },
-            "& .MuiDataGrid-columnHeaderTitle": { justifyContent: "flex-end", textAlign: "right" },
-            "& .MuiDataGrid-cell": { textAlign: "right" },
-          }}
-        />
-      </Box>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.id}
+        rowsPerPageOptions={[5, 10, 20]}
+        pageSize={pageSize}
+        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+        getRowSpacing={(params) => ({
+          top: params.isFirstVisible ? 0 : 5,
+          bottom: params.isLastVisible ? 0 : 5,
+        })}
+        sx={{
+          direction: "rtl",
+          border: 'none',
+          [`& .${gridClasses.row}`]: {
+            bgcolor: (theme) =>
+              theme.palette.mode === 'light' ? grey[200] : grey[900],
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: "#f5f5f5",
+            borderBottom: '2px solid #005a24',
+            direction: 'rtl',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+          },
+          '& .MuiDataGrid-columnHeaderTitle': {
+            textAlign: 'right',
+            marginRight: '8px',
+            width: '100%',
+          },
+          '& .MuiDataGrid-cell': {
+            textAlign: 'right',
+            direction: 'rtl',
+            fontSize: '0.9rem',
+            padding: '10px',
+          },
+          '& .MuiDataGrid-footerContainer': {
+            borderTop: '1px solid rgba(224, 224, 224, 1)',
+          }
+        }}
+        onCellEditCommit={(params) => setRowId(params.id)}
+        localeText={faIR}
+      />
 
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
@@ -455,7 +631,7 @@ const MayorsList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-        <Dialog
+      <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)} // Close dialog if user cancels
       >
