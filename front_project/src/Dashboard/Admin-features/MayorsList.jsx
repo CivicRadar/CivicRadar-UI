@@ -199,6 +199,8 @@ const MayorsList = () => {
 
   const handleEditClick = (mayor) => {
     // Find the mayor in the mayors list by ID
+    setcitiesToAdd([])
+    setcitiesToRemove([])
     const selectedMayorFromList = mayors.find((m) => m.id === mayor.id);
   
     if (selectedMayorFromList) {
@@ -245,7 +247,22 @@ const MayorsList = () => {
     
   const handleUpdate = async () => {
     try {
-      // Handle additions
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/update/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          id: selectedMayor.id,
+          FullName: selectedMayor.FullName,
+          Email: selectedMayor.Email,
+          Password: selectedMayor.Password,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("خطا در به‌روزرسانی اطلاعات مسئول");
+      }
+     // Handle additions
       for (const city of citiesToAdd) {
         await fetch("http://127.0.0.1:8000/mayor-registry/add-mayor-city/", {
           method: "POST",
@@ -468,31 +485,49 @@ const MayorsList = () => {
           ویرایش مسئول
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="نام و نام خانوادگی"
-            Name="FullName"
-            fullWidth
-            margin="dense"
-            value={selectedMayor.FullName}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="ایمیل"
-            Name="Email"
-            fullWidth
-            margin="dense"
-            value={selectedMayor.Email}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="رمز عبور جدید"
-            Name="Password"
-            type="Password"
-            fullWidth
-            margin="dense"
-            value={selectedMayor.Password}
-            onChange={handleInputChange}
-          />
+        <TextField
+          label="نام و نام خانوادگی"
+          name="FullName"
+          fullWidth
+          margin="dense"
+          value={selectedMayor.FullName} // Bind to selectedMayor state
+          onChange={(e) =>
+            setSelectedMayor((prev) => ({
+              ...prev,
+              FullName: e.target.value, // Update FullName in state
+            }))
+          }
+        />
+
+        {/* Email Field */}
+        <TextField
+          label="ایمیل"
+          name="Email"
+          fullWidth
+          margin="dense"
+          value={selectedMayor.Email} // Bind to selectedMayor state
+          onChange={(e) =>
+            setSelectedMayor((prev) => ({
+              ...prev,
+              Email: e.target.value, // Update Email in state
+            }))
+          }
+        />
+        {/* Password Field */}
+        <TextField
+          label="رمز عبور جدید"
+          name="Password"
+          type="password"
+          fullWidth
+          margin="dense"
+          value={selectedMayor.Password} // Bind to selectedMayor state
+          onChange={(e) =>
+            setSelectedMayor((prev) => ({
+              ...prev,
+              Password: e.target.value, // Update Password in state
+            }))
+          }
+        />
           {/* Current cities */}
           <Typography variant="body2" sx={{ marginTop: "10px" }}>
             شهرهای فعلی:
