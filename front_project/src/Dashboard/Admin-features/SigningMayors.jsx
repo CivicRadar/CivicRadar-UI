@@ -218,6 +218,7 @@ const SignUpForm = ({gotoregisted}) => {
             getOptionLabel={(option) => option.Name}
             value={selectedProvince}
             onChange={handleProvinceChange}
+            helperText={errorMessages.provinces}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -242,6 +243,8 @@ const SignUpForm = ({gotoregisted}) => {
                 variant="outlined"
                 fullWidth
                 margin="normal"
+                error={!!errorMessages.city}
+                helperText={errorMessages.city}
               />
             )}
           />

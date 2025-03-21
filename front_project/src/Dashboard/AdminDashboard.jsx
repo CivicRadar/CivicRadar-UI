@@ -343,7 +343,6 @@ export default function CitizenDashboard() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 bgcolor: "#F9FAFB",
-                padding: { xs: 2, sm: 4 },
               }}
             >
               <Paper
