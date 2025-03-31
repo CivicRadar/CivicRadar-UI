@@ -337,24 +337,28 @@ const MayorsList = () => {
       field: "FullName", 
       headerName: "نام و نام خانوادگی", 
       width: 180,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     { 
       field: "Email", 
       headerName: "ایمیل", 
       width: 200,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     {
       field: "cities",
       headerName: "شهرها",
       width: 250,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     {
       field: "LastCooperation",
       headerName: "آخرین همکاری",
       width: 150,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
       renderCell: (params) =>
         moment(params.row.LastCooperation).format('YYYY-MM-DD'),
@@ -363,6 +367,7 @@ const MayorsList = () => {
       field: "MonthlyReportCheck",
       headerName: "گزارش ماهانه",
       width: 130,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     {
@@ -370,6 +375,7 @@ const MayorsList = () => {
       headerName: "عملیات",
       type: 'actions',
       width: 100,
+      headerAlign: 'center', // 🔥 این کلیدیه
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: "8px" }}>
           <DeleteIcon
@@ -479,28 +485,31 @@ const MayorsList = () => {
           '& .MuiDataGrid-columnHeaders': {
             backgroundColor: "#f5f5f5",
             borderBottom: '2px solid #005a24',
-            direction: 'rtl',
-            fontSize: { xs: '0.9rem', md: '1rem' }, // فونت ریسپانسیو برای هدر
+            fontSize: { xs: '0.9rem', md: '1rem' },
             fontWeight: 'bold',
           },
+          '& .MuiDataGrid-columnHeader': {
+            justifyContent: 'center', // متن سرستون رو وسط چین کن
+          },
           '& .MuiDataGrid-columnHeaderTitle': {
-            textAlign: 'right',
-            marginRight: '8px',
+            fontWeight: 'bold',
+            textAlign: 'center',
             width: '100%',
+            display: 'block', // مهم! این باعث میشه متن واقعا وسط بیفته
           },
           '& .MuiDataGrid-cell': {
             textAlign: 'right',
             direction: 'rtl',
-            fontSize: { xs: '0.8rem', md: '0.9rem' }, // فونت ریسپانسیو برای سلول‌ها
+            fontSize: { xs: '0.8rem', md: '0.9rem' },
             padding: '10px',
           },
           '& .MuiDataGrid-footerContainer': {
             borderTop: '1px solid rgba(224, 224, 224, 1)',
-            fontSize: { xs: '0.8rem', md: '0.9rem' }, // فونت ریسپانسیو برای فوتر
+            fontSize: { xs: '0.8rem', md: '0.9rem' },
           },
           '& .MuiTablePagination-root': {
-              fontSize: { xs: '0.8rem', md: '0.9rem' }, // سایز فونت ریسپانسیو برای پیجینیشن
-            }
+            fontSize: { xs: '0.8rem', md: '0.9rem' },
+          },
         }}
         onCellEditCommit={(params) => setRowId(params.id)}
         localeText={faIR}

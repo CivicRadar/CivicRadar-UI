@@ -288,42 +288,42 @@ const SignUpForm = ({gotoregisted}) => {
 
       {/* Buttons */}
       <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: 2,
-        }}
-      >
-        <Button variant="contained" color="success" type="submit">
-          ثبت
-        </Button>
-        <Button
-          variant="outlined"
-          color="success" // Same color as the submit button
-          onClick={gotoregisted}
-        >
-          لیست مسئولین ثبت شده
-        </Button>
+  sx={{
+    display: 'flex',
+    flexDirection: { xs: 'column', sm: 'row' }, // responsive layout
+    justifyContent: { sm: 'space-between' },
+    alignItems: { xs: 'stretch', sm: 'center' },
+    gap: 2, // فاصله بین دکمه‌ها
+    marginTop: 2,
+  }}
+>
+  <Button variant="contained" color="success" type="submit">
+    ثبت
+  </Button>
+  <Button
+    variant="outlined"
+    color="success"
+    onClick={gotoregisted}
+  >
+    لیست مسئولین ثبت شده
+  </Button>
+  <Button
+    variant="outlined"
+    color="error"
+    onClick={() => {
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setSelectedProvince(null);
+      setSelectedCities([]);
+      setCities([]);
+      setErrorMessages({});
+    }}
+  >
+    از سرگیری
+  </Button>
+</Box>
 
-
-        <Button
-        variant="outlined"
-        color="error"
-        onClick={() => {
-          // Clear all fields and reset states
-          setFullName("");
-          setEmail("");
-          setPassword("");
-          setSelectedProvince(null);
-          setSelectedCities([]);
-          setCities([]);
-          setErrorMessages({});
-        }}
-      >
-      از سرگیری
-    </Button>
-
-      </Box>
     </form>
   );
 };
