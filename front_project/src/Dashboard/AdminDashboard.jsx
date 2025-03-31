@@ -31,18 +31,28 @@ import { useNavigate } from "react-router-dom";
 import SignUpForm from "./Admin-features/SigningMayors";
 import MayorsList from "./Admin-features/MayorsList";
 import TabPanel from "../Components/TabPanel"
+import { useAdmin } from "../context/AdminContext"; 
+import LogoutDialog from "./LogoutDialog";
+
+
 const dashboardData = {
   users: 32,
   admins: 32,
   reportsToday: 147,
 };
+const toPersianNumber = (num) => {
+  return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+};
 
-export default function CitizenDashboard() {
+export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState("overview");
   const [mobileOpen, setMobileOpen] = useState(false); 
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
+
 
 
   useEffect(() => {
@@ -173,7 +183,13 @@ export default function CitizenDashboard() {
         <Button
           key={item.id}
           fullWidth
-          onClick={() => setSelectedItem(item.id)}
+          onClick={() => {
+    if (item.id === "exit") {
+      setLogoutDialogOpen(true);
+    } else {
+      setSelectedItem(item.id);
+    }
+  }}
           sx={{
             justifyContent: "flex-start",
             my: 1,
@@ -327,8 +343,9 @@ export default function CitizenDashboard() {
                     {item.icon}
                     <Typography variant="subtitle1">{item.title}</Typography>
                     <Typography variant="h5" fontWeight="bold">
-                      {item.value}
-                    </Typography>
+  {toPersianNumber(item.value)}
+</Typography>
+
                   </Card>
                 </Grid>
               ))}
@@ -384,6 +401,11 @@ export default function CitizenDashboard() {
 
         </Box>
       </Box>
+      <LogoutDialog
+  open={logoutDialogOpen}
+  onClose={() => setLogoutDialogOpen(false)}
+/>
+
     </ThemeProvider>
   );
 }
