@@ -32,6 +32,8 @@ import { useNavigate } from "react-router-dom";
 import TabPanel from "../Components/TabPanel"
 import { useAdmin } from "../context/AdminContext"; 
 import LogoutDialog from "./LogoutDialog";
+import ReportsTab from "../Components/ReportsTab";
+
 
 
 const dashboardData = {
@@ -45,7 +47,7 @@ const toPersianNumber = (num) => {
 
 export default function MayorDashboard() {
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState("overview");
+  const [selectedItem, setSelectedItem] = useState("reports");
   const [mobileOpen, setMobileOpen] = useState(false); 
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -108,7 +110,7 @@ export default function MayorDashboard() {
   });
 
   const menuItems = [
-    { id: "overview", label: "نمای کلی", icon: <BarChart /> },
+    { id: "reports", label: "گزارشات", icon: <Campaign /> },
     { id: "map", label: "نقشه", icon: <Map /> },
     { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
@@ -267,54 +269,12 @@ export default function MayorDashboard() {
               </IconButton>
             </Toolbar>
           </AppBar>
+          <TabPanel value={selectedItem} index="reports">
+  <ReportsTab />
+</TabPanel>
 
-        <TabPanel value={selectedItem} index={"overview"}>
-          <Box sx={{ flexGrow: 1, p: 3 }}>
-            <Grid container spacing={10}>
-              {[
-                {
-                  title: "تعداد کل کاربران",
-                  value: dashboardData.users,
-                  icon: <Person color="success" />,
-                  color: "#E8F5E9",
-                },
-                {
-                  title: "تعداد کل مسئولین",
-                  value: dashboardData.admins,
-                  icon: <People color="error" />,
-                  color: "#FFEBEE",
-                },
-                {
-                  title: "تعداد گزارشات امروز",
-                  value: dashboardData.reportsToday,
-                  icon: <Campaign color="primary" />,
-                  color: "#E3F2FD",
-                },
-              ].map((item, index) => (
-                <Grid item xs={12} sm={4} key={index}>
-                  <Card
-                    sx={{
-                      textAlign: "center",
-                      p: 2,
-                      boxShadow: 3,
-                      bgcolor: item.color,
-                    }}
-                  >
-                    {item.icon}
-                    <Typography variant="subtitle1">{item.title}</Typography>
-                    <Typography variant="h5" fontWeight="bold">
-  {toPersianNumber(item.value)}
-</Typography>
 
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-          </TabPanel>
-       
-        
-
+      
         </Box>
       </Box>
       <LogoutDialog
