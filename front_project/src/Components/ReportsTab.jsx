@@ -81,7 +81,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
     setEditNoteDialogOpen(true);
   };
   const handleSaveEditedNote = () => {
-    fetch("http://127.0.0.1:8000/supervise/mayor-note/", {
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-note/`, {
       method: "PUT",
       credentials: "include",
       headers: {
@@ -159,7 +159,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
 
   const handleSaveNote = () => {
     if (selectedReport && noteText.trim()) {
-      fetch("http://127.0.0.1:8000/supervise/mayor-note/", {
+      fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-note/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -219,7 +219,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
   const handleOpenViewNotesDialog = () => {
     if (!selectedReport) return;
   
-    fetch(`http://127.0.0.1:8000/supervise/mayor-note/?CityProblemID=${selectedReport.id}`, {
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-note/?CityProblemID=${selectedReport.id}`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -231,7 +231,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
         return res.json();
       })
       .then((notes) => {
-        const fullBaseUrl = "http://127.0.0.1:8000";
+        const fullBaseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
       
         const noteTexts = Array.isArray(notes)
           ? notes.map((note) => ({
@@ -272,7 +272,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
   
     console.log("📌 NoteID برای حذف:", noteToDelete);
   
-    fetch("http://127.0.0.1:8000/supervise/mayor-note/", {
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-note/`, {
       method: "DELETE",
       credentials: "include",
       headers: {
@@ -407,9 +407,9 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
   
   
   useEffect(() => {
-    const fullBaseUrl = "http://127.0.0.1:8000" // مسیر اصلی برای فایل‌ها
+    const fullBaseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}` // مسیر اصلی برای فایل‌ها
   
-    fetch("http://127.0.0.1:8000/supervise/mayor-watch-report/", {
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-watch-report/`, {
       credentials: "include",
     })
       .then((res) => {
