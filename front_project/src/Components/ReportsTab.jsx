@@ -232,7 +232,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
       })
       .then((notes) => {
         const fullBaseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
-      
+
         const noteTexts = Array.isArray(notes)
           ? notes.map((note) => ({
               id: note.id,
@@ -240,9 +240,15 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
               NoteOwnerName: note.NoteOwnerName,
               NoteOwnerEmail: note.NoteOwnerEmail,
               PutDeletePermission: note.PutDeletePermission,
-              NoteOwnerPicture: note.NoteOwnerPicture ? `${fullBaseUrl}${note.NoteOwnerPicture}` : null // ✅ اضافه شد
+              NoteOwnerPicture: note.NoteOwnerPicture?.startsWith("/Media")
+                ? `${fullBaseUrl}${note.NoteOwnerPicture}`
+                : note.NoteOwnerPicture
+                  ? `${fullBaseUrl}/Media/Profile_Pictures/${note.NoteOwnerPicture}`
+                  : null
             }))
           : [];
+
+
       
 
 
@@ -419,10 +425,21 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
       .then((data) => {
         const updated = data.map((item) => ({
           ...item,
-          Picture: item.Picture ? `${fullBaseUrl}/${item.Picture}` : null,
-          Video: item.Video ? `${fullBaseUrl}/${item.Video}` : null,
-          Status: item.Status || "در انتظار بررسی", // پیش‌فرض برای وضعیت
-        }))
+          Picture: item.Picture?.startsWith("/Media")
+            ? `${fullBaseUrl}${item.Picture}`
+            : item.Picture
+              ? `${fullBaseUrl}/Media/CivicProblem_Pictures/${item.Picture}`
+              : null,
+        
+          Video: item.Video?.startsWith("/Media")
+            ? `${fullBaseUrl}${item.Video}`
+            : item.Video
+              ? `${fullBaseUrl}/Media/CivicProblem_Videos/${item.Video}`
+              : null,
+        
+          Status: item.Status || "در انتظار بررسی"
+        }));
+        
         setReports(updated)
       })
       .catch((err) => {
