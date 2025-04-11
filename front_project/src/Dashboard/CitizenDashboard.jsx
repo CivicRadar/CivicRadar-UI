@@ -9,6 +9,9 @@ import {
   Toolbar,
   IconButton,
   Drawer,
+  useMediaQuery,
+  CssBaseline,
+  styled
 } from "@mui/material";
 import {
   People,
@@ -17,27 +20,55 @@ import {
   BarChart,
   Map,
   Warning,
-  Add,
+  ExitToApp,
   Menu as MenuIcon,
   AccountCircle,
+  Campaign,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import logo from "../assets/lgo.jpg";
+import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
+import TabPanel from "../Components/TabPanel";
+import LogoutDialog from "./LogoutDialog";
+import ReportForm from "../Components/ReportsComp";
+import ReportFeed from "../Components/Reportsfeed";
+
+// Create a styled component for the main content area
+const MainContent = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  display: "flex",
+  flexDirection: "column",
+  height: "100vh",
+  overflow: "hidden",
+  backgroundColor: "#F9FAFB" // Set your desired background color
+}));
+
+const ContentContainer = styled(Box)(({ theme }) => ({
+  flex: 1,
+  overflowY: "auto",
+  padding: theme.spacing(3),
+  backgroundColor: "#F9FAFB" // Ensure content area has the same background
+}));
+
 const dashboardData = {
   users: 32,
   admins: 32,
   reportsToday: 147,
 };
 
+const toPersianNumber = (num) => {
+  return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+};
+
 export default function CitizenDashboard() {
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState("");
+  const [selectedItem, setSelectedItem] = useState("overview");
   const [mobileOpen, setMobileOpen] = useState(false); 
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
-
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width:900px)');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -54,6 +85,7 @@ export default function CitizenDashboard() {
 
     fetchProfile();
   }, [navigate]);
+  
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -93,9 +125,9 @@ export default function CitizenDashboard() {
 
   const menuItems = [
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
-    { id: "registered", label: "مسئولین ثبت شده", icon: <People /> },
     { id: "map", label: "نقشه", icon: <Map /> },
     { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
+    { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
 
   const SidebarContent = (
@@ -105,64 +137,35 @@ export default function CitizenDashboard() {
         bgcolor: "#fff",
         color: "black",
         direction: "rtl",
-
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         p: 2,
+        height: "100vh",
+        overflowY: "auto",
+        position: "sticky",
+        top: 0
       }}
     >
       <Box sx={{ mb: 2, textAlign: "center" }}>
         <img
           src={logo}
           alt="شهر سنج"
-          style={{ width: "100%", maxWidth: "150px" }}
+          style={{ width: isMobile ? "0%" : "100%", maxWidth: "150px" }}
         />
       </Box>
-
-      <Button
-        sx={{
-          bgcolor: "#007E33",
-          color: "white",
-          fontWeight: "bold",
-          borderRadius: "25px",
-          padding: "10px 24px",
-          minWidth: "240px",
-          display: "flex",
-          alignItems: "center",
-          textTransform: "none",
-          fontSize: "16px",
-          "&:hover": {
-            bgcolor: "#005a24",
-          },
-          mt: 2,
-          mb: 2,
-        }}
-      >
-        ثبت نام مسئولین
-        {
-          <span style={{ position: "relative", display: "inline-block" }}>
-            <Person sx={{ fontSize: 24 }} />
-            <Add
-              sx={{
-                fontSize: 14,
-                position: "absolute",
-                top: 0,
-                left: -5,
-                backgroundColor: "white",
-                borderRadius: "50%",
-                color: "green",
-              }}
-            />
-          </span>
-        }
-      </Button>
 
       {menuItems.map((item) => (
         <Button
           key={item.id}
           fullWidth
-          onClick={() => setSelectedItem(item.id)}
+          onClick={() => {
+            if (item.id === "exit") {
+              setLogoutDialogOpen(true);
+            } else {
+              setSelectedItem(item.id);
+            }
+          }}
           sx={{
             justifyContent: "flex-start",
             my: 1,
@@ -184,16 +187,15 @@ export default function CitizenDashboard() {
             },
           })}
           <Typography
-  sx={{
-    ml: 1.5,
-    color: selectedItem === item.id ? "black" : "gray",
-    fontWeight: selectedItem === item.id ? "bold" : "normal",
-    fontSize: { xs: "16px", md: "20px" }, 
-  }}
->
-  {item.label}
-</Typography>
-
+            sx={{
+              ml: 1.5,
+              color: selectedItem === item.id ? "black" : "gray",
+              fontWeight: selectedItem === item.id ? "bold" : "normal",
+              fontSize: { xs: "16px", md: "20px" }, 
+            }}
+          >
+            {item.label}
+          </Typography>
         </Button>
       ))}
     </Box>
@@ -205,16 +207,8 @@ export default function CitizenDashboard() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          width: "100%",
-          height: { xs: "auto", md: "100vh" },
-          direction: "rtl",
-          bgcolor: "#F9FAFB",
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
+      <CssBaseline /> {/* This helps with consistent baseline styles */}
+      <Box sx={{ direction: "rtl",display: "flex", height: "100vh", overflow: "hidden" }}>
         <Drawer
           variant="temporary"
           anchor="right"
@@ -224,27 +218,26 @@ export default function CitizenDashboard() {
             keepMounted: true,
           }}
           sx={{
-            display: { xs: "block", md: "none" }, 
+            display: { xs: "block", md: "none" },
             "& .MuiDrawer-paper": {
-              width: 250, 
-              
+              width: 250,
             },
           }}
         >
           {SidebarContent}
         </Drawer>
 
+        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           anchor="right"
           sx={{
-            display: { xs: "none", md: "block" }, 
+            display: { xs: "none", md: "block" },
             "& .MuiDrawer-paper": {
-              width: 300, 
+              width: 300,
               position: "relative",
               borderLeft: "1px solid #ddd",
-              overflowX: "hidden", 
-
+              overflowY: "auto",
             },
           }}
           open
@@ -252,28 +245,31 @@ export default function CitizenDashboard() {
           {SidebarContent}
         </Drawer>
 
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        <MainContent>
           <AppBar
-            position="static"
-            sx={{ backgroundColor: "#fff", color: "#000", boxShadow: 1 }}
+            position="sticky"
+            sx={{ 
+              backgroundColor: "#fff", 
+              color: "#000", 
+              boxShadow: 1,
+              zIndex: theme.zIndex.drawer + 1
+            }}
           >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Box sx={{ display: "flex", alignItems: "center"  ,     
- }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
                 <IconButton
                   color="inherit"
                   aria-label="open drawer"
                   edge="start"
                   onClick={handleDrawerToggle}
-                  sx={{ mr: 0, display: { xs: "block", md: "none"} , ml : 1 }}
+                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
                 >
                   <MenuIcon />
                 </IconButton>
                 <AccountCircle sx={{ fontSize: 50, color: "#B2ADAD", ml: 2 }} />
                 <Typography variant="body1" sx={{ marginLeft: 1 }}>
-  {profile ? profile.FullName : "نام کاربر"} 
-</Typography>
-
+                  {profile ? profile.FullName : "نام کاربر"} 
+                </Typography>
               </Box>
               <IconButton color="inherit">
                 <Notifications />
@@ -281,49 +277,68 @@ export default function CitizenDashboard() {
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ flexGrow: 1, p: 3 }}>
-            <Grid container spacing={2}>
-              {[
-                {
-                  title: "تعداد کل کاربران",
-                  value: dashboardData.users,
-                  icon: <Person color="success" />,
-                  color: "#E3F2FD",
-                },
-                {
-                  title: "تعداد کل مسئولین",
-                  value: dashboardData.admins,
-                  icon: <People color="error" />,
-                  color: "#FFEBEE",
-                },
-                {
-                  title: "تعداد گزارشات امروز",
-                  value: dashboardData.reportsToday,
-                  icon: <Notifications color="primary" />,
-                  color: "#E8F5E9",
-                },
-              ].map((item, index) => (
-                <Grid item xs={12} sm={4} key={index}>
-                  <Card
-                    sx={{
-                      textAlign: "center",
-                      p: 2,
-                      boxShadow: 3,
-                      bgcolor: item.color,
-                    }}
-                  >
-                    {item.icon}
-                    <Typography variant="subtitle1">{item.title}</Typography>
-                    <Typography variant="h5" fontWeight="bold">
-                      {item.value}
-                    </Typography>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </Box>
+          <ContentContainer>
+            <TabPanel value={selectedItem} index={"overview"}>
+              <Grid container spacing={3}>
+                {[
+                  {
+                    title: "تعداد کل کاربران",
+                    value: dashboardData.users,
+                    icon: <Person color="success" />,
+                    color: "#E8F5E9",
+                  },
+                  {
+                    title: "تعداد کل مسئولین",
+                    value: dashboardData.admins,
+                    icon: <People color="error" />,
+                    color: "#FFEBEE",
+                  },
+                  {
+                    title: "تعداد گزارشات امروز",
+                    value: dashboardData.reportsToday,
+                    icon: <Campaign color="primary" />,
+                    color: "#E3F2FD",
+                  },
+                ].map((item, index) => (
+                  <Grid item xs={12} sm={4} key={index}>
+                    <Card
+                      sx={{
+                        textAlign: "center",
+                        p: 2,
+                        boxShadow: 3,
+                        bgcolor: item.color,
+                      }}
+                    >
+                      {item.icon}
+                      <Typography variant="subtitle1">{item.title}</Typography>
+                      <Typography variant="h5" fontWeight="bold">
+                        {toPersianNumber(item.value)}
+                      </Typography>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </TabPanel>
+           
+            <TabPanel value={selectedItem} index={"map"}>
+              <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
+                <ReportForm/>
+              </Box>
+            </TabPanel>
+            
+            <TabPanel value={selectedItem} index={"violations"}>
+              <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
+                <ReportFeed/>
+              </Box>
+            </TabPanel>
+          </ContentContainer>
+        </MainContent>
       </Box>
+      
+      <LogoutDialog
+        open={logoutDialogOpen}
+        onClose={() => setLogoutDialogOpen(false)}
+      />
     </ThemeProvider>
   );
 }

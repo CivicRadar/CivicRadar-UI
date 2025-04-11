@@ -199,6 +199,8 @@ const MayorsList = () => {
 
   const handleEditClick = (mayor) => {
     // Find the mayor in the mayors list by ID
+    setcitiesToAdd([])
+    setcitiesToRemove([])
     const selectedMayorFromList = mayors.find((m) => m.id === mayor.id);
   
     if (selectedMayorFromList) {
@@ -245,7 +247,22 @@ const MayorsList = () => {
     
   const handleUpdate = async () => {
     try {
-      // Handle additions
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/update/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          id: selectedMayor.id,
+          FullName: selectedMayor.FullName,
+          Email: selectedMayor.Email,
+          Password: selectedMayor.Password,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("خطا در به‌روزرسانی اطلاعات مسئول");
+      }
+     // Handle additions
       for (const city of citiesToAdd) {
         await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/add-mayor-city/`, {
           method: "POST",
@@ -320,24 +337,28 @@ const MayorsList = () => {
       field: "FullName", 
       headerName: "نام و نام خانوادگی", 
       width: 180,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     { 
       field: "Email", 
       headerName: "ایمیل", 
       width: 200,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     {
       field: "cities",
       headerName: "شهرها",
       width: 250,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     {
       field: "LastCooperation",
       headerName: "آخرین همکاری",
       width: 150,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
       renderCell: (params) =>
         moment(params.row.LastCooperation).format('YYYY-MM-DD'),
@@ -346,6 +367,7 @@ const MayorsList = () => {
       field: "MonthlyReportCheck",
       headerName: "گزارش ماهانه",
       width: 130,
+      headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
     },
     {
@@ -353,6 +375,7 @@ const MayorsList = () => {
       headerName: "عملیات",
       type: 'actions',
       width: 100,
+      headerAlign: 'center', // 🔥 این کلیدیه
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: "8px" }}>
           <DeleteIcon
@@ -400,7 +423,7 @@ const MayorsList = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+    <Box display="flex" flexDirection="column" alignItems="center" mt={4}  width="100%">
       <Typography
         variant="h3"
         component="h3"
@@ -411,13 +434,34 @@ const MayorsList = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          paddingLeft: { xs: '60px', sm: 0 }, // Add padding to the right for mobile
+
           gap: "10px",
+          fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' }, // استایل ریسپانسیو برای تایتل
+          flexWrap: { xs: 'wrap', sm: 'nowrap' } // در موبایل آیکون‌ها و متن در خط جدید قرار بگیرند
         }}
       >
         <EngineeringIcon sx={{ color: "green" }} />
         <FormatListBulletedIcon sx={{ color: "green" }} />
         لیست مسئولین ثبت‌شده
       </Typography>
+      <Box 
+      sx={{ 
+        width: '90%',
+        overflow: 'auto', // اضافه کردن اسکرول افقی
+        maxWidth: '100vw', // حداکثر عرض برابر با عرض ویوپورت
+        '&::-webkit-scrollbar': {
+          height: '8px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,90,36,0.5)',
+          borderRadius: '4px',
+        }
+      }}
+    >
+       <Box sx={{ 
+        minWidth: { xs: '800px', sm: '100%' , md: '100%'  }, 
+      }}>
 
       <DataGrid
         rows={rows}
@@ -430,6 +474,7 @@ const MayorsList = () => {
           top: params.isFirstVisible ? 0 : 5,
           bottom: params.isLastVisible ? 0 : 5,
         })}
+        autoHeight 
         sx={{
           direction: "rtl",
           border: 'none',
@@ -440,59 +485,86 @@ const MayorsList = () => {
           '& .MuiDataGrid-columnHeaders': {
             backgroundColor: "#f5f5f5",
             borderBottom: '2px solid #005a24',
-            direction: 'rtl',
-            fontSize: '1rem',
+            fontSize: { xs: '0.9rem', md: '1rem' },
             fontWeight: 'bold',
           },
+          '& .MuiDataGrid-columnHeader': {
+            justifyContent: 'center', // متن سرستون رو وسط چین کن
+          },
           '& .MuiDataGrid-columnHeaderTitle': {
-            textAlign: 'right',
-            marginRight: '8px',
+            fontWeight: 'bold',
+            textAlign: 'center',
             width: '100%',
+            display: 'block', // مهم! این باعث میشه متن واقعا وسط بیفته
           },
           '& .MuiDataGrid-cell': {
             textAlign: 'right',
             direction: 'rtl',
-            fontSize: '0.9rem',
+            fontSize: { xs: '0.8rem', md: '0.9rem' },
             padding: '10px',
           },
           '& .MuiDataGrid-footerContainer': {
             borderTop: '1px solid rgba(224, 224, 224, 1)',
-          }
+            fontSize: { xs: '0.8rem', md: '0.9rem' },
+          },
+          '& .MuiTablePagination-root': {
+            fontSize: { xs: '0.8rem', md: '0.9rem' },
+          },
         }}
         onCellEditCommit={(params) => setRowId(params.id)}
         localeText={faIR}
       />
+      </Box>
+  </Box>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth   maxWidth="sm" >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           ویرایش مسئول
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="نام و نام خانوادگی"
-            Name="FullName"
-            fullWidth
-            margin="dense"
-            value={selectedMayor.FullName}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="ایمیل"
-            Name="Email"
-            fullWidth
-            margin="dense"
-            value={selectedMayor.Email}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="رمز عبور جدید"
-            Name="Password"
-            type="Password"
-            fullWidth
-            margin="dense"
-            value={selectedMayor.Password}
-            onChange={handleInputChange}
-          />
+        <TextField
+          label="نام و نام خانوادگی"
+          name="FullName"
+          fullWidth
+          margin="dense"
+          value={selectedMayor.FullName} // Bind to selectedMayor state
+          onChange={(e) =>
+            setSelectedMayor((prev) => ({
+              ...prev,
+              FullName: e.target.value, // Update FullName in state
+            }))
+          }
+        />
+
+        {/* Email Field */}
+        <TextField
+          label="ایمیل"
+          name="Email"
+          fullWidth
+          margin="dense"
+          value={selectedMayor.Email} // Bind to selectedMayor state
+          onChange={(e) =>
+            setSelectedMayor((prev) => ({
+              ...prev,
+              Email: e.target.value, // Update Email in state
+            }))
+          }
+        />
+        {/* Password Field */}
+        <TextField
+          label="رمز عبور جدید"
+          name="Password"
+          type="password"
+          fullWidth
+          margin="dense"
+          value={selectedMayor.Password} // Bind to selectedMayor state
+          onChange={(e) =>
+            setSelectedMayor((prev) => ({
+              ...prev,
+              Password: e.target.value, // Update Password in state
+            }))
+          }
+        />
           {/* Current cities */}
           <Typography variant="body2" sx={{ marginTop: "10px" }}>
             شهرهای فعلی:
@@ -585,6 +657,8 @@ const MayorsList = () => {
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)} // Close dialog if user cancels
+        fullWidth
+        maxWidth="xs" // تنظیم حداکثر عرض دیالوگ برای هشدار
       >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           هشدار
