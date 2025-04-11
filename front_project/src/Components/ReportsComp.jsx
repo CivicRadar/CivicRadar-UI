@@ -383,7 +383,7 @@ useEffect(() => {
         formDataToSend.append('Latitude', formData.lat);
         formDataToSend.append('FullAdress', formData.fullAddress);
     
-        const response = await fetch('http://127.0.0.1:8000/supervise/citizen-report-problem/', {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`, {
           method: 'POST',
           body: formDataToSend,
           credentials: "include",
