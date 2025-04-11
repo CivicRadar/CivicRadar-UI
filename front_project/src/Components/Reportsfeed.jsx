@@ -52,7 +52,7 @@ const ReportFeed = () => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://127.0.0.1:8000/supervise/all-citizen-report/');
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/all-citizen-report/`);
         
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -349,7 +349,7 @@ const ReportFeed = () => {
                     {report.Picture ? (
                       <Box
                         component="img"
-                        src={`http://127.0.0.1:8000${report.Picture}`}
+                        src={`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${report.Picture}`}
                         alt=""
                         sx={{
                           width: '100%',
