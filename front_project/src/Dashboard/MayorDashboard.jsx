@@ -2,59 +2,57 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
-  Card,
-  Grid,
   Button,
   AppBar,
   Toolbar,
-  Paper,
   IconButton,
   Drawer,
+  CssBaseline,
+  useMediaQuery,
+  styled,
 } from "@mui/material";
 import {
-  People,
-  Person,
-  Notifications,
-  BarChart,
   Map,
   Warning,
   ExitToApp,
-  Add,
   Menu as MenuIcon,
   AccountCircle,
   Campaign,
+  Notifications,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
-
-import TabPanel from "../Components/TabPanel"
-import { useAdmin } from "../context/AdminContext"; 
+import TabPanel from "../Components/TabPanel";
 import LogoutDialog from "./LogoutDialog";
 import ReportsTab from "../Components/ReportsTab";
 
+// Styled components
+const MainContent = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  display: "flex",
+  flexDirection: "column",
+  height: "100vh",
+  overflow: "hidden",
+  backgroundColor: "#F9FAFB",
+}));
 
-
-const dashboardData = {
-  users: 32,
-  admins: 32,
-  reportsToday: 147,
-};
-const toPersianNumber = (num) => {
-  return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
-};
+const ContentContainer = styled(Box)(({ theme }) => ({
+  flex: 1,
+  overflowY: "auto",
+  padding: theme.spacing(3),
+  backgroundColor: "#F9FAFB",
+}));
 
 export default function MayorDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState("reports");
-  const [mobileOpen, setMobileOpen] = useState(false); 
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-
-
-
+  const isMobile = useMediaQuery("(max-width:900px)");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -71,7 +69,7 @@ export default function MayorDashboard() {
 
     fetchProfile();
   }, [navigate]);
-  
+
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -119,39 +117,39 @@ export default function MayorDashboard() {
   const SidebarContent = (
     <Box
       sx={{
-        width: "240",
+        width: "240px",
         bgcolor: "#fff",
         color: "black",
         direction: "rtl",
-
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         p: 2,
+        height: "100vh",
+        overflowY: "auto",
+        position: "sticky",
+        top: 0,
       }}
     >
       <Box sx={{ mb: 2, textAlign: "center" }}>
         <img
           src={logo}
           alt="شهر سنج"
-          style={{ width: "100%", maxWidth: "150px" }}
+          style={{ width: isMobile ? "0%" : "100%", maxWidth: "150px" }}
         />
       </Box>
-
-     
-
 
       {menuItems.map((item) => (
         <Button
           key={item.id}
           fullWidth
           onClick={() => {
-    if (item.id === "exit") {
-      setLogoutDialogOpen(true);
-    } else {
-      setSelectedItem(item.id);
-    }
-  }}
+            if (item.id === "exit") {
+              setLogoutDialogOpen(true);
+            } else {
+              setSelectedItem(item.id);
+            }
+          }}
           sx={{
             justifyContent: "flex-start",
             my: 1,
@@ -173,16 +171,15 @@ export default function MayorDashboard() {
             },
           })}
           <Typography
-  sx={{
-    ml: 1.5,
-    color: selectedItem === item.id ? "black" : "gray",
-    fontWeight: selectedItem === item.id ? "bold" : "normal",
-    fontSize: { xs: "16px", md: "20px" }, 
-  }}
->
-  {item.label}
-</Typography>
-
+            sx={{
+              ml: 1.5,
+              color: selectedItem === item.id ? "black" : "gray",
+              fontWeight: selectedItem === item.id ? "bold" : "normal",
+              fontSize: { xs: "16px", md: "20px" },
+            }}
+          >
+            {item.label}
+          </Typography>
         </Button>
       ))}
     </Box>
@@ -194,6 +191,7 @@ export default function MayorDashboard() {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Box
         sx={{
           width: "100%",
@@ -204,6 +202,7 @@ export default function MayorDashboard() {
           flexDirection: "row",
         }}
       >
+        {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
           anchor="right"
@@ -213,27 +212,26 @@ export default function MayorDashboard() {
             keepMounted: true,
           }}
           sx={{
-            display: { xs: "block", md: "none" }, 
+            display: { xs: "block", md: "none" },
             "& .MuiDrawer-paper": {
-              width: 250, 
-              
+              width: 250,
             },
           }}
         >
           {SidebarContent}
         </Drawer>
 
+        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           anchor="right"
           sx={{
-            display: { xs: "none", md: "block" }, 
+            display: { xs: "none", md: "block" },
             "& .MuiDrawer-paper": {
-              width: 300, 
+              width: 300,
               position: "relative",
               borderLeft: "1px solid #ddd",
-              overflowX: "hidden", 
-
+              overflowY: "auto",
             },
           }}
           open
@@ -241,47 +239,52 @@ export default function MayorDashboard() {
           {SidebarContent}
         </Drawer>
 
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        {/* Main Content */}
+        <MainContent>
           <AppBar
-            position="static"
+            position="sticky"
             sx={{ backgroundColor: "#fff", color: "#000", boxShadow: 1 }}
           >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Box sx={{ display: "flex", alignItems: "center"  ,     
- }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
                 <IconButton
                   color="inherit"
                   aria-label="open drawer"
                   edge="start"
                   onClick={handleDrawerToggle}
-                  sx={{ mr: 0, display: { xs: "block", md: "none"} , ml : 1 }}
+                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
                 >
                   <MenuIcon />
                 </IconButton>
                 <AccountCircle sx={{ fontSize: 50, color: "#B2ADAD", ml: 2 }} />
                 <Typography variant="body1" sx={{ marginLeft: 1 }}>
-  {profile ? profile.FullName : "نام کاربر"} 
-</Typography>
-
+                  {profile ? profile.FullName : "نام کاربر"}
+                </Typography>
               </Box>
               <IconButton color="inherit">
                 <Notifications />
               </IconButton>
             </Toolbar>
           </AppBar>
-          <TabPanel value={selectedItem} index="reports">
-  <ReportsTab />
-</TabPanel>
 
-
-      
-        </Box>
+          <ContentContainer>
+            <TabPanel value={selectedItem} index="reports">
+              <ReportsTab />
+            </TabPanel>
+            <TabPanel value={selectedItem} index="map">
+              <Typography>نمایش نقشه در آینده</Typography>
+            </TabPanel>
+            <TabPanel value={selectedItem} index="violations">
+              <Typography>بررسی تخلفات در آینده</Typography>
+            </TabPanel>
+          </ContentContainer>
+        </MainContent>
       </Box>
-      <LogoutDialog
-  open={logoutDialogOpen}
-  onClose={() => setLogoutDialogOpen(false)}
-/>
 
+      <LogoutDialog
+        open={logoutDialogOpen}
+        onClose={() => setLogoutDialogOpen(false)}
+      />
     </ThemeProvider>
   );
 }
