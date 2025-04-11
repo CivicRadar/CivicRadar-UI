@@ -51,11 +51,6 @@ const AuthPage = () => {
     Email: "",
     Password: "",
   });
-  const [resetFormData, setResetFormData] = useState({
-    Password: "",
-    ConfirmPassword: "",
-    Token: token || "", // Pre-fill token from URL
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState("");
   const [errorMessages, setErrorMessages] = useState({
@@ -250,60 +245,6 @@ const AuthPage = () => {
     }
   };
 
-  const handleResetPasswordSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (resetFormData.Password !== resetFormData.ConfirmPassword) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]: "رمز عبور و تأیید رمز عبور مطابقت ندارند.",
-      }));
-      setIsLoading(false);
-      return;
-    }
-
-    if (!isStrongPassword(resetFormData.Password)) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]:
-          "رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و کاراکتر خاص باشد.",
-      }));
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/auth/password-reset-complete/", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-body: JSON.stringify({ ui64, token, Password, ConfirmPassword }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert("رمز عبور با موفقیت تغییر کرد!");
-        setIsResetPassword(false);
-        setFormData({ FullName: "", Email: "", Password: "" });
-        setResetFormData({ Password: "", ConfirmPassword: "", Token: "" });
-        navigate("/"); // Redirect to login page after success
-      } else {
-        setErrorMessages((prev) => ({
-          ...prev,
-          [authType]: data.error || "مشکلی در تغییر رمز عبور رخ داد. دوباره تلاش کنید.",
-        }));
-      }
-    } catch (error) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]: "خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.",
-      }));
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const theme = createTheme({
     typography: {
@@ -613,45 +554,6 @@ body: JSON.stringify({ ui64, token, Password, ConfirmPassword }),
                       value={resetFormData.Password}
                       onChange={(e) =>
                         setResetFormData({ ...resetFormData, Password: e.target.value })
-                      }
-                      fullWidth
-                      required
-                      margin="normal"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          "& fieldset": {
-                            borderColor: "#ccc",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "#aaa",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "#4a90e2",
-                          },
-                        },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Lock />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={togglePasswordVisibility}>
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    <TextField
-                      label="تأیید رمز عبور"
-                      name="ConfirmPassword"
-                      type={showPassword ? "text" : "password"}
-                      value={resetFormData.ConfirmPassword}
-                      onChange={(e) =>
-                        setResetFormData({ ...resetFormData, ConfirmPassword: e.target.value })
                       }
                       fullWidth
                       required
