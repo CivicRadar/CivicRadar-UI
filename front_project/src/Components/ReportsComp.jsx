@@ -30,6 +30,14 @@ const steps = [
   { label: 'ثبت مستندات', number: 3 }
 ];
 
+const greenPalette = {
+  light: '#81c784',
+  main: '#4caf50',
+  dark: '#388e3c',
+  darkest: '#00661c',
+  contrastText: '#fff',
+};
+
 const ReportForm = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [errors, setErrors] = useState({});
@@ -430,7 +438,7 @@ useEffect(() => {
           height: '2px',
           backgroundColor: '#e0e0e0',
           '&.active': {
-            backgroundColor: '#1976d2'
+            backgroundColor: '#9fe0b1'
           }
         }
       }}>
@@ -451,7 +459,7 @@ useEffect(() => {
                 width: 40,
                 height: 40,
                 borderRadius: '50%',
-                backgroundColor: activeStep >= index ? '#1976d2' : '#e0e0e0',
+                backgroundColor: activeStep >= index ? '#278240' : '#e0e0e0',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
@@ -570,6 +578,14 @@ useEffect(() => {
                   variant="contained" 
                   onClick={isMobile ? handleOpenMapDialog : getUserLocation}
                   startIcon={<MyLocation />}
+                  sx={{
+                    color: 'white',
+                    bgcolor: greenPalette.dark,
+                    '&:hover': {
+                      color: greenPalette.dark,
+                      backgroundColor: '#e8f5e9' // light green background
+                    }
+                  }}
                   fullWidth
                 >
                   {isMobile ? 'انتخاب از روی نقشه' : 'موقعیت فعلی من'}
@@ -715,6 +731,9 @@ useEffect(() => {
             onClick={getCurrentLocation}
             disabled={mapLoading}
             size="small"
+            sx={{
+              color: greenPalette.dark,
+            }}
           >
             موقعیت فعلی من
           </Button>
@@ -734,6 +753,14 @@ useEffect(() => {
               disabled={!userLocation}
               size="small"
               startIcon={<Place />}
+              sx={{
+                color: 'white',
+                bgcolor: greenPalette.dark,
+                '&:hover': {
+                  color: greenPalette.dark,
+                  backgroundColor: '#e8f5e9' // light green background
+                }
+              }}
             >
               ثبت موقعیت
             </Button>
@@ -766,6 +793,11 @@ useEffect(() => {
                     sx={{
                       height: '100%',
                       display: 'flex',
+                      color: greenPalette.darkest,
+                      borderColor: greenPalette.light,
+                      '&:hover': {
+                        borderColor: greenPalette.main
+                      },
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -828,6 +860,11 @@ useEffect(() => {
                     component="span"
                     fullWidth
                     sx={{
+                      color: greenPalette.darkest,
+                      borderColor: greenPalette.light,
+                      '&:hover': {
+                        borderColor: greenPalette.main
+                      },
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
@@ -858,10 +895,6 @@ useEffect(() => {
                             position: 'absolute',
                             top: 8,
                             left: 8,
-                            backgroundColor: 'rgba(255,255,255,0.7)',
-                            '&:hover': {
-                              backgroundColor: 'rgba(255,255,255,0.9)'
-                            }
                           }}
                         >
                           <DeleteIcon color="error" />
@@ -894,7 +927,11 @@ useEffect(() => {
           variant="outlined" 
           onClick={handleBack}
           disabled={activeStep === 0}
-          sx={{ minWidth: 120 }}
+          sx={{ borderColor: greenPalette.light,
+          color:greenPalette.dark,
+            '&:hover': {
+              borderColor: greenPalette.main
+            },minWidth: 120 }}
         >
           قبلی
         </Button>
@@ -903,7 +940,11 @@ useEffect(() => {
           <Button 
             variant="contained" 
             onClick={handleNext}
-            sx={{ minWidth: 120 }}
+            sx={{     backgroundColor: greenPalette.main,
+              '&:hover': {
+                backgroundColor: greenPalette.dark,
+              },
+              minWidth: 120 }}
           >
             مرحله بعدی
           </Button>
@@ -916,7 +957,11 @@ useEffect(() => {
                 submitReport();
               }
             }}
-            sx={{ minWidth: 120 }}
+            sx={{ backgroundColor: greenPalette.dark,
+              '&:hover': {
+                backgroundColor: '#2e7d32', // even darker green
+              },
+              minWidth: 120}}
           >
             ثبت نهایی
           </Button>
