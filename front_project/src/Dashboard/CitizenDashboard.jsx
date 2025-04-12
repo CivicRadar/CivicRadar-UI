@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -7,7 +7,6 @@ import {
   Button,
   AppBar,
   Toolbar,
-  Paper,
   IconButton,
   Drawer,
   Avatar,
@@ -17,6 +16,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  useMediaQuery,
+  CssBaseline,
+  styled,
+  Paper,
 } from "@mui/material";
 import {
   People,
@@ -26,25 +29,40 @@ import {
   Map,
   Warning,
   ExitToApp,
-  Add,
   Menu as MenuIcon,
   AccountCircle,
   Campaign,
   Email as EmailIcon,
   Badge as BadgeIcon,
-  Edit as EditIcon,
+  Favorite as FavoriteIcon,
+  Reply as ReplyIcon,
+  Share as ShareIcon,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
 import TabPanel from "../Components/TabPanel";
-import { useAdmin } from "../context/AdminContext";
 import LogoutDialog from "./LogoutDialog";
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ReplyIcon from '@mui/icons-material/Reply';
-import ShareIcon from '@mui/icons-material/Share';
+import ReportForm from "../Components/ReportsComp";
+import ReportFeed from "../Components/Reportsfeed";
 
+// Create a styled component for the main content area
+const MainContent = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  display: "flex",
+  flexDirection: "column",
+  height: "100vh",
+  overflow: "hidden",
+  backgroundColor: "#F9FAFB" // Set your desired background color
+}));
+
+const ContentContainer = styled(Box)(({ theme }) => ({
+  flex: 1,
+  overflowY: "auto",
+  padding: theme.spacing(3),
+  backgroundColor: "#F9FAFB" // Ensure content area has the same background
+}));
 
 
 import potholeImage from "../assets/pathole.jpg"; // Add your pothole image to src/assets/
@@ -79,16 +97,36 @@ const toPersianNumber = (num) => {
 
 const DeleteAccountDialog = ({ open, onClose, onConfirm }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>تأیید حذف حساب کاربری</DialogTitle>
+    <Dialog open={open} onClose={onClose} dir="rtl">
+      <DialogTitle sx={{ fontWeight: "bold" }}>تأیید حذف حساب کاربری</DialogTitle>
       <DialogContent>
-        <Typography>آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست.</Typography>
+        <Typography sx={{ mt: 1 }}>
+          آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست.
+        </Typography>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
+      <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
+        <Button
+          onClick={onClose}
+          sx={{
+            color: "#4caf50",
+            fontWeight: "bold",
+            "&:hover": {
+              bgcolor: "rgba(76, 175, 80, 0.1)",
+            },
+          }}
+        >
           لغو
         </Button>
-        <Button onClick={onConfirm} color="error">
+        <Button
+          onClick={onConfirm}
+          sx={{
+            color: "#f44336",
+            fontWeight: "bold",
+            "&:hover": {
+              bgcolor: "rgba(244, 67, 54, 0.1)",
+            },
+          }}
+        >
           حذف
         </Button>
       </DialogActions>
@@ -107,10 +145,14 @@ export default function CitizenDashboard() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [reports, setReports] = useState([]);
+  const fileInputRef = useRef();
+
+  const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
     FullName: '',
     Picture: null,
   });
+  const isMobile = useMediaQuery('(max-width:900px)');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -189,36 +231,108 @@ export default function CitizenDashboard() {
       setImagePreview(URL.createObjectURL(file)); // Preview the uploaded image
     }
   };
+  const handleMarkPictureForDeletion = () => {
+    setShouldDeletePicture(true);
+    setImagePreview(null);
+    setEditedProfile(prev => ({
+      ...prev,
+      Picture: null,
+    }));
+  
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+  
+  
 
   const handleSaveProfile = async () => {
     try {
-      const formData = new FormData();
-      formData.append("FullName", editedProfile.FullName);
-      if (editedProfile.Picture) {
-        formData.append("Picture", editedProfile.Picture);
+      // اگر کاربر خواسته عکس حذف شه → اول بزن DELETE
+      if (shouldDeletePicture) {
+        await fetch("http://127.0.0.1:8000/auth/profile/", {
+          method: "DELETE",
+          credentials: "include",
+        });
       }
-
-      const response = await fetch("http://127.0.0.1:8000/auth/profile/", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
+  
+      let response;
+  
+      if (editedProfile.Picture instanceof File) {
+        const formData = new FormData();
+        formData.append("FullName", editedProfile.FullName);
+        formData.append("Picture", editedProfile.Picture);
+  
+        response = await fetch("http://127.0.0.1:8000/auth/profile/", {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+      } else {
+        response = await fetch("http://127.0.0.1:8000/auth/profile/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            FullName: editedProfile.FullName,
+          }),
+        });
+      }
+  
       if (response.ok) {
         const updatedProfile = await response.json();
         setProfile(updatedProfile);
-        // Update the image preview with the new image URL from the backend
         if (updatedProfile.Picture) {
           setImagePreview(`http://127.0.0.1:8000${updatedProfile.Picture}`);
+        } else {
+          setImagePreview(null);
         }
         setIsEditing(false);
+        setShouldDeletePicture(false); // reset بعد از ذخیره
       } else {
-        console.error("Failed to update profile:", response.statusText);
+        const errorText = await response.text();
+        console.error("Server error:", response.status, errorText);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
     }
   };
+  
+  const handleDeleteProfilePicture = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/auth/profile/", {
+        method: "DELETE",
+        credentials: "include",
+      });
+  
+      if (response.ok) {
+        const updatedProfile = await response.json(); // اگر چیزی برمی‌گردونه
+        setProfile(updatedProfile);
+        setImagePreview(null);
+        setEditedProfile(prev => ({
+          ...prev,
+          Picture: null,
+        }));
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Failed to delete profile picture:", response.status, errorText);
+      }
+    } catch (error) {
+      console.error("🔥 Error deleting profile picture:", error);
+    }
+  };
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   const handleCancelEdit = () => {
     setIsEditing(false);
@@ -279,13 +393,17 @@ export default function CitizenDashboard() {
         flexDirection: "column",
         alignItems: "center",
         p: 2,
+        height: "100vh",
+        overflowY: "auto",
+        position: "sticky",
+        top: 0
       }}
     >
       <Box sx={{ mb: 2, textAlign: "center" }}>
         <img
           src={logo}
           alt="شهر سنج"
-          style={{ width: "100%", maxWidth: "150px" }}
+          style={{ width: isMobile ? "0%" : "100%", maxWidth: "150px" }}
         />
       </Box>
 
@@ -325,7 +443,7 @@ export default function CitizenDashboard() {
               ml: 1.5,
               color: selectedItem === item.id ? "black" : "gray",
               fontWeight: selectedItem === item.id ? "bold" : "normal",
-              fontSize: { xs: "16px", md: "20px" },
+              fontSize: { xs: "16px", md: "20px" }, 
             }}
           >
             {item.label}
@@ -356,16 +474,8 @@ export default function CitizenDashboard() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          width: "100%",
-          height: { xs: "auto", md: "100vh" },
-          direction: "rtl",
-          bgcolor: "#F9FAFB",
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
+      <CssBaseline /> {/* This helps with consistent baseline styles */}
+      <Box sx={{ direction: "rtl",display: "flex", height: "100vh", overflow: "hidden" }}>
         <Drawer
           variant="temporary"
           anchor="right"
@@ -384,6 +494,7 @@ export default function CitizenDashboard() {
           {SidebarContent}
         </Drawer>
 
+        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           anchor="right"
@@ -393,7 +504,7 @@ export default function CitizenDashboard() {
               width: 300,
               position: "relative",
               borderLeft: "1px solid #ddd",
-              overflowX: "hidden",
+              overflowY: "auto",
             },
           }}
           open
@@ -401,47 +512,51 @@ export default function CitizenDashboard() {
           {SidebarContent}
         </Drawer>
 
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+      <MainContent>
         <AppBar
-  position="static"
-  sx={{ backgroundColor: "#fff", color: "#000", boxShadow: 1 }}
->
-  <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-    <Box sx={{ display: "flex", alignItems: "center" }}>
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        edge="start"
-        onClick={handleDrawerToggle}
-        sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
-      >
-        <MenuIcon />
-      </IconButton>
-      <IconButton onClick={handleProfileClick}>
-        <Avatar
-          src={imagePreview || "/path-to-default-avatar.jpg"} // Use imagePreview for profile picture
-          sx={{
-            width: 40,
-            height: 40,
-            ml: 2,
-            border: "2px solid #4caf50", // Optional: Add a border for better visibility
-          }}
-        />
-      </IconButton>
-      <Typography variant="body1" sx={{ marginLeft: 1 }}>
-        {profile ? profile.FullName : "نام کاربر"}
-      </Typography>
-    </Box>
-    <IconButton color="inherit">
-      <Notifications />
-    </IconButton>
-  </Toolbar>
-</AppBar>
+            position="sticky"
+            sx={{
+              backgroundColor: "#fff",
+              color: "#000",
+              boxShadow: 1,
+              zIndex: theme.zIndex.drawer + 1,
+            }}
+          >
+            <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <IconButton onClick={handleProfileClick}>
+                  <Avatar
+                    src={imagePreview || "/path-to-default-avatar.jpg"}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      ml: 2,
+                      border: "2px solid #4caf50",
+                    }}
+                  />
+                </IconButton>
+                <Typography variant="body1" sx={{ marginLeft: 1 }}>
+                  {profile ? profile.FullName : "نام کاربر"}
+                </Typography>
+              </Box>
+              <IconButton color="inherit">
+                <Notifications />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
 
-          {/* Overview Tab */}
-          <TabPanel value={selectedItem} index={"overview"}>
-            <Box sx={{ flexGrow: 1, p: 3 }}>
-              <Grid container spacing={10}>
+          <ContentContainer>
+            <TabPanel value={selectedItem} index={"overview"}>
+              <Grid container spacing={3}>
                 {[
                   {
                     title: "تعداد کل کاربران",
@@ -480,11 +595,21 @@ export default function CitizenDashboard() {
                   </Grid>
                 ))}
               </Grid>
-            </Box>
           </TabPanel>
 
-{/* Profile Tab */}
-{/* Profile Tab */}
+          <TabPanel value={selectedItem} index={"map"}>
+              <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
+                <ReportForm/>
+              </Box>
+          </TabPanel>
+            
+            <TabPanel value={selectedItem} index={"violations"}>
+              <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
+                <ReportFeed/>
+              </Box>
+            </TabPanel>
+
+
 <TabPanel value={selectedItem} index={"profile"}>
   <Box
     sx={{
@@ -498,13 +623,18 @@ export default function CitizenDashboard() {
   >
     {/* Profile Card Section */}
     <Box
-      sx={{
-        width: { xs: "100%", md: "300px" },
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center", // Center the content (title and paper) horizontally
-      }}
-    >
+  sx={{
+    width: { xs: "100%", md: "460px" },
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    mr: { md: 15}, // ← این فاصله از راست ایجاد می‌کنه
+  }}
+>
+
+
+
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
       <AccountCircle sx={{ mr: 1, fontSize: 32, color: "#4caf50" }} /> {/* Profile-related icon */}
         <Typography variant="h5" fontWeight="bold">
@@ -523,60 +653,84 @@ export default function CitizenDashboard() {
         }}
       >
         <Box sx={{ textAlign: "center", mb: 2 }}>
-          <input
-            type="file"
-            accept="image/*"
-            id="profile-image-input"
-            style={{ display: "none" }}
-            onChange={handleImageUpload}
-          />
-          <label htmlFor={isEditing ? "profile-image-input" : undefined}>
-            <Avatar
-              src={imagePreview || "/path-to-default-avatar.jpg"}
-              sx={{
-                width: 100,
-                height: 100,
-                mx: "auto",
-                mb: 1,
-                boxShadow: "0 0 0 3px #4caf50, 0 0 10px rgba(76, 175, 80, 0.5)",
-                cursor: isEditing ? "pointer" : "default",
-              }}
-            />
-          </label>
+  <input
+    type="file"
+    accept="image/*"
+    id="profile-image-input"
+    style={{ display: "none" }}
+    onChange={handleImageUpload}
+    ref={fileInputRef}
 
-          {isEditing ? (
-            <>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                sx={{ mb: 1, fontSize: "14px" }}
-              >
-                برای تغییر عکس پروفایل روی تصویر بالا کلیک کنید.
-              </Typography>
-              <TextField
-                fullWidth
-                label="نام کامل"
-                value={editedProfile.FullName}
-                onChange={(e) =>
-                  setEditedProfile((prev) => ({
-                    ...prev,
-                    FullName: e.target.value,
-                  }))
-                }
-                sx={{ mt: 2, mb: 2 }}
-              />
-            </>
-          ) : (
-            <>
-              <Typography variant="h6" fontWeight="bold">
-                {profile?.FullName || "نام کاربر"}
-              </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                {profile?.user_type || "نوع کاربر مشخص نیست"}
-              </Typography>
-            </>
-          )}
-        </Box>
+  />
+  <label htmlFor={isEditing ? "profile-image-input" : undefined}>
+    <Avatar
+      src={imagePreview || "/path-to-default-avatar.jpg"}
+      sx={{
+        width: 100,
+        height: 100,
+        mx: "auto",
+        mb: 1,
+        boxShadow: "0 0 0 3px #4caf50, 0 0 10px rgba(76, 175, 80, 0.5)",
+        cursor: isEditing ? "pointer" : "default",
+      }}
+    />
+  </label>
+
+  {isEditing && (imagePreview || profile?.Picture) && (
+    <Button
+      variant="text"
+      size="small"
+      color="error"
+      onClick={handleMarkPictureForDeletion}
+      sx={{
+        fontSize: "0.8rem",
+        mt: 0.5,
+        color: "#f44336",
+        "&:hover": {
+          bgcolor: "rgba(244, 67, 54, 0.08)",
+        },
+      }}
+    >
+      حذف عکس پروفایل
+    </Button>
+  )}
+
+  {isEditing ? (
+    <>
+      <Typography
+        variant="subtitle2"
+        color="text.secondary"
+        sx={{ mb: 1, fontSize: "14px" }}
+      >
+        برای تغییر عکس پروفایل روی تصویر بالا کلیک کنید.
+      </Typography>
+
+      <TextField
+        fullWidth
+        label="نام کامل"
+        value={editedProfile.FullName}
+        onChange={(e) =>
+          setEditedProfile((prev) => ({
+            ...prev,
+            FullName: e.target.value,
+          }))
+        }
+        sx={{ mt: 2, mb: 2 }}
+      />
+    </>
+  ) : (
+    <>
+      <Typography variant="h6" fontWeight="bold">
+        {profile?.FullName || "نام کاربر"}
+      </Typography>
+      <Typography variant="subtitle1" color="text.secondary">
+        {profile?.user_type || "نوع کاربر مشخص نیست"}
+      </Typography>
+    </>
+  )}
+</Box>
+
+
 
         <Divider sx={{ my: 2 }} />
 
@@ -622,6 +776,8 @@ export default function CitizenDashboard() {
             >
               لغو
             </Button>
+           
+
           </Box>
         ) : (
           <>
@@ -771,8 +927,11 @@ export default function CitizenDashboard() {
     </Box>
   </Box>
 </TabPanel>
-  </Box>
-      </Box>
+
+          </ContentContainer>
+        </MainContent>
+    </Box>
+      
       <LogoutDialog
         open={logoutDialogOpen}
         onClose={() => setLogoutDialogOpen(false)}
