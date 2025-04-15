@@ -166,7 +166,7 @@ export default function CitizenDashboard() {
         });
         // Set the image preview if a profile picture exists
         if (response.Picture) {
-          setImagePreview(`http://127.0.0.1:8000${response.Picture}`); // Adjust the base URL as needed
+          setImagePreview(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`); // Adjust the base URL as needed
         }
         setLoading(false);
       } catch (error) {
@@ -177,7 +177,7 @@ export default function CitizenDashboard() {
 
     const fetchReports = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/supervise/citizen-report-citizen/", {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-citizen/`, {
           method: "GET",
           credentials: "include",
         });
@@ -204,7 +204,7 @@ export default function CitizenDashboard() {
 
   const handleDeleteAccount = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/logout/", {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/logout/`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -250,7 +250,7 @@ export default function CitizenDashboard() {
     try {
       // اگر کاربر خواسته عکس حذف شه → اول بزن DELETE
       if (shouldDeletePicture) {
-        await fetch("http://127.0.0.1:8000/auth/profile/", {
+        await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
           method: "DELETE",
           credentials: "include",
         });
@@ -263,13 +263,13 @@ export default function CitizenDashboard() {
         formData.append("FullName", editedProfile.FullName);
         formData.append("Picture", editedProfile.Picture);
   
-        response = await fetch("http://127.0.0.1:8000/auth/profile/", {
+        response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
           method: "POST",
           body: formData,
           credentials: "include",
         });
       } else {
-        response = await fetch("http://127.0.0.1:8000/auth/profile/", {
+        response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -285,7 +285,7 @@ export default function CitizenDashboard() {
         const updatedProfile = await response.json();
         setProfile(updatedProfile);
         if (updatedProfile.Picture) {
-          setImagePreview(`http://127.0.0.1:8000${updatedProfile.Picture}`);
+          setImagePreview(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${updatedProfile.Picture}`);
         } else {
           setImagePreview(null);
         }
@@ -302,7 +302,7 @@ export default function CitizenDashboard() {
   
   const handleDeleteProfilePicture = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/profile/", {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -341,7 +341,7 @@ export default function CitizenDashboard() {
       Picture: null,
     });
     // Reset the image preview to the original profile picture
-    setImagePreview(profile?.Picture ? `http://127.0.0.1:8000${profile.Picture}` : null);
+    setImagePreview(profile?.Picture ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${profile.Picture}` : null);
   };
 
   if (loading) {

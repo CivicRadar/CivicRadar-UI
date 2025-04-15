@@ -83,7 +83,7 @@ export default function ConfirmPassword() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/auth/password-reset-complete/`,
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/password-reset-complete/`,
         {
           method: "PATCH",
           headers: {
