@@ -46,6 +46,10 @@ import TabPanel from "../Components/TabPanel";
 import LogoutDialog from "./LogoutDialog";
 import ReportForm from "../Components/ReportsComp";
 import ReportFeed from "../Components/Reportsfeed";
+import ProfileSection from "../Components/ProfileSection";
+
+import { Assignment } from '@mui/icons-material';
+import { ListAlt } from '@mui/icons-material';
 
 // Create a styled component for the main content area
 const MainContent = styled(Box)(({ theme }) => ({
@@ -65,25 +69,6 @@ const ContentContainer = styled(Box)(({ theme }) => ({
 }));
 
 
-import potholeImage from "../assets/pathole.jpg"; // Add your pothole image to src/assets/
-import riverImage from "../assets/river.jpg"; // Add your river image to src/assets/
-
-const demoReports = [
-  {
-    id: 1,
-    title: "چاله خیابان اصلی",
-    description: "یک چاله بزرگ در خیابان اصلی شهر ایجاد شده که خطرناک است.",
-    image: potholeImage,
-    category: "مشکلات شهری",
-  },
-  {
-    id: 2,
-    title: "آلودگی رودخانه",
-    description: "رودخانه شهر به شدت آلوده شده و نیاز به پاکسازی دارد.",
-    image: riverImage,
-    category: "محیط زیست",
-  },
-];
 
 const dashboardData = {
   users: 32,
@@ -300,40 +285,12 @@ export default function CitizenDashboard() {
     }
   };
   
-  const handleDeleteProfilePicture = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-  
-      if (response.ok) {
-        const updatedProfile = await response.json(); // اگر چیزی برمی‌گردونه
-        setProfile(updatedProfile);
-        setImagePreview(null);
-        setEditedProfile(prev => ({
-          ...prev,
-          Picture: null,
-        }));
-      } else {
-        const errorText = await response.text();
-        console.error("❌ Failed to delete profile picture:", response.status, errorText);
-      }
-    } catch (error) {
-      console.error("🔥 Error deleting profile picture:", error);
-    }
-  };
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
+  
+  
+  
+  
+  
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedProfile({
@@ -377,10 +334,12 @@ export default function CitizenDashboard() {
 
   const menuItems = [
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
-    { id: "map", label: "نقشه", icon: <Map /> },
-    { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
+    { id: "map", label: "ثبت گزارشات", icon: <Assignment sx={{ color: "green" }} /> },
+    { id: "violations", label: "نمایش گزارشات", icon: <ListAlt sx={{ color: "green" }} /> },
+    { id: "profile", label: "پروفایل", icon: <AccountCircle /> }, 
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
+  
 
   const SidebarContent = (
     <Box
@@ -461,16 +420,7 @@ export default function CitizenDashboard() {
     setSelectedItem("profile");
   };
 
-  const formatDateTime = (dateTime) => {
-    const date = new Date(dateTime);
-    return date.toLocaleString("fa-IR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -610,323 +560,23 @@ export default function CitizenDashboard() {
             </TabPanel>
 
 
-<TabPanel value={selectedItem} index={"profile"}>
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "flex-start",
-      flexDirection: { xs: "column", md: "row" },
-      p: 4,
-      gap: 4,
-    }}
-  >
-    {/* Profile Card Section */}
-    <Box
-  sx={{
-    width: { xs: "100%", md: "460px" },
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    mr: { md: 15}, // ← این فاصله از راست ایجاد می‌کنه
-  }}
->
-
-
-
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-      <AccountCircle sx={{ mr: 1, fontSize: 32, color: "#4caf50" }} /> {/* Profile-related icon */}
-        <Typography variant="h5" fontWeight="bold">
-          اطلاعات کاربری
-        </Typography>
-        
-      </Box>
-      <Paper
-        elevation={4}
-        sx={{
-          width: "100%", // Ensure it takes the full width of the parent Box
-          bgcolor: "#fff",
-          p: 3,
-          borderRadius: 3,
-          boxShadow: "0 0 15px 5px rgba(76, 175, 80, 0.5)", // هاله سبز
-        }}
-      >
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-  <input
-    type="file"
-    accept="image/*"
-    id="profile-image-input"
-    style={{ display: "none" }}
-    onChange={handleImageUpload}
-    ref={fileInputRef}
-
+            <TabPanel value={selectedItem} index={"profile"}>
+  <ProfileSection
+    profile={profile}
+    imagePreview={imagePreview}
+    isEditing={isEditing}
+    editedProfile={editedProfile}
+    setEditedProfile={setEditedProfile}
+    setIsEditing={setIsEditing}
+    handleImageUpload={handleImageUpload}
+    handleSaveProfile={handleSaveProfile}
+    handleCancelEdit={handleCancelEdit}
+    setDeleteDialogOpen={setDeleteDialogOpen}
+    fileInputRef={fileInputRef}
+    handleMarkPictureForDeletion={handleMarkPictureForDeletion}
   />
-  <label htmlFor={isEditing ? "profile-image-input" : undefined}>
-    <Avatar
-      src={imagePreview || "/path-to-default-avatar.jpg"}
-      sx={{
-        width: 100,
-        height: 100,
-        mx: "auto",
-        mb: 1,
-        boxShadow: "0 0 0 3px #4caf50, 0 0 10px rgba(76, 175, 80, 0.5)",
-        cursor: isEditing ? "pointer" : "default",
-      }}
-    />
-  </label>
-
-  {isEditing && (imagePreview || profile?.Picture) && (
-    <Button
-      variant="text"
-      size="small"
-      color="error"
-      onClick={handleMarkPictureForDeletion}
-      sx={{
-        fontSize: "0.8rem",
-        mt: 0.5,
-        color: "#f44336",
-        "&:hover": {
-          bgcolor: "rgba(244, 67, 54, 0.08)",
-        },
-      }}
-    >
-      حذف عکس پروفایل
-    </Button>
-  )}
-
-  {isEditing ? (
-    <>
-      <Typography
-        variant="subtitle2"
-        color="text.secondary"
-        sx={{ mb: 1, fontSize: "14px" }}
-      >
-        برای تغییر عکس پروفایل روی تصویر بالا کلیک کنید.
-      </Typography>
-
-      <TextField
-        fullWidth
-        label="نام کامل"
-        value={editedProfile.FullName}
-        onChange={(e) =>
-          setEditedProfile((prev) => ({
-            ...prev,
-            FullName: e.target.value,
-          }))
-        }
-        sx={{ mt: 2, mb: 2 }}
-      />
-    </>
-  ) : (
-    <>
-      <Typography variant="h6" fontWeight="bold">
-        {profile?.FullName || "نام کاربر"}
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary">
-        {profile?.user_type || "نوع کاربر مشخص نیست"}
-      </Typography>
-    </>
-  )}
-</Box>
-
-
-
-        <Divider sx={{ my: 2 }} />
-
-        <Box sx={{ textAlign: "right", mb: 2 }}>
-          <Typography sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <EmailIcon sx={{ ml: 1, color: "#4caf50" }} />
-            {profile?.Email || "ایمیل موجود نیست"}
-          </Typography>
-
-          <Typography sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <BadgeIcon sx={{ ml: 1, color: "#4caf50" }} />
-            {profile?.user_type || "نوع کاربر مشخص نیست"}
-          </Typography>
-        </Box>
-
-        {isEditing ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{
-                borderRadius: 2,
-                bgcolor: "#4caf50",
-                "&:hover": { bgcolor: "#45a049" },
-              }}
-              onClick={handleSaveProfile}
-            >
-              ذخیره تغییرات
-            </Button>
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{
-                borderRadius: 2,
-                borderColor: "#f44336",
-                color: "#f44336",
-                "&:hover": {
-                  borderColor: "#d32f2f",
-                  bgcolor: "rgba(244, 67, 54, 0.04)",
-                },
-              }}
-              onClick={handleCancelEdit}
-            >
-              لغو
-            </Button>
-           
-
-          </Box>
-        ) : (
-          <>
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{
-                mt: 2,
-                borderRadius: 2,
-                borderColor: "#4caf50",
-                color: "#4caf50",
-                "&:hover": {
-                  borderColor: "#45a049",
-                  bgcolor: "rgba(76, 175, 80, 0.04)",
-                },
-              }}
-              onClick={() => {
-                setIsEditing(true);
-                setEditedProfile({
-                  FullName: profile?.FullName || "",
-                  Picture: null,
-                });
-              }}
-            >
-              ویرایش اطلاعات پروفایل
-            </Button>
-
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{
-                mt: 2,
-                borderRadius: 2,
-                borderColor: "#f44336",
-                color: "#f44336",
-                "&:hover": {
-                  borderColor: "#d32f2f",
-                  bgcolor: "rgba(244, 67, 54, 0.04)",
-                },
-              }}
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              حذف حساب کاربری
-            </Button>
-          </>
-        )}
-      </Paper>
-    </Box>
-
-    {/* Posts-like Section */}
-    <Box
-      sx={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        minHeight: "50vh",
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-      <Campaign sx={{ mr: 1, fontSize: 32, color: "#4caf50" }} /> {/* Report-related icon */}
-        <Typography variant="h5" fontWeight="bold">
-          گزارشات من
-        </Typography>
-        
-      </Box>
-
-      {demoReports.length > 0 ? (
-        demoReports.map((report) => (
-          <Paper
-            key={report.id}
-            elevation={3}
-            sx={{
-              p: 1.5,
-              mb: 2,
-              borderRadius: 2,
-              bgcolor: "#fff",
-              width: { xs: "100%", md: "80%" },
-              maxWidth: "600px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            {/* Report Image */}
-            <Box sx={{ mb: 1 }}>
-              <img
-                src={report.image}
-                alt={report.title}
-                style={{
-                  width: "100%",
-                  height: "60px",
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                }}
-              />
-            </Box>
-
-            {/* Report Title and Description */}
-            <Typography variant="h6" fontWeight="bold" mb={0.5}>
-              {report.title}
-            </Typography>
-            <Typography variant="body2" color="text.primary" mb={0.5}>
-              {report.description}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              دسته‌بندی: {report.category}
-            </Typography>
-
-            {/* Interaction Icons */}
-            <Box sx={{ display: "flex", mt: 1, gap: 1 }}>
-              <IconButton>
-                <FavoriteIcon color="error" />
-              </IconButton>
-              <IconButton>
-                <ReplyIcon />
-              </IconButton>
-              <IconButton>
-                <ShareIcon />
-              </IconButton>
-            </Box>
-          </Paper>
-        ))
-      ) : (
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            sx={{
-              bgcolor: "#f0f0f0",
-              p: 2,
-              borderRadius: 2,
-              boxShadow: 1,
-            }}
-          >
-            گزارشی برای نمایش وجود ندارد.
-          </Typography>
-        </Box>
-      )}
-    </Box>
-  </Box>
 </TabPanel>
+
 
           </ContentContainer>
         </MainContent>

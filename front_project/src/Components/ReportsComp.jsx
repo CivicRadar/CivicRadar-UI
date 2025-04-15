@@ -17,6 +17,8 @@ import {
   Autocomplete,
   CircularProgress
 } from '@mui/material';
+import { LinearProgress } from '@mui/material';
+
 
 import { MyLocation, Delete as DeleteIcon, AddPhotoAlternate, VideoLibrary,Close,Place } from '@mui/icons-material';
 import NeshanMap from 'react-neshan-map-leaflet';
@@ -50,6 +52,8 @@ const ReportForm = () => {
   const [userLocation, setUserLocation] = useState(null);
   const mapDialogRef = useRef(null);
   const [mapLoading, setMapLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null); // null یا عدد بین 0 تا 100
+
 
 
 useEffect(() => {
@@ -350,74 +354,82 @@ useEffect(() => {
 
     // Add this function to your component
     const submitReport = async () => {
+      if (!validateCurrentStep()) return;
+    
       try {
         const formDataToSend = new FormData();
-        
-        // Append all fields
         formDataToSend.append('CityID', formData.city?.id || '');
         formDataToSend.append('Information', formData.description);
         formDataToSend.append('Type', formData.reportSubject);
-        
-        // Append files directly from file inputs (recommended approach)
+    
         if (formData.image) {
-          // If using file input, use this:
-          // formDataToSend.append('Picture', formData.image);
-          
-          // If using blob URLs, convert to file
           const imageResponse = await fetch(formData.image);
           const imageBlob = await imageResponse.blob();
           formDataToSend.append('Picture', imageBlob, 'image.jpg');
         }
-        
+    
         if (formData.video) {
-          // If using file input, use this:
-          // formDataToSend.append('Video', formData.video);
-          
-          // If using blob URLs, convert to file
           const videoResponse = await fetch(formData.video);
           const videoBlob = await videoResponse.blob();
           formDataToSend.append('Video', videoBlob, 'video.mp4');
         }
-        
+    
         formDataToSend.append('Longitude', formData.lng);
         formDataToSend.append('Latitude', formData.lat);
         formDataToSend.append('FullAdress', formData.fullAddress);
     
-        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`, {
-          method: 'POST',
-          body: formDataToSend,
-          credentials: "include",
-          // Don't set Content-Type header - browser will set it automatically with boundary
-        });
+        const xhr = new XMLHttpRequest();
     
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Network response was not ok');
-        }
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        };
     
-        const data = await response.json();
-        console.log('Success:', data);
-        alert('گزارش با موفقیت ثبت شد');
-        setActiveStep(0);
-        setFormData({
-          reportSubject: '',
-          reportTitle: '',
-          description: '',
-          province: null,
-          city: null,
-          fullAddress: '',
-          mapAddress: '',
-          lat: 35.699739,
-          lng: 51.338097,
-          image: null,
-          video: null
-        });
-        
+        xhr.onload = () => {
+          setUploadProgress(null); // Reset progress
+          if (xhr.status >= 200 && xhr.status < 300) {
+            alert("گزارش با موفقیت ثبت شد");
+            setActiveStep(0);
+            setFormData({
+              reportSubject: '',
+              reportTitle: '',
+              description: '',
+              province: null,
+              city: null,
+              fullAddress: '',
+              mapAddress: '',
+              lat: 35.699739,
+              lng: 51.338097,
+              image: null,
+              video: null
+            });
+          } else {
+            const response = JSON.parse(xhr.responseText);
+            throw new Error(response.message || 'خطا در ارسال اطلاعات');
+          }
+        };
+    
+        xhr.onerror = () => {
+          setUploadProgress(null);
+          alert("ارسال گزارش با خطا مواجه شد");
+        };
+    
+        xhr.open(
+          "POST",
+          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`,
+          true
+        );
+        xhr.withCredentials = true;
+        xhr.send(formDataToSend);
       } catch (error) {
-        console.error('Error:', error);
-        alert('خطا در ثبت گزارش: ' + (error.message || 'خطای ناشناخته'));
+        setUploadProgress(null);
+        console.error("Error:", error);
+        alert("خطا در ثبت گزارش: " + (error.message || "خطای ناشناخته"));
       }
     };
+    
   return (
     <Box sx={{ 
       maxWidth: 1000, 
@@ -486,7 +498,7 @@ useEffect(() => {
       </Box>
 
       {/* Current Step Content */}
-      <Box sx={{ my: 3, height: '500px', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ my: 3,  display: 'flex', flexDirection: 'column' }}>
         {activeStep === 0 && (
           <>
             <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -646,23 +658,27 @@ useEffect(() => {
   </Grid>
 )}
 <Dialog
-        open={mapDialogOpen}
-        onClose={handleCloseMapDialog}
-        fullScreen={isMobile}
-        maxWidth="md"
-        fullWidth
-        sx={{
-          '& .MuiDialog-container': {
-            alignItems: 'flex-end'
-          },
-          '& .MuiDialog-paper': {
-            margin: 0,
-            width: '100%',
-            height: '80vh',
-            maxHeight: '80vh'
-          }
-        }}
-      >
+  open={mapDialogOpen}
+  onClose={handleCloseMapDialog}
+  fullScreen={false} // حالا false می‌ذاریم حتی برای موبایل
+  maxWidth="sm"
+  fullWidth
+  sx={{
+    '& .MuiDialog-container': {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    '& .MuiDialog-paper': {
+      margin: 1.55,
+      width: '100%',
+      height: '85vh',
+      maxHeight: '85vh',
+      borderRadius: 3, // گوشه‌ها گرد
+    }
+  }}
+>
+
+
         <DialogTitle sx={{ 
           display: 'flex',
           justifyContent: 'space-between',
@@ -677,12 +693,16 @@ useEffect(() => {
           </IconButton>
         </DialogTitle>
         
-        <DialogContent sx={{ 
-          p: 0, 
-          height: '100%',
-          overflow: 'hidden',
-          position: 'relative'
-        }}>
+        <DialogContent
+  sx={{
+    p: 0,
+    flex: 1,
+    overflow: 'hidden',
+    position: 'relative',
+    height: isMobile ? 'calc(100vh - 110px)' : '100%', // برای موبایل فضای دکمه‌ها رو کم می‌کنیم
+  }}
+>
+
           {mapLoading && (
             <Box sx={{
               position: 'absolute',
@@ -771,202 +791,288 @@ useEffect(() => {
           </Grid>
         )}
 
-        {activeStep === 2 && (
-          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              مستندات گزارش
+{activeStep === 2 && (
+  <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+      مستندات گزارش
+    </Typography>
+
+    <Grid container spacing={3}>
+      {/* عکس */}
+      <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+        <Box
+          sx={{
+            minHeight: 250,
+            maxHeight: 320,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            flexGrow: 1,
+          }}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{ display: 'none' }}
+            id="image-upload"
+          />
+          <label htmlFor="image-upload">
+            <Button
+              variant="outlined"
+              component="span"
+              fullWidth
+              sx={{
+                minHeight: 220,
+                maxHeight: 320,
+                display: 'flex',
+                color: greenPalette.darkest,
+                borderColor: greenPalette.light,
+                '&:hover': {
+                  borderColor: greenPalette.main,
+                },
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderStyle: formData.image ? 'solid' : 'dashed',
+                position: 'relative',
+                overflow: 'hidden',
+                height: '100%',
+              }}
+            >
+              {formData.image ? (
+                <>
+                  <Box
+                    component="img"
+                    src={formData.image}
+                    alt="Uploaded"
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      left: 8,
+                      bgcolor: 'white',
+                      boxShadow: 1,
+                      '&:hover': {
+                        bgcolor: 'error.light',
+                      }
+                    }}
+                  >
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                </>
+              ) : (
+                <>
+                  <AddPhotoAlternate fontSize="large" />
+                  <Typography sx={{ mt: 1 }}>عکس برای این گزارش اضافه کنید</Typography>
+                </>
+              )}
+            </Button>
+          </label>
+          {errors.image && (
+            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+              {errors.image}
             </Typography>
-            <Grid container spacing={3} sx={{ flex: 1 }}>
-              <Grid item xs={12} md={6}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: 'none' }}
-                  id="image-upload"
-                />
-                <label htmlFor="image-upload">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    fullWidth
+          )}
+        </Box>
+      </Grid>
+
+      {/* ویدیو */}
+      <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+        <Box
+          sx={{
+            minHeight: 250,
+            maxHeight: 320,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            flexGrow: 1,
+          }}
+        >
+          <input
+            type="file"
+            accept="video/*"
+            onChange={handleVideoUpload}
+            style={{ display: 'none' }}
+            id="video-upload"
+          />
+          <label htmlFor="video-upload">
+            <Button
+              variant="outlined"
+              component="span"
+              fullWidth
+              sx={{
+                minHeight: 220,
+                maxHeight: 320,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderStyle: formData.video ? 'solid' : 'dashed',
+                position: 'relative',
+                overflow: 'hidden',
+                color: greenPalette.darkest,
+                borderColor: greenPalette.light,
+                '&:hover': {
+                  borderColor: greenPalette.main,
+                },
+                height: '100%',
+              }}
+            >
+              {formData.video ? (
+                <>
+                  <Box
+                    component="video"
+                    src={formData.video}
+                    controls
                     sx={{
+                      width: '100%',
                       height: '100%',
-                      display: 'flex',
-                      color: greenPalette.darkest,
-                      borderColor: greenPalette.light,
+                      objectFit: 'cover',
+                    }}
+                  />
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveVideo();
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      left: 8,
+                      bgcolor: 'white',
+                      boxShadow: 1,
                       '&:hover': {
-                        borderColor: greenPalette.main
-                      },
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderStyle: formData.image ? 'solid' : 'dashed',
-                      position: 'relative'
+                        bgcolor: 'error.light',
+                      }
                     }}
                   >
-                    {formData.image ? (
-                      <>
-                        <Box
-                          component="img"
-                          src={formData.image}
-                          alt="Uploaded"
-                          sx={{
-                            maxHeight: '80%',
-                            maxWidth: '100%',
-                            objectFit: 'contain'
-                          }}
-                        />
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveImage();
-                          }}
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            left: 8,
-                            backgroundColor: 'rgba(255,255,255,0.7)',
-                            '&:hover': {
-                              backgroundColor: 'rgba(255,255,255,0.9)'
-                            }
-                          }}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </>
-                    ) : (
-                      <>
-                        <AddPhotoAlternate fontSize="large" />
-                        <Typography sx={{ mt: 1 }}>عکس برای این گزارش اضافه کنید</Typography>
-                      </>
-                    )}
-                  </Button>
-                </label>
-                {errors.image && <Typography color="error" variant="caption" sx={{ mt: 1 }}>{errors.image}</Typography>}
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleVideoUpload}
-                  style={{ display: 'none' }}
-                  id="video-upload"
-                />
-                <label htmlFor="video-upload">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    fullWidth
-                    sx={{
-                      color: greenPalette.darkest,
-                      borderColor: greenPalette.light,
-                      '&:hover': {
-                        borderColor: greenPalette.main
-                      },
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderStyle: formData.video ? 'solid' : 'dashed',
-                      position: 'relative'
-                    }}
-                  >
-                    {formData.video ? (
-                      <>
-                        <Box
-                          component="video"
-                          src={formData.video}
-                          controls
-                          sx={{
-                            maxHeight: '80%',
-                            maxWidth: '100%',
-                            objectFit: 'contain'
-                          }}
-                        />
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveVideo();
-                          }}
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            left: 8,
-                          }}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </>
-                    ) : (
-                      <>
-                        <VideoLibrary fontSize="large" />
-                        <Typography sx={{ mt: 1 }}>فیلمی برای این گزارش اضافه کنید</Typography>
-                      </>
-                    )}
-                  </Button>
-                </label>
-                {errors.video && <Typography color="error" variant="caption" sx={{ mt: 1 }}>{errors.video}</Typography>}
-              </Grid>
-            </Grid>
-          </Box>
-        )}
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                </>
+              ) : (
+                <>
+                  <VideoLibrary fontSize="large" />
+                  <Typography sx={{ mt: 1 }}>فیلمی برای این گزارش اضافه کنید</Typography>
+                </>
+              )}
+            </Button>
+          </label>
+          {errors.video && (
+            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+              {errors.video}
+            </Typography>
+          )}
+        </Box>
+      </Grid>
+    </Grid>
+  </Box>
+)}
+
+
       </Box>
 
+      {/* Upload Progress Bar */}
+{uploadProgress !== null && (
+  <Box sx={{ my: 2 }}>
+    <Typography variant="body2" align="center" sx={{ mb: 1 }}>
+      در حال ارسال فایل‌ها... {uploadProgress}٪
+    </Typography>
+    <LinearProgress
+  variant="determinate"
+  value={uploadProgress}
+  sx={{
+    height: 8,
+    borderRadius: 5,
+    backgroundColor: '#e0f2f1',
+    '& .MuiLinearProgress-bar': {
+      backgroundColor: greenPalette.dark
+    }
+  }}
+/>
+
+  </Box>
+)}
+
       {/* Navigation Buttons */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        mt: 3,
-        pt: 2,
-        borderTop: '1px solid #f0f0f0'
-      }}>
-        <Button 
-          variant="outlined" 
-          onClick={handleBack}
-          disabled={activeStep === 0}
-          sx={{ borderColor: greenPalette.light,
-          color:greenPalette.dark,
-            '&:hover': {
-              borderColor: greenPalette.main
-            },minWidth: 120 }}
-        >
-          قبلی
-        </Button>
-        
-        {activeStep < steps.length - 1 ? (
-          <Button 
-            variant="contained" 
-            onClick={handleNext}
-            sx={{     backgroundColor: greenPalette.main,
-              '&:hover': {
-                backgroundColor: greenPalette.dark,
-              },
-              minWidth: 120 }}
-          >
-            مرحله بعدی
-          </Button>
-        ) : (
-          <Button 
-            variant="contained" 
-            color="success"
-            onClick={() => {
-              if (validateCurrentStep()) {
-                submitReport();
-              }
-            }}
-            sx={{ backgroundColor: greenPalette.dark,
-              '&:hover': {
-                backgroundColor: '#2e7d32', // even darker green
-              },
-              minWidth: 120}}
-          >
-            ثبت نهایی
-          </Button>
-        )}
-      </Box>
+      <Box
+  sx={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: { xs: 'column', sm: 'row' }, // دکمه‌ها زیر هم در موبایل
+    gap: 2,
+    mt: 3,
+    pt: 2,
+    borderTop: '1px solid #f0f0f0',
+  }}
+>
+  {/* دکمه قبلی */}
+  <Button
+    variant="outlined"
+    onClick={handleBack}
+    disabled={activeStep === 0}
+    sx={{
+      borderColor: greenPalette.light,
+      color: greenPalette.dark,
+      '&:hover': {
+        borderColor: greenPalette.main,
+      },
+      minWidth: 120,
+      width: { xs: '100%', sm: 'auto' }, // تمام عرض در موبایل
+    }}
+  >
+    قبلی
+  </Button>
+
+  {/* دکمه ثبت یا مرحله بعدی */}
+  {activeStep < steps.length - 1 ? (
+    <Button
+      variant="contained"
+      onClick={handleNext}
+      sx={{
+        backgroundColor: greenPalette.main,
+        '&:hover': {
+          backgroundColor: greenPalette.dark,
+        },
+        minWidth: 120,
+        width: { xs: '100%', sm: 'auto' },
+      }}
+    >
+      مرحله بعدی
+    </Button>
+  ) : (
+    <Button
+      variant="contained"
+      color="success"
+      onClick={() => {
+        if (validateCurrentStep()) {
+          submitReport();
+        }
+      }}
+      sx={{
+        backgroundColor: greenPalette.dark,
+        '&:hover': {
+          backgroundColor: '#2e7d32',
+        },
+        minWidth: 120,
+        width: { xs: '100%', sm: 'auto' },
+      }}
+    >
+      ثبت نهایی
+    </Button>
+  )}
+</Box>
+
     </Box>
   );
 };
