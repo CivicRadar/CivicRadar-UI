@@ -20,7 +20,11 @@ import { getProvince, getCity } from "../../services/admin-api";
 import IconButton from "@mui/material/IconButton";
 import { gridClasses } from '@mui/x-data-grid';
 import { grey } from '@mui/material/colors';
-import moment from 'moment';
+// import moment from 'moment';
+import Swal from "sweetalert2";
+import moment from "moment-jalaali";
+moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
+
 
 const faIR = {
   // Root
@@ -190,9 +194,29 @@ const MayorsList = () => {
       }
 
       setMayors((prevMayors) => prevMayors.filter((mayor) => mayor.id !== id));
-      alert("مسئول موردنظر با موفقیت حذف شد");
+      Swal.fire({
+        icon: "success",
+        title: "حذف موفق",
+        text: "مسئول با موفقیت حذف شد ✅",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
     } catch (err) {
-      alert(`خطا در حذف: ${err.message}`);
+      Swal.fire({
+        icon: "error",
+        title: "خطا",
+        text: `حذف با خطا مواجه شد ❌: ${err.message}`,
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
     }
     setDeleteDialogOpen(false);
   };
@@ -214,7 +238,17 @@ const MayorsList = () => {
       setSelectedcities(selectedMayorFromList.cities || []); // Keep cities intact for adding/removing
       setOpen(true);
     } else {
-      alert("خطا: مسئول موردنظر یافت نشد");
+      Swal.fire({
+        icon: "error",
+        title: "خطا",
+        text: "مسئول موردنظر یافت نشد ❌",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
     }
   };
   
@@ -292,11 +326,31 @@ const MayorsList = () => {
         });
       }
   
-      alert("اطلاعات با موفقیت بروزرسانی شد");
+      Swal.fire({
+        icon: "success",
+        title: "بروزرسانی موفق",
+        text: "اطلاعات مسئول با موفقیت ذخیره شد ✅",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
       setOpen(false); // Close the dialog
       fetchMayors(); // Refresh the list
     } catch (error) {
-      alert(`خطا در بروزرسانی اطلاعات: ${error.message}`);
+      Swal.fire({
+        icon: "error",
+        title: "خطا در بروزرسانی",
+        text: `${error.message} ❌`,
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
     }
   };
   
@@ -308,8 +362,17 @@ const MayorsList = () => {
         const data = await getCity(newValue.id);
         setcities(data);
       } catch (error) {
-        alert("خطا در دریافت شهرها");
-      }
+        Swal.fire({
+          icon: "error",
+          title: "خطا",
+          text: "دریافت اطلاعات شهرها با خطا مواجه شد ❌",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: 'swal-confirm-btn',
+            title: 'swal-title',
+          }
+        });
+              }
     } else {
       setcities([]);
     }
@@ -325,8 +388,17 @@ const MayorsList = () => {
         const data = await getProvince();
         setProvinces(data);
       } catch (error) {
-        alert("خطا در دریافت استان‌ها");
-      }
+        Swal.fire({
+          icon: "error",
+          title: "خطا",
+          text: "دریافت اطلاعات استان‌ها با خطا مواجه شد ❌",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: 'swal-confirm-btn',
+            title: 'swal-title',
+          }
+        });
+              }
     };
 
     fetchProvinces();
@@ -357,11 +429,21 @@ const MayorsList = () => {
     {
       field: "LastCooperation",
       headerName: "آخرین همکاری",
-      width: 150,
+      width: 230,
       headerAlign: 'center', // 🔥 این کلیدیه
       editable: false,
-      renderCell: (params) =>
-        moment(params.row.LastCooperation).format('YYYY-MM-DD'),
+      renderCell: (params) => {
+        const date = params.row.LastCooperation;
+      
+        if (!date || date === "N/A") return "بدون همکاری";
+      
+        const formatted = moment(date)
+          .local()
+          .format("jD jMMMM jYYYY، ساعت HH:mm");
+          
+        return formatted;
+      }
+      
     },
     {
       field: "MonthlyReportCheck",

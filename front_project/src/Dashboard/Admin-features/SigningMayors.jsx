@@ -3,6 +3,8 @@ import { TextField, Button, FormControl, FormGroup, FormLabel, Box, Typography, 
 import { getCity, getProvince, addMayor } from '../../services/admin-api';
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
+import Swal from "sweetalert2";
+
 
 const SignUpForm = ({gotoregisted}) => {
   // const [loading, setLoading] = useState(true);
@@ -117,7 +119,17 @@ const SignUpForm = ({gotoregisted}) => {
     try {
       const response = await addMayor(MayorData);
       console.log("Form submitted successfully:", response);
-      alert("ثبت نام با موفقیت انجام شد!");
+      Swal.fire({
+        icon: "success",
+        title: "ثبت‌نام موفقیت‌آمیز بود",
+        text: "اکنون می‌توانید به لیست مسئولین بروید",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
     } catch (error) {
       console.error(
         "Authentication Error:",
@@ -148,7 +160,17 @@ const SignUpForm = ({gotoregisted}) => {
         const data = await getCity(newValue.id);
         setCities(data);
       } catch (error) {
-        alert("خطا در دریافت شهرها");
+        Swal.fire({
+          icon: "error",
+          title: "خطا",
+          text: "خطا در دریافت شهرها ❌",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: 'swal-confirm-btn',
+            title: 'swal-title',
+          }
+        });
+        
       }
     } else {
       setCities([]);

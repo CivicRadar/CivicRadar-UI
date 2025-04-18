@@ -33,6 +33,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate, useParams } from "react-router-dom"; // Added useParams for URL params
+import Swal from "sweetalert2";
+
 
 const AuthPage = () => {
   const { loginCitizen } = useCitizen();
@@ -122,7 +124,13 @@ const AuthPage = () => {
           console.log("Citizen Signup Data:", formData);
           response = await signupCitizen(formData);
           console.log("Citizen Signup Success:", response);
-          alert("ثبت‌نام موفقیت‌آمیز بود! ✅ برای تایید اکانت ایمیل فرستاده شده را تایید کنید");
+          Swal.fire({
+            icon: "success",
+            title: "ثبت‌نام موفقیت‌آمیز بود!",
+            text: "برای تایید اکانت، ایمیل فرستاده شده را بررسی کنید.",
+            confirmButtonText: "باشه",
+          });
+          
         } else {
           console.log("Citizen Login Data:", formData);
           response = await loginCitizenapi({
@@ -136,7 +144,16 @@ const AuthPage = () => {
           if (response.jwt) {
             loginCitizen(response);
             console.log("JWT Token Saved:", response.jwt);
-            alert("ورود موفقیت‌آمیز بود! ✅");
+            Swal.fire({
+              icon: "success",
+              title: "!ورود موفقیت‌آمیز بود",
+              confirmButtonText: "باشه",
+              customClass: {
+                confirmButton: 'swal-confirm-btn',
+                title: 'swal-title',
+              }
+            });
+            
             navigate("/CitizenDashboard");
           } else {
             console.log(response.fail);
@@ -158,7 +175,16 @@ const AuthPage = () => {
         if (response.jwt) {
           loginMayor(response);
           console.log("JWT Token Saved (Mayor):", response.jwt);
-          alert("ورود شهردار موفقیت‌آمیز بود! ✅");
+          Swal.fire({
+            icon: "success",
+            title: "!ورود شهردار موفقیت‌آمیز بود",
+            confirmButtonText: "باشه",
+            customClass: {
+              confirmButton: 'swal-confirm-btn',
+              title: 'swal-title',
+            }
+          });
+          
           navigate("/MayorDashboard");
         } else {
           const errorMsg =
@@ -178,7 +204,15 @@ const AuthPage = () => {
         if (response.jwt) {
           loginAdmin(response);
           console.log("JWT Token Saved (Admin):", response.jwt);
-          alert("ورود ادمین موفقیت‌آمیز بود! ✅");
+          Swal.fire({
+            icon: "success",
+            title: "!ورود ادمین موفقیت‌آمیز بود",
+            confirmButtonText: "باشه",
+            customClass: {
+              confirmButton: 'swal-confirm-btn',
+              title: 'swal-title',
+            }
+          });
           navigate("/AdminDashboard");
         } else {
           const errorMsg =
