@@ -12,6 +12,7 @@ import {
   Drawer,
   Avatar,
   CssBaseline,
+  styled,
   useMediaQuery,
 } from "@mui/material";
 import {
@@ -36,6 +37,7 @@ import MayorsList from "./Admin-features/MayorsList";
 import TabPanel from "../Components/TabPanel";
 import LogoutDialog from "./LogoutDialog";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import Swal from "sweetalert2";
 
 
 import AdminProfileSection from "../Components/adminProfileSection";
@@ -49,6 +51,24 @@ const dashboardData = {
 const toPersianNumber = (num) => {
   return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 };
+const MainContent = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  display: "flex",
+  flexDirection: "column",
+  height: "100vh",
+  overflow: "hidden",
+  backgroundColor: "#F9FAFB",
+}));
+
+const ContentContainer = styled(Box)(({ theme }) => ({
+  flex: 1,
+  overflowY: "auto",
+  overflowX: "hidden",
+
+  padding: theme.spacing(1),
+  backgroundColor: "#F9FAFB",
+}));
+
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
@@ -396,11 +416,31 @@ export default function AdminDashboard() {
       } else {
         const errText = await response.text();
         console.error("خطا در حذف حساب:", errText);
-        alert("حذف حساب با خطا مواجه شد");
+        Swal.fire({
+          icon: "error",
+          title: "خطا",
+          text: "حذف حساب با خطا مواجه شد ❌",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: 'swal-confirm-btn',
+            title: 'swal-title',
+          }
+        });
+        
       }
     } catch (error) {
       console.error("خطای شبکه:", error);
-      alert("خطا در ارتباط با سرور");
+      Swal.fire({
+        icon: "error",
+        title: "خطای شبکه",
+        text: "خطا در ارتباط با سرور ❌",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
     } finally {
       setDeleteDialogOpen(false);
     }
@@ -414,26 +454,25 @@ export default function AdminDashboard() {
       <Box
         sx={{
           width: "100%",
-          height: { xs: "auto", md: "100vh" },
+          height: "100vh",
           direction: "rtl",
           bgcolor: "#F9FAFB",
           display: "flex",
           flexDirection: "row",
+          overflow: "hidden",
         }}
       >
-        {/* Drawer حالت موبایل */}
+        {/* Drawer موبایل */}
         <Drawer
           variant="temporary"
           anchor="right"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", md: "none" },
             "& .MuiDrawer-paper": {
-              width: 300, // یا 250، ولی 300 برای تطابق با داشبوردهای دیگر
+              width: 300,
               bgcolor: "#fff",
               direction: "rtl",
               boxShadow: 3,
@@ -442,8 +481,8 @@ export default function AdminDashboard() {
         >
           {SidebarContent}
         </Drawer>
-
-        {/* Drawer حالت دسکتاپ */}
+  
+        {/* Drawer دسکتاپ */}
         <Drawer
           variant="permanent"
           anchor="right"
@@ -460,129 +499,105 @@ export default function AdminDashboard() {
         >
           {SidebarContent}
         </Drawer>
-
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+  
+        {/* Main Content Area */}
+        <MainContent>
+          {/* AppBar */}
           <AppBar
-             position="sticky"
-             sx={{
-               width: isMobile && selectedItem === "registered" ? "90%" : "100%",
-               backgroundColor: "#fff",
-               color: "#000",
-               boxShadow: 1,
-               zIndex: theme.zIndex.drawer + 1,
-               transition: "all 0.3s ease",
-             }}
+            position="sticky"
+            sx={{
+              backgroundColor: "#fff",
+              color: "#000",
+              boxShadow: 1,
+              zIndex: theme.zIndex.drawer + 1,
+            }}
           >
-           <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-  <Box sx={{ display: "flex", alignItems: "center" }}>
-    <IconButton
-      color="inherit"
-      aria-label="open drawer"
-      edge="start"
-      onClick={handleDrawerToggle}
-      sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
-    >
-      <MenuIcon />
-    </IconButton>
-
-    {/* اینجا آواتار را داخل IconButton می‌گذاریم تا کلیک‌پذیر شود */}
-    <IconButton onClick={() => setSelectedItem("profile")}>
-      <Avatar
-        sx={{
-          width: 40,
-          height: 40,
-          ml: 2,
-          border: "2px solid #4caf50",
-        }}
-        src={imagePreview || "/path-to-default-avatar.jpg"}
-      />
-    </IconButton>
-
-    {/* در صورت تمایل: نمایش نام ادمین */}
-    <Typography variant="body1" sx={{ marginLeft: 1 }}>
-      {profile ? profile.FullName : "نام کاربر"}
-    </Typography>
-  </Box>
-
-  <IconButton color="inherit">
-    <Notifications />
-  </IconButton>
-</Toolbar>
-
+            <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
+                >
+                  <MenuIcon />
+                </IconButton>
+  
+                <IconButton onClick={() => setSelectedItem("profile")}>
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      ml: 2,
+                      border: "2px solid #4caf50",
+                    }}
+                    src={imagePreview || "/path-to-default-avatar.jpg"}
+                  />
+                </IconButton>
+  
+                <Typography variant="body1" sx={{ marginLeft: 1 }}>
+                  {profile ? profile.FullName : "نام کاربر"}
+                </Typography>
+              </Box>
+  
+              <IconButton color="inherit">
+                <Notifications />
+              </IconButton>
+            </Toolbar>
           </AppBar>
-          
-
-          {/* تب‌ها */}
-          <TabPanel value={selectedItem} index={"overview"}>
-            <Box sx={{ flexGrow: 1, p: 3 }}>
-              <Grid container spacing={10}>
-                {[
-                  {
+  
+          {/* Scrollable Tab Content */}
+          <ContentContainer>
+            <TabPanel value={selectedItem} index={"overview"}>
+              <Box sx={{ flexGrow: 1 }}>
+                <Grid container spacing={10}>
+                  {[{
                     title: "تعداد کل کاربران",
                     value: dashboardData.users,
                     icon: <Person color="success" />,
                     color: "#E8F5E9",
-                  },
-                  {
+                  }, {
                     title: "تعداد کل مسئولین",
                     value: dashboardData.admins,
                     icon: <People color="error" />,
                     color: "#FFEBEE",
-                  },
-                  {
+                  }, {
                     title: "تعداد گزارشات امروز",
                     value: dashboardData.reportsToday,
                     icon: <Campaign color="primary" />,
                     color: "#E3F2FD",
-                  },
-                ].map((item, index) => (
-                  <Grid item xs={12} sm={4} key={index}>
-                    <Card
-                      sx={{
-                        textAlign: "center",
-                        p: 2,
-                        boxShadow: 3,
-                        bgcolor: item.color,
-                      }}
-                    >
-                      {item.icon}
-                      <Typography variant="subtitle1">{item.title}</Typography>
-                      <Typography variant="h5" fontWeight="bold">
-                        {toPersianNumber(item.value)}
-                      </Typography>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </TabPanel>
-
-          <TabPanel value={selectedItem} index={"registerform"}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "#F9FAFB",
-                p: 3,
-              }}
-            >
-              <Paper
-                elevation={3}
-                sx={{
-                  maxWidth: 600,
-                  width: "100%",
-                  padding: 4,
-                  borderRadius: 4,
-                }}
-              >
-                <Box
+                  }].map((item, index) => (
+                    <Grid item xs={12} sm={4} key={index}>
+                      <Card
+                        sx={{
+                          textAlign: "center",
+                          p: 2,
+                          boxShadow: 3,
+                          bgcolor: item.color,
+                        }}
+                      >
+                        {item.icon}
+                        <Typography variant="subtitle1">{item.title}</Typography>
+                        <Typography variant="h5" fontWeight="bold">
+                          {toPersianNumber(item.value)}
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            </TabPanel>
+  
+            <TabPanel value={selectedItem} index={"registerform"}>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <Paper
+                  elevation={3}
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    mb: 3,
+                    maxWidth: 600,
+                    width: "100%",
+                    padding: 4,
+                    borderRadius: 4,
                   }}
                 >
                   <Typography
@@ -591,55 +606,56 @@ export default function AdminDashboard() {
                     sx={{
                       textAlign: "center",
                       fontWeight: "bold",
+                      mb: 3,
                     }}
                   >
                     ثبت نام مسئولین
                   </Typography>
-                </Box>
-
-                <SignUpForm gotoregisted={() => setSelectedItem("registered")} />
-              </Paper>
-            </Box>
-          </TabPanel>
-
-          <TabPanel value={selectedItem} index={"registered"}>
-            <MayorsList />
-          </TabPanel>
-
-          <TabPanel value={selectedItem} index={"map"}>
-            <Typography sx={{ p: 3 }}>اینجا نقشه قرار می‌گیرد</Typography>
-          </TabPanel>
-          <TabPanel value={selectedItem} index={"violations"}>
-            <Typography sx={{ p: 3 }}>اینجا بررسی تخلفات قرار می‌گیرد</Typography>
-          </TabPanel>
-
-          {/* تب پروفایل */}
-          <TabPanel value={selectedItem} index={"profile"}>
-            <AdminProfileSection
-              profile={profile}
-              imagePreview={imagePreview}
-              isEditing={isEditing}
-              editedProfile={editedProfile}
-              setEditedProfile={setEditedProfile}
-              setIsEditing={setIsEditing}
-              handleImageUpload={handleImageUpload}
-              handleSaveProfile={handleSaveProfile}
-              handleCancelEdit={handleCancelEdit}
-              setDeleteDialogOpen={setDeleteDialogOpen} // 👈 اینو اضافه کن
-              fileInputRef={fileInputRef}
-              handleMarkPictureForDeletion={handleMarkPictureForDeletion}
-            />
-          </TabPanel>
-        </Box>
+                  <SignUpForm gotoregisted={() => setSelectedItem("registered")} />
+                </Paper>
+              </Box>
+            </TabPanel>
+  
+            <TabPanel value={selectedItem} index={"registered"}>
+              <MayorsList />
+            </TabPanel>
+  
+            <TabPanel value={selectedItem} index={"map"}>
+              <Typography>اینجا نقشه قرار می‌گیرد</Typography>
+            </TabPanel>
+  
+            <TabPanel value={selectedItem} index={"violations"}>
+              <Typography>اینجا بررسی تخلفات قرار می‌گیرد</Typography>
+            </TabPanel>
+  
+            <TabPanel value={selectedItem} index={"profile"}>
+              <AdminProfileSection
+                profile={profile}
+                imagePreview={imagePreview}
+                isEditing={isEditing}
+                editedProfile={editedProfile}
+                setEditedProfile={setEditedProfile}
+                setIsEditing={setIsEditing}
+                handleImageUpload={handleImageUpload}
+                handleSaveProfile={handleSaveProfile}
+                handleCancelEdit={handleCancelEdit}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                fileInputRef={fileInputRef}
+                handleMarkPictureForDeletion={handleMarkPictureForDeletion}
+              />
+            </TabPanel>
+          </ContentContainer>
+        </MainContent>
       </Box>
-
+  
+      {/* Dialogs */}
       <LogoutDialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} />
       <DeleteAccountDialog
-  open={deleteDialogOpen}
-  onClose={() => setDeleteDialogOpen(false)}
-  onConfirm={handleDeleteAccount}
-/>
-
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteAccount}
+      />
     </ThemeProvider>
   );
+  
 }

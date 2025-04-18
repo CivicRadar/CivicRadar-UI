@@ -18,6 +18,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { LinearProgress } from '@mui/material';
+import Swal from "sweetalert2";
 
 
 import { MyLocation, Delete as DeleteIcon, AddPhotoAlternate, VideoLibrary,Close,Place } from '@mui/icons-material';
@@ -215,18 +216,48 @@ useEffect(() => {
         (error) => {
           console.error("Geolocation error:", error);
           setMapLoading(false);
-          alert("دریافت موقعیت مکانی با مشکل مواجه شد");
+          Swal.fire({
+            icon: "error",
+            title: "خطا",
+            text: "دریافت موقعیت مکانی با خطا مواجه شد ❌",
+            confirmButtonText: "باشه",
+            customClass: {
+              confirmButton: 'swal-confirm-btn',
+              title: 'swal-title',
+            }
+          });
+          
         }
       );
     } else {
-      alert("مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند");
+      Swal.fire({
+        icon: "error",
+        title: "خطا",
+        text: "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند ❌",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
       setMapLoading(false);
     }
   };
 
   const getUserLocation = () => {
     if (!navigator.geolocation) {
-      alert("مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند");
+      Swal.fire({
+        icon: "error",
+        title: "خطا",
+        text: "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند ❌",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      
       return;
     }
 
@@ -236,8 +267,20 @@ useEffect(() => {
         updateMapPosition(latitude, longitude);
         fetchAddress(latitude, longitude);
       },
-      () => alert("دریافت موقعیت مکانی با مشکل مواجه شد")
+      () => {
+        Swal.fire({
+          icon: "error",
+          title: "خطا",
+          text: "دریافت موقعیت مکانی با مشکل مواجه شد ❌",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: 'swal-confirm-btn',
+            title: 'swal-title',
+          }
+        });
+      }
     );
+    
   };
 
   const handleChange = (name, value) => {
@@ -390,7 +433,17 @@ useEffect(() => {
         xhr.onload = () => {
           setUploadProgress(null); // Reset progress
           if (xhr.status >= 200 && xhr.status < 300) {
-            alert("گزارش با موفقیت ثبت شد");
+            Swal.fire({
+              icon: "success",
+              title: "موفقیت‌آمیز",
+              text: "گزارش با موفقیت ثبت شد ✅",
+              confirmButtonText: "باشه",
+              customClass: {
+                confirmButton: 'swal-confirm-btn',
+                title: 'swal-title',
+              }
+            });
+            
             setActiveStep(0);
             setFormData({
               reportSubject: '',
@@ -413,7 +466,17 @@ useEffect(() => {
     
         xhr.onerror = () => {
           setUploadProgress(null);
-          alert("ارسال گزارش با خطا مواجه شد");
+          Swal.fire({
+            icon: "error",
+            title: "خطا",
+            text: "ارسال گزارش با خطا مواجه شد ❌",
+            confirmButtonText: "باشه",
+            customClass: {
+              confirmButton: 'swal-confirm-btn',
+              title: 'swal-title',
+            }
+          });
+          
         };
     
         xhr.open(
@@ -426,7 +489,17 @@ useEffect(() => {
       } catch (error) {
         setUploadProgress(null);
         console.error("Error:", error);
-        alert("خطا در ثبت گزارش: " + (error.message || "خطای ناشناخته"));
+        Swal.fire({
+          icon: "error",
+          title: "خطا در ثبت گزارش",
+          text: error.message || "خطای ناشناخته ❌",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: 'swal-confirm-btn',
+            title: 'swal-title',
+          }
+        });
+        
       }
     };
     

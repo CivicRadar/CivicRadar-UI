@@ -23,6 +23,10 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal from 'sweetalert2';
 import MapWithClickDialog from "./MapWithClickDialog"; // مسیر رو درست کن
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
+import PendingIcon from '@mui/icons-material/Pending';
+
 
 
 
@@ -51,6 +55,11 @@ const [selectedReportForMap, setSelectedReportForMap] = useState(null);
   const [editNoteDialogOpen, setEditNoteDialogOpen] = useState(false);
 const [editNoteText, setEditNoteText] = useState("");
 const [editNoteId, setEditNoteId] = useState(null);
+const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
+const [tempPriority, setTempPriority] = useState("");
+const [selectedPriority, setSelectedPriority] = useState("");
+
+
 
 
 const uniqueProvinces = [...new Set(reports.map(r => r.ProvinceName))];
@@ -74,6 +83,15 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
   // دیالوگ تغییر وضعیت گزارش
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [tempStatus, setTempStatus] = useState("")
+
+  const translateStatus = (status) => {
+    switch (status) {
+      case "PendingReview": return "در انتظار بررسی";
+      case "UnderConsideration": return "در حال رسیدگی";
+      case "IssueResolved": return "حل‌شده";
+      default: return status;
+    }
+  };
 
   const handleEditNoteClick = (noteId, information) => {
     setEditNoteId(noteId);
@@ -115,6 +133,7 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
     setSelectedProvince("")
     setSelectedCity("")
     setSelectedStatus("")
+    setSelectedPriority("");
     setDateFrom("")
     setDateTo("")
   }
@@ -351,11 +370,36 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
   }
 
   const handleSaveStatus = () => {
-    if (selectedReport) {
-      updateReportStatus(selectedReport.id, tempStatus)
-    }
-    handleCloseStatusDialog()
-  }
+    if (!selectedReport) return;
+  
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-determine-cityproblem-situation/`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        CityProblemID: selectedReport.id,
+        NewSituation: tempStatus,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("خطا در تغییر وضعیت");
+        return res.json();
+      })
+      .then(() => {
+        setReports((prev) =>
+          prev.map((report) =>
+            report.id === selectedReport.id ? { ...report, Status: tempStatus } : report
+          )
+        );
+        handleCloseStatusDialog();
+      })
+      .catch((err) => {
+        console.error("❌ خطا:", err);
+      });
+  };
+  
   const breakpointColumnsObj = {
     default: 2,
     960: 2,
@@ -400,8 +444,8 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
         (selectedType === "" || translateType(r.Type) === selectedType) &&
         (selectedProvince === "" || r.ProvinceName === selectedProvince) &&
         (selectedCity === "" || r.CityName === selectedCity) &&
-
-      (selectedStatus === "" || r.Status === selectedStatus) &&
+        (selectedStatus === "" || translateStatus(r.Status) === selectedStatus)&&
+        (selectedPriority === "" || r.Priority === selectedPriority) &&
       (searchQuery === "" ||
         r.Information.includes(searchQuery) ||
         r.ReporterName.includes(searchQuery)) &&
@@ -446,6 +490,57 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
         console.error(err)
       })
   }, [])
+
+  const handleOpenPriorityDialog = () => {
+    setTempPriority(selectedReport.Priority || "Medium"); // مقدار پیش‌فرض
+    setPriorityDialogOpen(true);
+    handleMenuClose();
+  };
+  
+  const handleClosePriorityDialog = () => {
+    setPriorityDialogOpen(false);
+    setTempPriority("");
+  };
+  
+  const handleSavePriority = () => {
+    if (!selectedReport) return;
+  
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-prioritize/`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        CityProblemID: selectedReport.id,
+        Priority: tempPriority
+      })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("خطا در ثبت اولویت");
+        return res.json();
+      })
+      .then(() => {
+        // آپدیت محلی لیست گزارش‌ها
+        setReports(prev =>
+          prev.map(report =>
+            report.id === selectedReport.id
+              ? { ...report, Priority: tempPriority }
+              : report
+          )
+        );
+        setPriorityDialogOpen(false);
+      })
+      .catch(err => {
+        console.error("❌ خطا در ثبت اولویت:", err);
+      });
+  };
+
+  
+
+
+
+  
   
   
   
@@ -461,7 +556,8 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
 
       <Button
         variant="contained"
-        startIcon={<FilterAltIcon />}
+        startIcon={    <FilterAltIcon sx={{ ml: 0.5 }} />  // 👈 یه فاصله ریز به چپ
+      }
         onClick={() => setShowFilters(prev => !prev)}
         sx={{
             mb: 2,
@@ -490,16 +586,59 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
             mb: 4
           }}
         >
-          <TextField
-            size="small"
-            placeholder="جستجو در توضیحات یا نام گزارش‌دهنده"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ color: "gray", mr: 1 }} />,
-            }}
-            sx={{ minWidth: 220 }}
-          />
+<Box
+  sx={{
+    position: "relative",
+    minWidth: { xs: 250, sm: 300, md: 350 },
+    width: "100%",
+  }}
+>
+  <TextField
+    size="small"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    fullWidth
+    placeholder={searchQuery === "" ? (window.innerWidth >= 600 ? "جستجو در توضیحات یا نام گزارش‌دهنده" : "") : ""}
+    InputProps={{
+      startAdornment: <SearchIcon sx={{ color: "gray", mr: 1 }} />,
+    }}
+  />
+
+  {/* فقط موبایل و زمانی که فیلد خالیه → متن متحرک */}
+  {searchQuery === "" && (
+    <Box
+      sx={{
+        display: { xs: "flex", sm: "none" },
+        alignItems: "center",
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        right: 40,
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        fontSize: "0.85rem",
+        color: "#aaa",
+        pointerEvents: "none",
+        paddingRight: 1,
+      }}
+    >
+      <Box
+        sx={{
+          display: "inline-block",
+          animation: "scrollText 8s linear infinite",
+        }}
+      >
+        جستجو در توضیحات یا نام گزارش‌دهنده
+      </Box>
+    </Box>
+  )}
+</Box>
+
+
+
+
+
+
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>نوع گزارش</InputLabel>
             <Select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} label="نوع گزارش">
@@ -538,6 +677,20 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
               <MenuItem value="حل‌شده">حل‌شده</MenuItem>
             </Select>
           </FormControl>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+  <InputLabel>درجه اهمیت</InputLabel>
+  <Select
+    value={selectedPriority}
+    onChange={(e) => setSelectedPriority(e.target.value)}
+    label="درجه اهمیت"
+  >
+    <MenuItem value="">همه</MenuItem>
+    <MenuItem value="High">زیاد</MenuItem>
+    <MenuItem value="Medium">متوسط</MenuItem>
+    <MenuItem value="Low">کم</MenuItem>
+  </Select>
+</FormControl>
+
           <DatePicker
     value={dateFrom}
     onChange={setDateFrom}
@@ -712,14 +865,101 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
           </Box>
         </Box>
 
-        {/* نمایش وضعیت با مقدار پیش‌فرض */}
-        <Box mt={1}>
-          <Chip
-            label={report.Status || "در انتظار بررسی"}
-            color={getStatusColor(report.Status || "در انتظار بررسی")}
-            size="small"
-          />
-        </Box>
+        <Box mt={1} sx={{ width: "100%", textAlign: "right" }}>
+  <Box sx={{ mb: 1 }}>
+  <Chip
+  icon={
+    report.Status === "IssueResolved"
+      ? <CheckCircleIcon sx={{ color: "#2e7d32" }} />
+      : report.Status === "UnderConsideration"
+      ? <HourglassTopIcon sx={{ color: "#f9a825" }} />
+      : <PendingIcon sx={{ color: "#1976d2" }} />
+  }
+  label={
+    report.Status === "IssueResolved"
+      ? "حل‌شده"
+      : report.Status === "UnderConsideration"
+      ? "در حال بررسی"
+      : "در انتظار بررسی"
+  }
+  sx={{
+    backgroundColor:
+      report.Status === "IssueResolved"
+        ? "#e8f5e9"
+        : report.Status === "UnderConsideration"
+        ? "#fffde7"
+        : "#e3f2fd",
+    color:
+      report.Status === "IssueResolved"
+        ? "#2e7d32"
+        : report.Status === "UnderConsideration"
+        ? "#f57f17"
+        : "#1565c0",
+    fontWeight: 500,
+    borderRadius: "12px",
+    px: 1.5,
+  }}
+  size="small"
+/>
+
+  </Box>
+
+  <Box>
+  <Chip
+  icon={<span style={{ fontSize: "1rem" }}>🎯</span>}
+  label={`اهمیت: ${
+    report.Priority === "High"
+      ? "زیاد"
+      : report.Priority === "Medium"
+      ? "متوسط"
+      : report.Priority === "Low"
+      ? "کم"
+      : "تعیین نشده"
+  }`}
+  color={
+    report.Priority === "High"
+      ? "error"
+      : report.Priority === "Medium"
+      ? "warning"
+      : report.Priority === "Low"
+      ? "default"
+      : "default"
+  }
+  variant="outlined"
+  size="small"
+  sx={{
+    direction: "rtl",
+    borderRadius: "16px",
+    fontWeight: 500,
+    px: 1.5,
+    backgroundColor:
+      report.Priority === "High"
+        ? "#ffebee"
+        : report.Priority === "Medium"
+        ? "#fff8e1"
+        : report.Priority === "Low"
+        ? "#f5f5f5"
+        : "#eeeeee",
+    color:
+      report.Priority === "High"
+        ? "#c62828"
+        : report.Priority === "Medium"
+        ? "#f9a825"
+        : "#616161",
+    border: "none"
+  }}
+/>
+
+  </Box>
+</Box>
+
+
+
+
+
+
+
+
       </CardContent>
     </Card>
   ))}
@@ -743,20 +983,24 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
 
       {/* منوی مربوط به آیکون ۳ نقطه */}
       <Menu
-        anchorEl={noteAnchor}
-        open={Boolean(noteAnchor)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleOpenNoteDialog}>
-          افزودن یادداشت داخلی
-        </MenuItem>
-        <MenuItem onClick={handleOpenViewNotesDialog}>
-          نمایش یادداشت‌های ثبت شده
-        </MenuItem>
-        <MenuItem onClick={handleOpenStatusDialog}>
-          تغییر وضعیت گزارش
-        </MenuItem>
-      </Menu>
+  anchorEl={noteAnchor}
+  open={Boolean(noteAnchor)}
+  onClose={handleMenuClose}
+>
+  <MenuItem onClick={handleOpenNoteDialog}>
+    افزودن یادداشت داخلی
+  </MenuItem>
+  <MenuItem onClick={handleOpenViewNotesDialog}>
+    نمایش یادداشت‌های ثبت شده
+  </MenuItem>
+  <MenuItem onClick={handleOpenStatusDialog}>
+    تغییر وضعیت گزارش
+  </MenuItem>
+  <MenuItem onClick={handleOpenPriorityDialog}>
+    تغییر درجه اهمیت
+  </MenuItem>
+</Menu>
+
 
       {/* دیالوگ برای افزودن یادداشت داخلی */}
       <Dialog
@@ -973,14 +1217,19 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
           <FormControl fullWidth>
             <InputLabel>وضعیت گزارش</InputLabel>
             <Select
-              value={tempStatus}
-              onChange={(e) => setTempStatus(e.target.value)}
-              label="وضعیت گزارش"
-            >
-              <MenuItem value="در انتظار بررسی">در انتظار بررسی</MenuItem>
-              <MenuItem value="در حال رسیدگی">در حال رسیدگی</MenuItem>
-              <MenuItem value="حل‌شده">حل‌شده</MenuItem>
-            </Select>
+  value={tempStatus}
+  onChange={(e) => setTempStatus(e.target.value)}
+  label="وضعیت"
+>
+  <MenuItem value="PendingReview" disabled={selectedReport?.Status !== "PendingReview"}>
+    در انتظار بررسی
+  </MenuItem>
+  <MenuItem value="UnderConsideration" disabled={selectedReport?.Status === "IssueResolved"}>
+    در حال بررسی
+  </MenuItem>
+  <MenuItem value="IssueResolved">حل‌شده</MenuItem>
+</Select>
+
           </FormControl>
         </DialogContent>
         <DialogActions>
@@ -1088,6 +1337,172 @@ const uniqueCities = [...new Set(reports.map(r => r.CityName))];
     </Button>
   </DialogActions>
 </Dialog>
+
+<Dialog open={priorityDialogOpen} onClose={handleClosePriorityDialog}>
+  <DialogTitle
+    sx={{
+      fontWeight: "bold",
+      textAlign: "center",
+      color: "#black" // سبز متعادل (نه خیلی روشن، نه خیلی تیره)
+    }}
+  >
+    🎯 انتخاب درجه اهمیت
+  </DialogTitle>
+
+  <DialogContent>
+    <FormControl fullWidth sx={{ mt: 2 }}>
+    <InputLabel
+  sx={{
+    color: "#2e7d32",
+    "&.Mui-focused": {
+      color: "#2e7d32"
+    }
+  }}
+>
+  درجه اهمیت
+</InputLabel>
+
+      <Select
+        value={tempPriority}
+        onChange={(e) => setTempPriority(e.target.value)}
+        label="درجه اهمیت"
+        sx={{
+          "& .MuiSelect-select": {
+            color: "#2e7d32", fontWeight: 500
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#a5d6a7" // فقط یه نوار سبز روشن
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#81c784"
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#388e3c"
+          }
+        }}
+      >
+        <MenuItem value="High">زیاد</MenuItem>
+        <MenuItem value="Medium">متوسط</MenuItem>
+        <MenuItem value="Low">کم</MenuItem>
+      </Select>
+    </FormControl>
+  </DialogContent>
+
+  <DialogActions sx={{ justifyContent: "center", px: 3, pb: 2 }}>
+    <Button
+      onClick={handleClosePriorityDialog}
+      variant="outlined"
+      sx={{ borderColor: "#2e7d32", color: "#2e7d32" }}
+    >
+      انصراف
+    </Button>
+    <Button
+      onClick={handleSavePriority}
+      variant="contained"
+      sx={{ backgroundColor: "#4caf50", "&:hover": { backgroundColor: "#388e3c" } }}
+    >
+      ثبت
+    </Button>
+  </DialogActions>
+</Dialog>
+<Dialog
+  open={statusDialogOpen}
+  onClose={handleCloseStatusDialog}
+  maxWidth="xs"
+  fullWidth
+  BackdropProps={{
+    sx: {
+      backgroundColor: "rgba(0, 0, 0, 0.25)", // پس‌زمینه ملایم
+    },
+  }}
+>
+  <DialogTitle
+    sx={{
+      fontWeight: "bold",
+      textAlign: "center",
+      color: "black", // رنگ تیتر مثل بقیه
+    }}
+  >
+    وضعیت گزارش
+  </DialogTitle>
+
+  <DialogContent>
+    <FormControl fullWidth sx={{ mt: 2 }}>
+      <InputLabel
+        sx={{
+          color: "#2e7d32",
+          "&.Mui-focused": { color: "#2e7d32" },
+        }}
+      >
+        وضعیت گزارش
+      </InputLabel>
+      <Select
+        value={tempStatus}
+        onChange={(e) => setTempStatus(e.target.value)}
+        label="وضعیت گزارش"
+        sx={{
+          "& .MuiSelect-select": {
+            color: "#2e7d32",
+            fontWeight: 500,
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#a5d6a7",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#81c784",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#388e3c",
+          },
+        }}
+      >
+        <MenuItem
+          value="PendingReview"
+          disabled={selectedReport?.Status !== "PendingReview"}
+        >
+          در انتظار بررسی
+        </MenuItem>
+        <MenuItem
+          value="UnderConsideration"
+          disabled={selectedReport?.Status === "IssueResolved"}
+        >
+          در حال بررسی
+        </MenuItem>
+        <MenuItem value="IssueResolved">حل‌شده</MenuItem>
+      </Select>
+    </FormControl>
+  </DialogContent>
+
+  <DialogActions sx={{ justifyContent: "center", px: 3, pb: 2 }}>
+    <Button
+      onClick={handleCloseStatusDialog}
+      variant="outlined"
+      sx={{
+        borderColor: "#2e7d32",
+        color: "#2e7d32",
+        fontWeight: "bold",
+      }}
+    >
+      انصراف
+    </Button>
+    <Button
+      onClick={handleSaveStatus}
+      variant="contained"
+      sx={{
+        backgroundColor: "#4caf50",
+        "&:hover": { backgroundColor: "#388e3c" },
+        color: "#fff",
+        fontWeight: "bold",
+      }}
+    >
+      ذخیره
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+
+
 
 
     </Box>
