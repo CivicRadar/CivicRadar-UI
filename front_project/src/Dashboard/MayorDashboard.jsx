@@ -31,6 +31,7 @@ import TabPanel from "../Components/TabPanel";
 import LogoutDialog from "./LogoutDialog";
 import ReportsTab from "../Components/ReportsTab"; 
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 
 
 import ProfileSection from "../Components/mayerProfileSection";
@@ -70,6 +71,10 @@ export default function MayorDashboard() {
   });
   const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
   const fileInputRef = useRef();
+  const handleShowTeamForm = () => {
+    // setShowTeamForm(true);
+    setSelectedItem("teamForm"); // تغییر دادن مقدار selectedItem به "افزودن تیم"
+  };
 
   const handleProfileClick = () => {
     setSelectedItem("profile");
@@ -262,6 +267,22 @@ export default function MayorDashboard() {
           }}
         />
       </Box>
+      <Button
+  variant="contained"
+  color="success"
+  fullWidth
+  sx={{
+    mb: 2,
+    borderRadius: "12px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    mt: 1, // فاصله از لوگو
+  }}
+  onClick={handleShowTeamForm}
+>
+  افزودن تیم
+</Button>
+
 
       {menuItems.map((item) => (
         <Button
@@ -347,6 +368,8 @@ export default function MayorDashboard() {
       setDeleteDialogOpen(false);
     }
   };
+ 
+  
   
 
   return (
@@ -443,35 +466,45 @@ export default function MayorDashboard() {
           </AppBar>
 
           <ContentContainer>
-            <TabPanel value={selectedItem} index="reports">
-              <ReportsTab />
-            </TabPanel>
+  
+    <>
+      <TabPanel value={selectedItem} index="reports">
+        <ReportsTab />
+      </TabPanel>
 
-            <TabPanel value={selectedItem} index="map">
-              <Typography>در اینجا نقشه قرار می‌گیرد.</Typography>
-            </TabPanel>
+      <TabPanel value={selectedItem} index="map">
+        <Typography>در اینجا نقشه قرار می‌گیرد.</Typography>
+      </TabPanel>
 
-            <TabPanel value={selectedItem} index="violations">
-              <Typography>اینجا می‌توانید تخلفات را بررسی کنید.</Typography>
-            </TabPanel>
+      <TabPanel value={selectedItem} index="violations">
+        <Typography>اینجا می‌توانید تخلفات را بررسی کنید.</Typography>
+      </TabPanel>
 
-            <TabPanel value={selectedItem} index="profile">
-              <ProfileSection
-                profile={profile}
-                imagePreview={imagePreview}
-                isEditing={isEditing}
-                editedProfile={editedProfile}
-                setEditedProfile={setEditedProfile}
-                setIsEditing={setIsEditing}
-                handleImageUpload={handleImageUpload}
-                handleSaveProfile={handleSaveProfile}
-                handleCancelEdit={handleCancelEdit}
-                setDeleteDialogOpen={setDeleteDialogOpen} // باید از MayorDashboard بیاد
-                fileInputRef={fileInputRef}
-                handleMarkPictureForDeletion={handleMarkPictureForDeletion}
-              />
-            </TabPanel>
-          </ContentContainer>
+      <TabPanel value={selectedItem} index="profile">
+        <ProfileSection
+          profile={profile}
+          imagePreview={imagePreview}
+          isEditing={isEditing}
+          editedProfile={editedProfile}
+          setEditedProfile={setEditedProfile}
+          setIsEditing={setIsEditing}
+          handleImageUpload={handleImageUpload}
+          handleSaveProfile={handleSaveProfile}
+          handleCancelEdit={handleCancelEdit}
+          setDeleteDialogOpen={setDeleteDialogOpen}
+          fileInputRef={fileInputRef}
+          handleMarkPictureForDeletion={handleMarkPictureForDeletion}
+        />
+      </TabPanel>
+      <TabPanel value={selectedItem} index="teamForm">
+  <TeamRegistrationForm onClose={() => setShowTeamForm(false)} />
+</TabPanel>
+
+
+    </>
+  
+</ContentContainer>
+
         </MainContent>
       </Box>
 
