@@ -9,7 +9,6 @@ import MayorDashboard from  "./Dashboard/MayorDashboard"
 import AdminDashboard from "./Dashboard/AdminDashboard"
 import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن PrivateRoute
 import VerifyEmail from "./verifyemail";
-import ConfirmPassword from "./ConfirmPassword"; // Import the new component
 
 
 import "./App.css"
@@ -22,11 +21,6 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/signuplogin" element={<AuthPage />} />
-              {/* New route for ConfirmPassword page */}
-              <Route
-                path="auth/password-reset/:ui64/:token"
-                element={<ConfirmPassword />}
-              />
               <Route 
             path="/CitizenDashboard" 
             element={

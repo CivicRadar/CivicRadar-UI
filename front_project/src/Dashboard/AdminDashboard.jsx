@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,10 +10,6 @@ import {
   Paper,
   IconButton,
   Drawer,
-  Avatar,
-  CssBaseline,
-  styled,
-  useMediaQuery,
 } from "@mui/material";
 import {
   People,
@@ -26,173 +22,33 @@ import {
   Add,
   Menu as MenuIcon,
   AccountCircle,
-  Campaign,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
 import SignUpForm from "./Admin-features/SigningMayors";
-import MayorsList from "./Admin-features/MayorsList";
-import TabPanel from "../Components/TabPanel";
-import LogoutDialog from "./LogoutDialog";
-import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import Swal from "sweetalert2";
-
-
-import AdminProfileSection from "../Components/adminProfileSection";
-
+import TabPanel from "../Components/TabPanel"
 const dashboardData = {
   users: 32,
   admins: 32,
   reportsToday: 147,
 };
 
-const toPersianNumber = (num) => {
-  return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
-};
-const MainContent = styled(Box)(({ theme }) => ({
-  flexGrow: 1,
-  display: "flex",
-  flexDirection: "column",
-  height: "100vh",
-  overflow: "hidden",
-  backgroundColor: "#F9FAFB",
-}));
-
-const ContentContainer = styled(Box)(({ theme }) => ({
-  flex: 1,
-  overflowY: "auto",
-  overflowX: "hidden",
-
-  padding: theme.spacing(1),
-  backgroundColor: "#F9FAFB",
-}));
-
-
-export default function AdminDashboard() {
+export default function CitizenDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState("overview");
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false); 
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
-  // برای مدیریت تصویر پروفایل
-  const [imagePreview, setImagePreview] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({
-    FullName: "",
-    Picture: null,
-  });
-  const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
-  const fileInputRef = useRef();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-
-  const isMobile = useMediaQuery("(max-width:900px)");
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setEditedProfile((prev) => ({ ...prev, Picture: file }));
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleMarkPictureForDeletion = () => {
-    setShouldDeletePicture(true);
-    setImagePreview(null);
-    setEditedProfile((prev) => ({ ...prev, Picture: null }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedProfile({
-      FullName: profile?.FullName || "",
-      Picture: null,
-    });
-    setImagePreview(
-      profile?.Picture
-        ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${profile.Picture}`
-        : null
-    );
-  };
-
-  const handleSaveProfile = async () => {
-    try {
-      // اگر درخواست حذف عکس پروفایل داشتیم
-      if (shouldDeletePicture) {
-        await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          }
-        );
-      }
-
-      let response;
-      if (editedProfile.Picture instanceof File) {
-        const formData = new FormData();
-        formData.append("FullName", editedProfile.FullName);
-        formData.append("Picture", editedProfile.Picture);
-        response = await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
-          {
-            method: "POST",
-            body: formData,
-            credentials: "include",
-          }
-        );
-      } else {
-        response = await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ FullName: editedProfile.FullName }),
-          }
-        );
-      }
-
-      if (response.ok) {
-        const updatedProfile = await response.json();
-        setProfile(updatedProfile);
-        setImagePreview(
-          updatedProfile.Picture
-            ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${updatedProfile.Picture}`
-            : null
-        );
-        setIsEditing(false);
-        setShouldDeletePicture(false);
-      } else {
-        const errorText = await response.text();
-        console.error("Server error:", response.status, errorText);
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await getProfile();
+        console.log("Profile Data:", response);
         setProfile(response);
-        setEditedProfile({
-          FullName: response.FullName || "",
-          Picture: null,
-        });
-        if (response.Picture) {
-          setImagePreview(
-            `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`
-          );
-        }
         setLoading(false);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -202,7 +58,7 @@ export default function AdminDashboard() {
 
     fetchProfile();
   }, [navigate]);
-
+  
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -241,7 +97,6 @@ export default function AdminDashboard() {
   });
 
   const menuItems = [
-    { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
     { id: "registered", label: "مسئولین ثبت شده", icon: <People /> },
     { id: "map", label: "نقشه", icon: <Map /> },
@@ -252,38 +107,31 @@ export default function AdminDashboard() {
   const SidebarContent = (
     <Box
       sx={{
-        width: 300,
+        width: "240",
         bgcolor: "#fff",
         color: "black",
         direction: "rtl",
+
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         p: 2,
-        height: "100vh",
-        overflowY: "auto",
-        position: "sticky",
-        top: 0,
       }}
     >
       <Box sx={{ mb: 2, textAlign: "center" }}>
         <img
           src={logo}
           alt="شهر سنج"
-          style={{ width: isMobile ? "0%" : "100%", maxWidth: "150px" }}
+          style={{ width: "100%", maxWidth: "150px" }}
         />
       </Box>
 
-      {/* دکمه اختصاصی برای ثبت مسئولین */}
       <Button
-        onClick={() => setSelectedItem("registerform")}
+      onClick={() => setSelectedItem("registerform")}
         sx={{
-          bgcolor: selectedItem === "registerform" ? "transparent" : "#007E33",
-          color: selectedItem === "registerform" ? "#007E33" : "white",
+          bgcolor: "#007E33",
+          color: "white",
           fontWeight: "bold",
-          border: selectedItem === "registerform"
-            ? "2px solid #007E33"
-            : "none",
           borderRadius: "25px",
           padding: "10px 24px",
           minWidth: "240px",
@@ -292,10 +140,7 @@ export default function AdminDashboard() {
           textTransform: "none",
           fontSize: "16px",
           "&:hover": {
-            bgcolor:
-              selectedItem === "registerform"
-                ? "rgba(0, 126, 51, 0.1)"
-                : "#005a24",
+            bgcolor: "#005a24",
           },
           mt: 2,
           mb: 2,
@@ -324,13 +169,7 @@ export default function AdminDashboard() {
         <Button
           key={item.id}
           fullWidth
-          onClick={() => {
-            if (item.id === "exit") {
-              setLogoutDialogOpen(true);
-            } else {
-              setSelectedItem(item.id);
-            }
-          }}
+          onClick={() => setSelectedItem(item.id)}
           sx={{
             justifyContent: "flex-start",
             my: 1,
@@ -352,15 +191,16 @@ export default function AdminDashboard() {
             },
           })}
           <Typography
-            sx={{
-              ml: 1.5,
-              color: selectedItem === item.id ? "black" : "gray",
-              fontWeight: selectedItem === item.id ? "bold" : "normal",
-              fontSize: { xs: "16px", md: "20px" },
-            }}
-          >
-            {item.label}
-          </Typography>
+  sx={{
+    ml: 1.5,
+    color: selectedItem === item.id ? "black" : "gray",
+    fontWeight: selectedItem === item.id ? "bold" : "normal",
+    fontSize: { xs: "16px", md: "20px" }, 
+  }}
+>
+  {item.label}
+</Typography>
+
         </Button>
       ))}
     </Box>
@@ -369,293 +209,175 @@ export default function AdminDashboard() {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-  const DeleteAccountDialog = ({ open, onClose, onConfirm }) => {
-    return (
-      <Dialog open={open} onClose={onClose} dir="rtl">
-        <DialogTitle sx={{ fontWeight: "bold" }}>تأیید حذف حساب کاربری</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mt: 1 }}>
-            آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-          <Button
-            onClick={onClose}
-            sx={{
-              color: "#4caf50",
-              fontWeight: "bold",
-              "&:hover": { bgcolor: "rgba(76, 175, 80, 0.1)" },
-            }}
-          >
-            لغو
-          </Button>
-          <Button
-            onClick={onConfirm}
-            sx={{
-              color: "#f44336",
-              fontWeight: "bold",
-              "&:hover": { bgcolor: "rgba(244, 67, 54, 0.1)" },
-            }}
-          >
-            حذف
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  };
-  const handleDeleteAccount = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/logout/`, {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-  
-      if (response.ok) {
-        navigate("/signuplogin");
-      } else {
-        const errText = await response.text();
-        console.error("خطا در حذف حساب:", errText);
-        Swal.fire({
-          icon: "error",
-          title: "خطا",
-          text: "حذف حساب با خطا مواجه شد ❌",
-          confirmButtonText: "باشه",
-          customClass: {
-            confirmButton: 'swal-confirm-btn',
-            title: 'swal-title',
-          }
-        });
-        
-      }
-    } catch (error) {
-      console.error("خطای شبکه:", error);
-      Swal.fire({
-        icon: "error",
-        title: "خطای شبکه",
-        text: "خطا در ارتباط با سرور ❌",
-        confirmButtonText: "باشه",
-        customClass: {
-          confirmButton: 'swal-confirm-btn',
-          title: 'swal-title',
-        }
-      });
-      
-    } finally {
-      setDeleteDialogOpen(false);
-    }
-  };
-  
-  
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
       <Box
         sx={{
           width: "100%",
-          height: "100vh",
+          height: { xs: "auto", md: "100vh" },
           direction: "rtl",
           bgcolor: "#F9FAFB",
           display: "flex",
           flexDirection: "row",
-          overflow: "hidden",
         }}
       >
-        {/* Drawer موبایل */}
         <Drawer
           variant="temporary"
           anchor="right"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
+          ModalProps={{
+            keepMounted: true,
+          }}
           sx={{
-            display: { xs: "block", md: "none" },
+            display: { xs: "block", md: "none" }, 
             "& .MuiDrawer-paper": {
-              width: 300,
-              bgcolor: "#fff",
-              direction: "rtl",
-              boxShadow: 3,
+              width: 250, 
+              
             },
           }}
         >
           {SidebarContent}
         </Drawer>
-  
-        {/* Drawer دسکتاپ */}
+
         <Drawer
           variant="permanent"
           anchor="right"
           sx={{
-            display: { xs: "none", md: "block" },
+            display: { xs: "none", md: "block" }, 
             "& .MuiDrawer-paper": {
-              width: 300,
+              width: 300, 
               position: "relative",
               borderLeft: "1px solid #ddd",
-              overflowY: "auto",
+              overflowX: "hidden", 
+
             },
           }}
           open
         >
           {SidebarContent}
         </Drawer>
-  
-        {/* Main Content Area */}
-        <MainContent>
-          {/* AppBar */}
+
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <AppBar
-            position="sticky"
-            sx={{
-              backgroundColor: "#fff",
-              color: "#000",
-              boxShadow: 1,
-              zIndex: theme.zIndex.drawer + 1,
-            }}
+            position="static"
+            sx={{ backgroundColor: "#fff", color: "#000", boxShadow: 1 }}
           >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Box sx={{ display: "flex", alignItems: "center"  ,     
+ }}>
                 <IconButton
                   color="inherit"
                   aria-label="open drawer"
                   edge="start"
                   onClick={handleDrawerToggle}
-                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
+                  sx={{ mr: 0, display: { xs: "block", md: "none"} , ml : 1 }}
                 >
                   <MenuIcon />
                 </IconButton>
-  
-                <IconButton onClick={() => setSelectedItem("profile")}>
-                  <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      ml: 2,
-                      border: "2px solid #4caf50",
-                    }}
-                    src={imagePreview || "/path-to-default-avatar.jpg"}
-                  />
-                </IconButton>
-  
+                <AccountCircle sx={{ fontSize: 50, color: "#B2ADAD", ml: 2 }} />
                 <Typography variant="body1" sx={{ marginLeft: 1 }}>
-                  {profile ? profile.FullName : "نام کاربر"}
-                </Typography>
+  {profile ? profile.FullName : "نام کاربر"} 
+</Typography>
+
               </Box>
-  
               <IconButton color="inherit">
                 <Notifications />
               </IconButton>
             </Toolbar>
           </AppBar>
-  
-          {/* Scrollable Tab Content */}
-          <ContentContainer>
-            <TabPanel value={selectedItem} index={"overview"}>
-              <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={10}>
-                  {[{
-                    title: "تعداد کل کاربران",
-                    value: dashboardData.users,
-                    icon: <Person color="success" />,
-                    color: "#E8F5E9",
-                  }, {
-                    title: "تعداد کل مسئولین",
-                    value: dashboardData.admins,
-                    icon: <People color="error" />,
-                    color: "#FFEBEE",
-                  }, {
-                    title: "تعداد گزارشات امروز",
-                    value: dashboardData.reportsToday,
-                    icon: <Campaign color="primary" />,
-                    color: "#E3F2FD",
-                  }].map((item, index) => (
-                    <Grid item xs={12} sm={4} key={index}>
-                      <Card
-                        sx={{
-                          textAlign: "center",
-                          p: 2,
-                          boxShadow: 3,
-                          bgcolor: item.color,
-                        }}
-                      >
-                        {item.icon}
-                        <Typography variant="subtitle1">{item.title}</Typography>
-                        <Typography variant="h5" fontWeight="bold">
-                          {toPersianNumber(item.value)}
-                        </Typography>
-                      </Card>
-                    </Grid>
-                  ))}
+
+        <TabPanel value={selectedItem} index={"overview"}>
+          <Box sx={{ flexGrow: 1, p: 3 }}>
+            <Grid container spacing={10}>
+              {[
+                {
+                  title: "تعداد کل کاربران",
+                  value: dashboardData.users,
+                  icon: <Person color="success" />,
+                  color: "#E3F2FD",
+                },
+                {
+                  title: "تعداد کل مسئولین",
+                  value: dashboardData.admins,
+                  icon: <People color="error" />,
+                  color: "#FFEBEE",
+                },
+                {
+                  title: "تعداد گزارشات امروز",
+                  value: dashboardData.reportsToday,
+                  icon: <Notifications color="primary" />,
+                  color: "#E8F5E9",
+                },
+              ].map((item, index) => (
+                <Grid item xs={12} sm={4} key={index}>
+                  <Card
+                    sx={{
+                      textAlign: "center",
+                      p: 2,
+                      boxShadow: 3,
+                      bgcolor: item.color,
+                    }}
+                  >
+                    {item.icon}
+                    <Typography variant="subtitle1">{item.title}</Typography>
+                    <Typography variant="h5" fontWeight="bold">
+                      {item.value}
+                    </Typography>
+                  </Card>
                 </Grid>
-              </Box>
-            </TabPanel>
-  
-            <TabPanel value={selectedItem} index={"registerform"}>
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <Paper
-                  elevation={3}
+              ))}
+            </Grid>
+          </Box>
+          </TabPanel>
+        <TabPanel value={selectedItem} index={"registerform"}>
+          <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: "#F9FAFB",
+                padding: { xs: 2, sm: 4 },
+              }}
+            >
+              <Paper
+                elevation={3}
+                sx={{
+                  maxWidth: 600,
+                  width: '100%',
+                  padding: 4,
+                  borderRadius: 4,
+                }}
+              >
+                <Box
                   sx={{
-                    maxWidth: 600,
-                    width: "100%",
-                    padding: 4,
-                    borderRadius: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    mb: 3,
                   }}
                 >
                   <Typography
                     variant="h4"
                     component="h1"
                     sx={{
-                      textAlign: "center",
-                      fontWeight: "bold",
-                      mb: 3,
+                      textAlign: 'center',
+                      fontWeight: 'bold',
                     }}
                   >
                     ثبت نام مسئولین
                   </Typography>
-                  <SignUpForm gotoregisted={() => setSelectedItem("registered")} />
-                </Paper>
-              </Box>
-            </TabPanel>
-  
-            <TabPanel value={selectedItem} index={"registered"}>
-              <MayorsList />
-            </TabPanel>
-  
-            <TabPanel value={selectedItem} index={"map"}>
-              <Typography>اینجا نقشه قرار می‌گیرد</Typography>
-            </TabPanel>
-  
-            <TabPanel value={selectedItem} index={"violations"}>
-              <Typography>اینجا بررسی تخلفات قرار می‌گیرد</Typography>
-            </TabPanel>
-  
-            <TabPanel value={selectedItem} index={"profile"}>
-              <AdminProfileSection
-                profile={profile}
-                imagePreview={imagePreview}
-                isEditing={isEditing}
-                editedProfile={editedProfile}
-                setEditedProfile={setEditedProfile}
-                setIsEditing={setIsEditing}
-                handleImageUpload={handleImageUpload}
-                handleSaveProfile={handleSaveProfile}
-                handleCancelEdit={handleCancelEdit}
-                setDeleteDialogOpen={setDeleteDialogOpen}
-                fileInputRef={fileInputRef}
-                handleMarkPictureForDeletion={handleMarkPictureForDeletion}
-              />
-            </TabPanel>
-          </ContentContainer>
-        </MainContent>
+                </Box>
+          
+          <SignUpForm/>
+          </Paper>
+          </Box>
+          </TabPanel>
+
+        </Box>
       </Box>
-  
-      {/* Dialogs */}
-      <LogoutDialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} />
-      <DeleteAccountDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleDeleteAccount}
-      />
     </ThemeProvider>
   );
-  
 }

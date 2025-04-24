@@ -1,44 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@latest/dist/font-face.css');
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-sans-web@latest/css/iran-sans.css');
 
-.swal-confirm-btn {
-  background-color: #2e7d32 !important;
-  font-family: "Vazir", "IranSans", "IRANYekan", "Vazirmatn", "Shabnam", sans-serif !important;
-  font-weight: 500;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  padding: 6px 20px;
-}
-
-.swal-confirm-btn:hover {
-  background-color: #1b5e20 !important;
-}
-
-.swal-title {
-  font-family: "Vazir", "IranSans", "IRANYekan", "Vazirmatn", "Shabnam", sans-serif !important;
-}
-.swal2-container {
-  z-index: 2000 !important; /* اطمینان از بالاتر بودن نسبت به بقیه */
-  backdrop-filter: blur(2px);
-  background-color: rgba(0, 0, 0, 0.4); /* به جای پیش‌فرض SweetAlert */
-}
-
-.swal2-popup {
-  border-radius: 12px;
-}
-@keyframes scrollText {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-
-
-
-
 /* #root {
   max-width: 1280px;
   margin: 0 auto;
