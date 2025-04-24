@@ -228,10 +228,10 @@ export default function MayorDashboard() {
   });
 
   const menuItems = [
+    { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
     { id: "reports", label: "گزارشات", icon: <Campaign /> },
     { id: "map", label: "نقشه", icon: <Map /> },
     { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
-    { id: "profile", label: "پروفایل", icon: <AccountCircle /> },
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
 

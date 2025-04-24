@@ -241,11 +241,11 @@ export default function AdminDashboard() {
   });
 
   const menuItems = [
+    { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
     { id: "registered", label: "مسئولین ثبت شده", icon: <People /> },
     { id: "map", label: "نقشه", icon: <Map /> },
     { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
-    { id: "profile", label: "پروفایل", icon: <AccountCircle /> },
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
 

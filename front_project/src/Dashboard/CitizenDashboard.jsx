@@ -24,7 +24,6 @@ import {
 import {
   People,
   Person,
-  Notifications,
   BarChart,
   Map,
   Warning,
@@ -32,11 +31,9 @@ import {
   Menu as MenuIcon,
   AccountCircle,
   Campaign,
-  Email as EmailIcon,
-  Badge as BadgeIcon,
-  Favorite as FavoriteIcon,
-  Reply as ReplyIcon,
-  Share as ShareIcon,
+  EmojiEvents, // Added for the new icon
+  Assignment,
+  ListAlt,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/lgo.png";
@@ -47,9 +44,8 @@ import LogoutDialog from "./LogoutDialog";
 import ReportForm from "../Components/ReportsComp";
 import ReportFeed from "../Components/Reportsfeed";
 import ProfileSection from "../Components/ProfileSection";
-
-import { Assignment } from '@mui/icons-material';
-import { ListAlt } from '@mui/icons-material';
+import CitizenNotification from "./CitizenNotification";
+import CitizenStats from "./CitizenStats";
 
 // Create a styled component for the main content area
 const MainContent = styled(Box)(({ theme }) => ({
@@ -58,17 +54,15 @@ const MainContent = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   height: "100vh",
   overflow: "hidden",
-  backgroundColor: "#F9FAFB" // Set your desired background color
+  backgroundColor: "#F9FAFB"
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
   flex: 1,
   overflowY: "auto",
   padding: theme.spacing(3),
-  backgroundColor: "#F9FAFB" // Ensure content area has the same background
+  backgroundColor: "#F9FAFB"
 }));
-
-
 
 const dashboardData = {
   users: 32,
@@ -86,7 +80,7 @@ const DeleteAccountDialog = ({ open, onClose, onConfirm }) => {
       <DialogTitle sx={{ fontWeight: "bold" }}>تأیید حذف حساب کاربری</DialogTitle>
       <DialogContent>
         <Typography sx={{ mt: 1 }}>
-          آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست.
+          آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست।
         </Typography>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
@@ -125,7 +119,7 @@ export default function CitizenDashboard() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null); // For displaying the profile image
+  const [imagePreview, setImagePreview] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -149,9 +143,8 @@ export default function CitizenDashboard() {
           FullName: response.FullName || '',
           Picture: null,
         });
-        // Set the image preview if a profile picture exists
         if (response.Picture) {
-          setImagePreview(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`); // Adjust the base URL as needed
+          setImagePreview(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`);
         }
         setLoading(false);
       } catch (error) {
@@ -213,9 +206,10 @@ export default function CitizenDashboard() {
         ...prev,
         Picture: file,
       }));
-      setImagePreview(URL.createObjectURL(file)); // Preview the uploaded image
+      setImagePreview(URL.createObjectURL(file));
     }
   };
+
   const handleMarkPictureForDeletion = () => {
     setShouldDeletePicture(true);
     setImagePreview(null);
@@ -223,31 +217,27 @@ export default function CitizenDashboard() {
       ...prev,
       Picture: null,
     }));
-  
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
-  
-  
 
   const handleSaveProfile = async () => {
     try {
-      // اگر کاربر خواسته عکس حذف شه → اول بزن DELETE
       if (shouldDeletePicture) {
         await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
           method: "DELETE",
           credentials: "include",
         });
       }
-  
+
       let response;
-  
+
       if (editedProfile.Picture instanceof File) {
         const formData = new FormData();
         formData.append("FullName", editedProfile.FullName);
         formData.append("Picture", editedProfile.Picture);
-  
+
         response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`, {
           method: "POST",
           body: formData,
@@ -265,7 +255,7 @@ export default function CitizenDashboard() {
           }),
         });
       }
-  
+
       if (response.ok) {
         const updatedProfile = await response.json();
         setProfile(updatedProfile);
@@ -275,7 +265,7 @@ export default function CitizenDashboard() {
           setImagePreview(null);
         }
         setIsEditing(false);
-        setShouldDeletePicture(false); // reset بعد از ذخیره
+        setShouldDeletePicture(false);
       } else {
         const errorText = await response.text();
         console.error("Server error:", response.status, errorText);
@@ -284,20 +274,13 @@ export default function CitizenDashboard() {
       console.error("Error updating profile:", error);
     }
   };
-  
 
-  
-  
-  
-  
-  
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedProfile({
       FullName: profile?.FullName || "",
       Picture: null,
     });
-    // Reset the image preview to the original profile picture
     setImagePreview(profile?.Picture ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${profile.Picture}` : null);
   };
 
@@ -333,13 +316,13 @@ export default function CitizenDashboard() {
   });
 
   const menuItems = [
+    { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
     { id: "map", label: "ثبت گزارشات", icon: <Assignment sx={{ color: "green" }} /> },
     { id: "violations", label: "نمایش گزارشات", icon: <ListAlt sx={{ color: "green" }} /> },
-    { id: "profile", label: "پروفایل", icon: <AccountCircle /> }, 
+    { id: "stats", label: "فعالیت‌ها و امتیازات", icon: <EmojiEvents /> }, // Changed icon to EmojiEvents
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
-  
 
   const SidebarContent = (
     <Box
@@ -402,7 +385,7 @@ export default function CitizenDashboard() {
               ml: 1.5,
               color: selectedItem === item.id ? "black" : "gray",
               fontWeight: selectedItem === item.id ? "bold" : "normal",
-              fontSize: { xs: "16px", md: "20px" }, 
+              fontSize: { xs: "16px", md: "20px" },
             }}
           >
             {item.label}
@@ -420,12 +403,10 @@ export default function CitizenDashboard() {
     setSelectedItem("profile");
   };
 
-
-
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline /> {/* This helps with consistent baseline styles */}
-      <Box sx={{ direction: "rtl",display: "flex", height: "100vh", overflow: "hidden" }}>
+      <CssBaseline />
+      <Box sx={{ direction: "rtl", display: "flex", height: "100vh", overflow: "hidden" }}>
         <Drawer
           variant="temporary"
           anchor="right"
@@ -444,7 +425,6 @@ export default function CitizenDashboard() {
           {SidebarContent}
         </Drawer>
 
-        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           anchor="right"
@@ -462,8 +442,8 @@ export default function CitizenDashboard() {
           {SidebarContent}
         </Drawer>
 
-      <MainContent>
-        <AppBar
+        <MainContent>
+          <AppBar
             position="sticky"
             sx={{
               backgroundColor: "#fff",
@@ -498,9 +478,7 @@ export default function CitizenDashboard() {
                   {profile ? profile.FullName : "نام کاربر"}
                 </Typography>
               </Box>
-              <IconButton color="inherit">
-                <Notifications />
-              </IconButton>
+              <CitizenNotification />
             </Toolbar>
           </AppBar>
 
@@ -545,43 +523,43 @@ export default function CitizenDashboard() {
                   </Grid>
                 ))}
               </Grid>
-          </TabPanel>
+            </TabPanel>
 
-          <TabPanel value={selectedItem} index={"map"}>
+            <TabPanel value={selectedItem} index={"stats"}>
+                <CitizenStats />
+            </TabPanel>
+            <TabPanel value={selectedItem} index={"map"}>
               <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
-                <ReportForm/>
-              </Box>
-          </TabPanel>
-            
-            <TabPanel value={selectedItem} index={"violations"}>
-              <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
-                <ReportFeed/>
+                <ReportForm />
               </Box>
             </TabPanel>
 
+            <TabPanel value={selectedItem} index={"violations"}>
+              <Box sx={{ height: "100%", backgroundColor: "#F9FAFB" }}>
+                <ReportFeed />
+              </Box>
+            </TabPanel>
 
             <TabPanel value={selectedItem} index={"profile"}>
-  <ProfileSection
-    profile={profile}
-    imagePreview={imagePreview}
-    isEditing={isEditing}
-    editedProfile={editedProfile}
-    setEditedProfile={setEditedProfile}
-    setIsEditing={setIsEditing}
-    handleImageUpload={handleImageUpload}
-    handleSaveProfile={handleSaveProfile}
-    handleCancelEdit={handleCancelEdit}
-    setDeleteDialogOpen={setDeleteDialogOpen}
-    fileInputRef={fileInputRef}
-    handleMarkPictureForDeletion={handleMarkPictureForDeletion}
-  />
-</TabPanel>
-
-
+              <ProfileSection
+                profile={profile}
+                imagePreview={imagePreview}
+                isEditing={isEditing}
+                editedProfile={editedProfile}
+                setEditedProfile={setEditedProfile}
+                setIsEditing={setIsEditing}
+                handleImageUpload={handleImageUpload}
+                handleSaveProfile={handleSaveProfile}
+                handleCancelEdit={handleCancelEdit}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                fileInputRef={fileInputRef}
+                handleMarkPictureForDeletion={handleMarkPictureForDeletion}
+              />
+            </TabPanel>
           </ContentContainer>
         </MainContent>
-    </Box>
-      
+      </Box>
+
       <LogoutDialog
         open={logoutDialogOpen}
         onClose={() => setLogoutDialogOpen(false)}
