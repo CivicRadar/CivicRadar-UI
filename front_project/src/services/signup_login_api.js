@@ -3,7 +3,7 @@
 //تامامی  ای پی ای ها  در 
 // فایل های جداگانه نوشته میشود
 
-const API_BASE_URL = "http://127.0.0.1:8000/auth";
+// const API_BASE_URL = "http://127.0.0.1:8000/auth";
 
 // درود دوستان این پایین 
 //sign up  
@@ -11,7 +11,7 @@ const API_BASE_URL = "http://127.0.0.1:8000/auth";
 // ساخت اکانت شهردار توسط ادمین انجام میشود 
 export const signupCitizen = async (citizenData) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/signup/`, {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/signup/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export const signupCitizen = async (citizenData) => {
 
 export const loginCitizenapi = async (loginData) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/login/`, {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/login/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
