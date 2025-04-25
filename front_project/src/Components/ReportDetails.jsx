@@ -56,12 +56,6 @@ function ReportDetails() {
     setDialogOpen(false);
   };
 
-  const handleShare = (url) => {
-    navigator.clipboard.writeText(url).then(() => {
-      alert("URL copied to clipboard!");
-    });
-  };
-    
   if (loading) {
     return <CircularProgress />;
   }
@@ -124,7 +118,7 @@ function ReportDetails() {
 
       <MediaSlider reportData={reportData} />
       <ReportContent reportData={reportData} />
-      <EngagementSection handleShare={handleShare} reportData={reportData} />
+      <EngagementSection reportData={reportData} />
       <CommentsSection />
     </Box>
   );

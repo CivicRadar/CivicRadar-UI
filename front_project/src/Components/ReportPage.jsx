@@ -29,7 +29,6 @@ import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
 import TabPanel from "../Components/TabPanel";
 import LogoutDialog from "../Dashboard/LogoutDialog";
-import ReportsTab from "../Components/ReportsTab"; 
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
@@ -225,108 +224,6 @@ export default function ReportPageCon() {
     },
   });
 
-  const menuItems = [
-    { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
-    { id: "reports", label: "گزارشات", icon: <Campaign /> },
-    { id: "map", label: "نقشه", icon: <Map /> },
-    { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
-    { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
-  ];
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const SidebarContent = (
-    <Box
-      sx={{
-        width: 300,
-        bgcolor: "#fff",
-        color: "black",
-        direction: "rtl",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        p: 2,
-        height: "100vh",
-        overflowY: "auto",
-        position: "sticky",
-        top: 0,
-      }}
-    >
-      <Box sx={{ mb: 2, textAlign: "center" }}>
-        <img
-          src={logo}
-          alt="شهر سنج"
-          style={{
-            width: isMobile ? "0%" : "100%",
-            maxWidth: "150px",
-            transition: "width 0.3s",
-          }}
-        />
-      </Box>
-      <Button
-  variant="contained"
-  color="success"
-  fullWidth
-  sx={{
-    mb: 2,
-    borderRadius: "12px",
-    fontWeight: "bold",
-    fontSize: "16px",
-    mt: 1, // فاصله از لوگو
-  }}
-  onClick={handleShowTeamForm}
->
-  بازگشت به داشبورد
-</Button>
-
-
-      {menuItems.map((item) => (
-        <Button
-          key={item.id}
-          fullWidth
-          onClick={() => {
-            if (item.id === "exit") {
-              setLogoutDialogOpen(true);
-            } else {
-              setSelectedItem(item.id);
-            }
-          }}
-          sx={{
-            justifyContent: "flex-start",
-            my: 1,
-            color: selectedItem === item.id ? "black" : "gray",
-            fontWeight: selectedItem === item.id ? "bold" : "normal",
-            display: "flex",
-            flexDirection: "row",
-            borderRadius: "10px",
-            padding: "12px",
-            "&:hover": {
-              bgcolor: "lightgray",
-            },
-          }}
-        >
-          {React.cloneElement(item.icon, {
-            sx: {
-              color: selectedItem === item.id ? "green" : "gray",
-              fontSize: "46px",
-            },
-          })}
-          <Typography
-            sx={{
-              ml: 1.5,
-              color: selectedItem === item.id ? "black" : "gray",
-              fontWeight: selectedItem === item.id ? "bold" : "normal",
-              fontSize: { xs: "16px", md: "20px" },
-            }}
-          >
-            {item.label}
-          </Typography>
-        </Button>
-      ))}
-    </Box>
-  );
 
   const DeleteAccountDialog = ({ open, onClose, onConfirm }) => {
     return (
@@ -372,7 +269,6 @@ export default function ReportPageCon() {
       setSelectedReport(repid)
       navigate(`/reports/${repid}`);
     }
-  
 
   return (
     <ThemeProvider theme={theme}>
@@ -436,28 +332,6 @@ export default function ReportPageCon() {
       <TabPanel value={selectedItem} index="reports">
         <ReportDetails/>
       </TabPanel>
-
-      <TabPanel value={selectedItem} index="profile">
-        <ProfileSection
-          profile={profile}
-          imagePreview={imagePreview}
-          isEditing={isEditing}
-          editedProfile={editedProfile}
-          setEditedProfile={setEditedProfile}
-          setIsEditing={setIsEditing}
-          handleImageUpload={handleImageUpload}
-          handleSaveProfile={handleSaveProfile}
-          handleCancelEdit={handleCancelEdit}
-          setDeleteDialogOpen={setDeleteDialogOpen}
-          fileInputRef={fileInputRef}
-          handleMarkPictureForDeletion={handleMarkPictureForDeletion}
-        />
-      </TabPanel>
-      <TabPanel value={selectedItem} index="teamForm">
-  <TeamRegistrationForm onClose={() => setShowTeamForm(false)} />
-</TabPanel>
-
-
     </>
   
 </ContentContainer>
