@@ -62,9 +62,6 @@ const monthMap = {
   '12': 'دی',
 };
 
-// Base URL for the backend API
-const BASE_URL = 'http://127.0.0.1:8000';
-
 const CitizenStats = () => {
   const [monthlyPoints, setMonthlyPoints] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -79,7 +76,7 @@ const CitizenStats = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('http://127.0.0.1:8000/communicate/points/', {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/points/`, {
           method: "GET",
           credentials: "include",
         });
@@ -135,7 +132,7 @@ const CitizenStats = () => {
             .map((user, index) => ({
               id: index + 1,
               name: user.is_current_user ? 'کاربر شما' : (user.FullName || 'کاربر ناشناس'),
-              picture: user.Picture ? `${BASE_URL}${user.Picture}` : null,
+              picture: user.Picture ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${user.Picture}` : null,
               points: user.points || 0,
               rank: user.rank || (index + 1),
               isCurrentUser: user.is_current_user || false,
@@ -148,7 +145,7 @@ const CitizenStats = () => {
             const userRankData = {
               rank: currentUser.rank || 0,
               name: 'کاربر شما',
-              picture: currentUser.Picture ? `${BASE_URL}${currentUser.Picture}` : null,
+              picture: currentUser.Picture ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${currentUser.Picture}` : null,
               points: currentUser.points || 0,
             };
             setUserRank(userRankData);

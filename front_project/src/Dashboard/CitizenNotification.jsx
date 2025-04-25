@@ -35,7 +35,7 @@ export default function CitizenNotification() {
   // Fetch notifications with polling
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/communicate/notification/', {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/notification/`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -71,7 +71,7 @@ export default function CitizenNotification() {
       if (unseenNotifications.length === 0) return;
 
       for (const notif of unseenNotifications) {
-        const response = await fetch('http://127.0.0.1:8000/communicate/notification/', {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/notification/`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
