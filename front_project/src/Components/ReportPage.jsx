@@ -74,8 +74,8 @@ export default function ReportPageCon() {
   };
 
   const handleProfileClick = () => {
-    navigate(`/MayorDashboard`);
-  };
+    navigate(`/MayorDashboard`, { state: { page: "profile" } });
+ };
 
   const fetchProfile = async () => {
     try {
@@ -94,92 +94,6 @@ export default function ReportPageCon() {
     } catch (error) {
       console.error("Error fetching profile:", error);
       navigate("/signuplogin");
-    }
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setEditedProfile((prev) => ({ ...prev, Picture: file }));
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleMarkPictureForDeletion = () => {
-    setShouldDeletePicture(true);
-    setImagePreview(null);
-    setEditedProfile((prev) => ({ ...prev, Picture: null }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedProfile({
-      FullName: profile?.FullName || "",
-      Picture: null,
-    });
-    setImagePreview(
-      profile?.Picture
-        ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${profile.Picture}`
-        : null
-    );
-  };
-
-  const handleSaveProfile = async () => {
-    try {
-      if (shouldDeletePicture) {
-        await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          }
-        );
-      }
-
-      let response;
-      if (editedProfile.Picture instanceof File) {
-        const formData = new FormData();
-        formData.append("FullName", editedProfile.FullName);
-        formData.append("Picture", editedProfile.Picture);
-        response = await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
-          {
-            method: "POST",
-            body: formData,
-            credentials: "include",
-          }
-        );
-      } else {
-        response = await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ FullName: editedProfile.FullName }),
-          }
-        );
-      }
-
-      if (response.ok) {
-        const updatedProfile = await response.json();
-        setProfile(updatedProfile);
-        setImagePreview(
-          updatedProfile.Picture
-            ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${updatedProfile.Picture}`
-            : null
-        );
-        setIsEditing(false);
-        setShouldDeletePicture(false);
-      } else {
-        const errorText = await response.text();
-        console.error("Server error:", response.status, errorText);
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
     }
   };
 

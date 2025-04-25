@@ -33,6 +33,7 @@ import ReportsTab from "../Components/ReportsTab";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
+import { useLocation } from "react-router-dom";
 
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
@@ -52,6 +53,7 @@ const ContentContainer = styled(Box)(({ theme }) => ({
 
 export default function MayorDashboard() {
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
   const [selectedItem, setSelectedItem] = useState("reports");
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
@@ -115,6 +117,17 @@ export default function MayorDashboard() {
     }
   };
 
+  useEffect(() => {
+    // Check if state exists on initial load
+    if (location.state?.page) {
+      // Use the state value
+      setSelectedItem(location.state.page);
+
+      // Immediately clear the state by navigating to the same route without state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
+  
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedProfile({
