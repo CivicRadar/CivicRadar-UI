@@ -51,7 +51,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import logo from "../assets/lgo.png";
 
 
-export default function Reports() {
+export default function Reports({ReportClick}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState(null);
   const [mapOpen, setMapOpen] = useState(false);
@@ -544,6 +544,10 @@ export default function Reports() {
     setViewNotesDialogOpen(false);
   };
 
+  const handleReportClick = () => {
+    ReportClick(selectedReport.id);
+  };
+  
   const handleOpenStatusDialog = () => {
     setTempStatus(selectedReport.status);
     setStatusDialogOpen(true);
@@ -1334,6 +1338,7 @@ export default function Reports() {
         open={Boolean(noteAnchor)}
         onClose={handleMenuClose}
       >
+        <MenuItem onClick={handleReportClick}>رفتن به صفحه گزارش</MenuItem>
         <MenuItem onClick={handleOpenNoteDialog}>افزودن یادداشت داخلی</MenuItem>
         <MenuItem onClick={handleOpenViewNotesDialog}>
           نمایش یادداشت‌های ثبت شده

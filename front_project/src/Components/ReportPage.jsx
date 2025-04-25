@@ -28,12 +28,11 @@ import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
 import TabPanel from "../Components/TabPanel";
-import LogoutDialog from "./LogoutDialog";
-import ReportsTab from "../Components/ReportsTab"; 
+import LogoutDialog from "../Dashboard/LogoutDialog";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
-
+import ReportDetails from "./ReportDetails";
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
   display: "flex",
@@ -50,7 +49,7 @@ const ContentContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#F9FAFB",
 }));
 
-export default function MayorDashboard() {
+export default function ReportPageCon() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState("reports");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,7 +74,7 @@ export default function MayorDashboard() {
   };
 
   const handleProfileClick = () => {
-    setSelectedItem("profile");
+    navigate(`/MayorDashboard`);
   };
 
   const fetchProfile = async () => {
@@ -225,108 +224,6 @@ export default function MayorDashboard() {
     },
   });
 
-  const menuItems = [
-    { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
-    { id: "reports", label: "گزارشات", icon: <Campaign /> },
-    { id: "map", label: "نقشه", icon: <Map /> },
-    { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
-    { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
-  ];
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const SidebarContent = (
-    <Box
-      sx={{
-        width: 300,
-        bgcolor: "#fff",
-        color: "black",
-        direction: "rtl",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        p: 2,
-        height: "100vh",
-        overflowY: "auto",
-        position: "sticky",
-        top: 0,
-      }}
-    >
-      <Box sx={{ mb: 2, textAlign: "center" }}>
-        <img
-          src={logo}
-          alt="شهر سنج"
-          style={{
-            width: isMobile ? "0%" : "100%",
-            maxWidth: "150px",
-            transition: "width 0.3s",
-          }}
-        />
-      </Box>
-      <Button
-  variant="contained"
-  color="success"
-  fullWidth
-  sx={{
-    mb: 2,
-    borderRadius: "12px",
-    fontWeight: "bold",
-    fontSize: "16px",
-    mt: 1, // فاصله از لوگو
-  }}
-  onClick={handleShowTeamForm}
->
-  افزودن تیم
-</Button>
-
-
-      {menuItems.map((item) => (
-        <Button
-          key={item.id}
-          fullWidth
-          onClick={() => {
-            if (item.id === "exit") {
-              setLogoutDialogOpen(true);
-            } else {
-              setSelectedItem(item.id);
-            }
-          }}
-          sx={{
-            justifyContent: "flex-start",
-            my: 1,
-            color: selectedItem === item.id ? "black" : "gray",
-            fontWeight: selectedItem === item.id ? "bold" : "normal",
-            display: "flex",
-            flexDirection: "row",
-            borderRadius: "10px",
-            padding: "12px",
-            "&:hover": {
-              bgcolor: "lightgray",
-            },
-          }}
-        >
-          {React.cloneElement(item.icon, {
-            sx: {
-              color: selectedItem === item.id ? "green" : "gray",
-              fontSize: "46px",
-            },
-          })}
-          <Typography
-            sx={{
-              ml: 1.5,
-              color: selectedItem === item.id ? "black" : "gray",
-              fontWeight: selectedItem === item.id ? "bold" : "normal",
-              fontSize: { xs: "16px", md: "20px" },
-            }}
-          >
-            {item.label}
-          </Typography>
-        </Button>
-      ))}
-    </Box>
-  );
 
   const DeleteAccountDialog = ({ open, onClose, onConfirm }) => {
     return (
@@ -372,7 +269,6 @@ export default function MayorDashboard() {
       setSelectedReport(repid)
       navigate(`/reports/${repid}`);
     }
-  
 
   return (
     <ThemeProvider theme={theme}>
@@ -387,42 +283,6 @@ export default function MayorDashboard() {
           flexDirection: "row",
         }}
       >
-        <Drawer
-          variant="temporary"
-          anchor="right"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: "block", md: "none" },
-            "& .MuiDrawer-paper": {
-              width: 300,
-              bgcolor: "#fff",
-              direction: "rtl",
-              boxShadow: 3,
-            },
-          }}
-        >
-          {SidebarContent}
-        </Drawer>
-
-        <Drawer
-          variant="permanent"
-          anchor="right"
-          sx={{
-            display: { xs: "none", md: "block" },
-            "& .MuiDrawer-paper": {
-              width: 300,
-              position: "relative",
-              borderLeft: "1px solid #ddd",
-              overflowY: "auto",
-            },
-          }}
-          open
-        >
-          {SidebarContent}
-        </Drawer>
-
         <MainContent>
           <AppBar
             position="sticky"
@@ -435,16 +295,15 @@ export default function MayorDashboard() {
           >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="start"
-                  onClick={handleDrawerToggle}
-                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
-                >
-                  <MenuIcon />
-                </IconButton>
-
+              <img
+          src={logo}
+          alt="شهر سنج"
+          style={{
+            width: isMobile ? "0%" : "100%",
+            maxWidth: "150px",
+            transition: "width 0.3s",
+          }}
+        />
                 <IconButton onClick={handleProfileClick}>
                   <Avatar
                     src={imagePreview || "/path-to-default-avatar.jpg"}
@@ -471,38 +330,8 @@ export default function MayorDashboard() {
   
     <>
       <TabPanel value={selectedItem} index="reports">
-        <ReportsTab ReportClick={handleReportClick}/>
+        <ReportDetails/>
       </TabPanel>
-
-      <TabPanel value={selectedItem} index="map">
-        <Typography>در اینجا نقشه قرار می‌گیرد.</Typography>
-      </TabPanel>
-
-      <TabPanel value={selectedItem} index="violations">
-        <Typography>اینجا می‌توانید تخلفات را بررسی کنید.</Typography>
-      </TabPanel>
-
-      <TabPanel value={selectedItem} index="profile">
-        <ProfileSection
-          profile={profile}
-          imagePreview={imagePreview}
-          isEditing={isEditing}
-          editedProfile={editedProfile}
-          setEditedProfile={setEditedProfile}
-          setIsEditing={setIsEditing}
-          handleImageUpload={handleImageUpload}
-          handleSaveProfile={handleSaveProfile}
-          handleCancelEdit={handleCancelEdit}
-          setDeleteDialogOpen={setDeleteDialogOpen}
-          fileInputRef={fileInputRef}
-          handleMarkPictureForDeletion={handleMarkPictureForDeletion}
-        />
-      </TabPanel>
-      <TabPanel value={selectedItem} index="teamForm">
-  <TeamRegistrationForm onClose={() => setShowTeamForm(false)} />
-</TabPanel>
-
-
     </>
   
 </ContentContainer>
