@@ -10,6 +10,7 @@ import AdminDashboard from "./Dashboard/AdminDashboard"
 import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن PrivateRoute
 import VerifyEmail from "./verifyemail";
 import ConfirmPassword from "./ConfirmPassword"; // Import the new component
+import ReportPageCon from "./Components/ReportPage";
 
 
 import "./App.css"
@@ -43,6 +44,12 @@ function App() {
                 <MayorDashboard />
               </PrivateRoute>
               
+            } 
+          />
+          <Route 
+            path="/reports/:id" 
+            element={
+                <ReportPageCon />              
             } 
           />
            <Route 

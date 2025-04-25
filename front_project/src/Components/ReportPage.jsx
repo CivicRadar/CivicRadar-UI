@@ -28,12 +28,12 @@ import logo from "../assets/lgo.png";
 import { getProfile } from "../services/profile";
 import { useNavigate } from "react-router-dom";
 import TabPanel from "../Components/TabPanel";
-import LogoutDialog from "./LogoutDialog";
+import LogoutDialog from "../Dashboard/LogoutDialog";
 import ReportsTab from "../Components/ReportsTab"; 
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
-
+import ReportDetails from "./ReportDetails";
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
   display: "flex",
@@ -50,7 +50,7 @@ const ContentContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#F9FAFB",
 }));
 
-export default function MayorDashboard() {
+export default function ReportPageCon() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState("reports");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,7 +75,7 @@ export default function MayorDashboard() {
   };
 
   const handleProfileClick = () => {
-    setSelectedItem("profile");
+    navigate(`/MayorDashboard`);
   };
 
   const fetchProfile = async () => {
@@ -278,7 +278,7 @@ export default function MayorDashboard() {
   }}
   onClick={handleShowTeamForm}
 >
-  افزودن تیم
+  بازگشت به داشبورد
 </Button>
 
 
@@ -387,42 +387,6 @@ export default function MayorDashboard() {
           flexDirection: "row",
         }}
       >
-        <Drawer
-          variant="temporary"
-          anchor="right"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: "block", md: "none" },
-            "& .MuiDrawer-paper": {
-              width: 300,
-              bgcolor: "#fff",
-              direction: "rtl",
-              boxShadow: 3,
-            },
-          }}
-        >
-          {SidebarContent}
-        </Drawer>
-
-        <Drawer
-          variant="permanent"
-          anchor="right"
-          sx={{
-            display: { xs: "none", md: "block" },
-            "& .MuiDrawer-paper": {
-              width: 300,
-              position: "relative",
-              borderLeft: "1px solid #ddd",
-              overflowY: "auto",
-            },
-          }}
-          open
-        >
-          {SidebarContent}
-        </Drawer>
-
         <MainContent>
           <AppBar
             position="sticky"
@@ -435,16 +399,15 @@ export default function MayorDashboard() {
           >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="start"
-                  onClick={handleDrawerToggle}
-                  sx={{ mr: 0, display: { xs: "block", md: "none" }, ml: 1 }}
-                >
-                  <MenuIcon />
-                </IconButton>
-
+              <img
+          src={logo}
+          alt="شهر سنج"
+          style={{
+            width: isMobile ? "0%" : "100%",
+            maxWidth: "150px",
+            transition: "width 0.3s",
+          }}
+        />
                 <IconButton onClick={handleProfileClick}>
                   <Avatar
                     src={imagePreview || "/path-to-default-avatar.jpg"}
@@ -471,15 +434,7 @@ export default function MayorDashboard() {
   
     <>
       <TabPanel value={selectedItem} index="reports">
-        <ReportsTab ReportClick={handleReportClick}/>
-      </TabPanel>
-
-      <TabPanel value={selectedItem} index="map">
-        <Typography>در اینجا نقشه قرار می‌گیرد.</Typography>
-      </TabPanel>
-
-      <TabPanel value={selectedItem} index="violations">
-        <Typography>اینجا می‌توانید تخلفات را بررسی کنید.</Typography>
+        <ReportDetails/>
       </TabPanel>
 
       <TabPanel value={selectedItem} index="profile">
