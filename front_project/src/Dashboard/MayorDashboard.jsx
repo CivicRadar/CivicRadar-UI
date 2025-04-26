@@ -34,6 +34,8 @@ import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
 import { useLocation } from "react-router-dom";
+import IranMapSection from "../Components/iranmap";
+
 
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
@@ -240,6 +242,7 @@ export default function MayorDashboard() {
 
   const menuItems = [
     { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
+    { id: "overview", label: "نمای کلی", icon: <Map /> },  // نمای کلی (جدید)
     { id: "reports", label: "گزارشات", icon: <Campaign /> },
     { id: "map", label: "نقشه", icon: <Map /> },
     { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
@@ -483,6 +486,9 @@ export default function MayorDashboard() {
           <ContentContainer>
   
     <>
+    <TabPanel value={selectedItem} index="overview">
+    <IranMapSection />
+  </TabPanel>
       <TabPanel value={selectedItem} index="reports">
         <ReportsTab ReportClick={handleReportClick}/>
       </TabPanel>

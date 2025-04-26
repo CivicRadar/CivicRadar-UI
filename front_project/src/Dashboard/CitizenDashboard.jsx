@@ -46,6 +46,7 @@ import ReportFeed from "../Components/Reportsfeed";
 import ProfileSection from "../Components/ProfileSection";
 import CitizenNotification from "./CitizenNotification";
 import CitizenStats from "./CitizenStats";
+import IranMapSection from "../Components/iranmap";
 
 // Create a styled component for the main content area
 const MainContent = styled(Box)(({ theme }) => ({
@@ -523,6 +524,9 @@ export default function CitizenDashboard() {
                   </Grid>
                 ))}
               </Grid>
+              <Box sx={{ mt: 4 }}>
+    <IranMapSection />
+  </Box>
             </TabPanel>
 
             <TabPanel value={selectedItem} index={"stats"}>

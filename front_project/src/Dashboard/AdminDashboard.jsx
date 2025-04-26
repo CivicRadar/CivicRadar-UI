@@ -38,6 +38,7 @@ import TabPanel from "../Components/TabPanel";
 import LogoutDialog from "./LogoutDialog";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Swal from "sweetalert2";
+import IranMapSection from "../Components/iranmap";
 
 
 import AdminProfileSection from "../Components/adminProfileSection";
@@ -549,45 +550,56 @@ export default function AdminDashboard() {
   
           {/* Scrollable Tab Content */}
           <ContentContainer>
-            <TabPanel value={selectedItem} index={"overview"}>
-              <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={10}>
-                  {[{
-                    title: "تعداد کل کاربران",
-                    value: dashboardData.users,
-                    icon: <Person color="success" />,
-                    color: "#E8F5E9",
-                  }, {
-                    title: "تعداد کل مسئولین",
-                    value: dashboardData.admins,
-                    icon: <People color="error" />,
-                    color: "#FFEBEE",
-                  }, {
-                    title: "تعداد گزارشات امروز",
-                    value: dashboardData.reportsToday,
-                    icon: <Campaign color="primary" />,
-                    color: "#E3F2FD",
-                  }].map((item, index) => (
-                    <Grid item xs={12} sm={4} key={index}>
-                      <Card
-                        sx={{
-                          textAlign: "center",
-                          p: 2,
-                          boxShadow: 3,
-                          bgcolor: item.color,
-                        }}
-                      >
-                        {item.icon}
-                        <Typography variant="subtitle1">{item.title}</Typography>
-                        <Typography variant="h5" fontWeight="bold">
-                          {toPersianNumber(item.value)}
-                        </Typography>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            </TabPanel>
+          <TabPanel value={selectedItem} index={"overview"}>
+  <Box sx={{ flexGrow: 1 }}>
+    <Grid container spacing={10}>
+
+      {[{
+        title: "تعداد کل کاربران",
+        value: dashboardData.users,
+        icon: <Person color="success" />,
+        color: "#E8F5E9",
+      }, {
+        title: "تعداد کل مسئولین",
+        value: dashboardData.admins,
+        icon: <People color="error" />,
+        color: "#FFEBEE",
+      }, {
+        title: "تعداد گزارشات امروز",
+        value: dashboardData.reportsToday,
+        icon: <Campaign color="primary" />,
+        color: "#E3F2FD",
+      }].map((item, index) => (
+        <Grid item xs={12} sm={4} key={index}>
+          <Card
+            sx={{
+              textAlign: "center",
+              p: 2,
+              boxShadow: 3,
+              bgcolor: item.color,
+            }}
+          >
+            {item.icon}
+            <Typography variant="subtitle1">{item.title}</Typography>
+            <Typography variant="h5" fontWeight="bold">
+              {toPersianNumber(item.value)}
+            </Typography>
+          </Card>
+        </Grid>
+      ))}
+
+    </Grid>
+
+    {/* 👇👇 اینو بعد از کارت‌ها اضافه کن */}
+    <Box sx={{ mt: 6 }}>
+      
+
+      <IranMapSection />
+    </Box>
+
+  </Box>
+</TabPanel>
+
   
             <TabPanel value={selectedItem} index={"registerform"}>
               <Box sx={{ display: "flex", justifyContent: "center" }}>

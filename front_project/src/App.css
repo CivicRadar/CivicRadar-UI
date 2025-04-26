@@ -34,6 +34,24 @@
     transform: translateX(100%);
   }
 }
+/* src/App.css */
+
+
+.iran-map-wrapper path,
+.iran-map-wrapper polygon {
+  outline: none !important;
+  stroke: #1caa60 !important;     
+  stroke-width: 1.1 !important;
+  cursor: pointer;
+  transition: all .3s;
+}
+.iran-map-wrapper path:not([data-name]):not(.react-map-water) {
+  fill: none !important;
+  stroke: none !important;
+}
+
+
+
 
 
 
