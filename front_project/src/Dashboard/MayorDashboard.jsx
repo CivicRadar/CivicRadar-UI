@@ -35,6 +35,7 @@ import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
 import { useLocation } from "react-router-dom";
 import IranMapSection from "../Components/iranmap";
+import ReportsMap from "../Components/ReportsMap";
 
 
 const MainContent = styled(Box)(({ theme }) => ({
@@ -494,8 +495,9 @@ export default function MayorDashboard() {
       </TabPanel>
 
       <TabPanel value={selectedItem} index="map">
-        <Typography>در اینجا نقشه قرار می‌گیرد.</Typography>
-      </TabPanel>
+  <ReportsMap />
+</TabPanel>
+
 
       <TabPanel value={selectedItem} index="violations">
         <Typography>اینجا می‌توانید تخلفات را بررسی کنید.</Typography>
