@@ -155,8 +155,8 @@ const ReportFeed = () => {
       case "Garbage":
       case "garbage":
         return "زباله"
-      case "Others":
-      case "others":
+      case "Other":
+      case "other":
         return "سایر"
       default:
         return type 

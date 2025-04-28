@@ -587,10 +587,10 @@ useEffect(() => {
                   error={!!errors.reportSubject}
                   label="موضوع گزارش"
                 >
-                  <MenuItem value="lighting">نور </MenuItem>
-                  <MenuItem value="street">خیابان</MenuItem>
-                  <MenuItem value="garbage">زباله</MenuItem>
-                  <MenuItem value="others">سایر</MenuItem>
+                  <MenuItem value="Lighting">نور </MenuItem>
+                  <MenuItem value="Street">خیابان</MenuItem>
+                  <MenuItem value="Garbage">زباله</MenuItem>
+                  <MenuItem value="Other">سایر</MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
