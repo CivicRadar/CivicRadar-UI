@@ -1119,6 +1119,18 @@ export default function Reports({ ReportClick }) {
                 </Box>
               </Box>
 
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                  my: 1,
+                  color: "#333",
+                  textAlign: "right",
+                }}
+              >
+                {report.Information}
+              </Typography>
+
               {report.Picture && (
                 <Box
                   sx={{
