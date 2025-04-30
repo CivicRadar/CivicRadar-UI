@@ -319,7 +319,6 @@ export default function CitizenDashboard() {
   const menuItems = [
     { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
-    { id: "map", label: "ثبت گزارشات", icon: <Assignment sx={{ color: "green" }} /> },
     { id: "violations", label: "نمایش گزارشات", icon: <ListAlt sx={{ color: "green" }} /> },
     { id: "stats", label: "فعالیت‌ها و امتیازات", icon: <EmojiEvents /> }, // Changed icon to EmojiEvents
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
@@ -349,6 +348,24 @@ export default function CitizenDashboard() {
           style={{ width: isMobile ? "0%" : "100%", maxWidth: "150px" }}
         />
       </Box>
+
+      <Box sx={{ width: "100%", mt: 2 }}>
+  <Button
+    variant="contained"
+    color="success"
+    fullWidth
+    sx={{
+      py: 1.2,
+      borderRadius: "10px",
+      fontWeight: "bold",
+      fontSize: "16px",
+    }}
+    onClick={() => setSelectedItem("map")}
+  >
+    ثبت گزارشات
+  </Button>
+</Box>
+
 
       {menuItems.map((item) => (
         <Button

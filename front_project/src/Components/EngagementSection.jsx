@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, Typography, IconButton, Dialog, DialogTitle, useMediaQuery, DialogContent } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Grid,
+  Box,
+  Typography,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  useMediaQuery,
+  Tooltip,
+} from "@mui/material";
+import { styled, useTheme } from "@mui/system";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ShareIcon from "@mui/icons-material/Share";
@@ -7,252 +20,275 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonIcon from "@mui/icons-material/Person";
 import CloseIcon from "@mui/icons-material/Close";
 import NeshanMap from "react-neshan-map-leaflet";
+import { Avatar } from '@mui/material';
 
 const MAP_API_KEY = "web.2705e42e6fd74f8796b16a52b4a0b2aa";
 
-function EngagementSection({ reportData }) {
+const Count = styled(Typography)(({ theme }) => ({
+  fontSize: "0.75rem",
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(0.25),
+}));
+
+export default function EngagementSection({ reportData }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [likeStatus, setLikeStatus] = useState(null); // True (liked), false (disliked), null (neutral)
+  const [likeStatus, setLikeStatus] = useState(null); // true, false, null
   const [likes, setLikes] = useState(reportData.Likes || 0);
   const [dislikes, setDislikes] = useState(reportData.Dislikes || 0);
-  const mapRef = useRef(null);
-  const isMobile = useMediaQuery("(max-width:900px)");
-  const reportID = reportData.id;
+  const mapRef = useRef();
 
-  // Fetch current like/dislike status on load
+
   useEffect(() => {
-    const fetchLikeStatus = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/like/?CityProblemID=${reportData.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include", // Include credentials
-          }
-        );
+    if (!dialogOpen) {
+      mapRef.current = null; // ریست نقشه وقتی دیالوگ بسته میشه
+    }
+  }, [dialogOpen]);
+  
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch like/dislike status");
-        }
-
-        const data = await response.json();
-        setLikeStatus(data.Like); // Update likeStatus based on API response (true, false, null)
-      } catch (error) {
-        console.error("Error fetching like/dislike status:", error.message);
+  useEffect(() => {
+    // بارگزاری وضعیت لایک/دیسلایک
+    fetch(
+      `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/like/?CityProblemID=${reportData.id}`,
+      {
+        method: "GET",
+        credentials: "include",
       }
-    };
-
-    fetchLikeStatus();
+    )
+      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((data) => setLikeStatus(data.Like))
+      .catch((e) => console.error(e));
   }, [reportData.id]);
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleShowMap = () => {
-    setDialogOpen(true);
-  };
-
-  const handleShare = () => {
-
-    navigator.clipboard
-      .writeText(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_FRONT}/reports/${reportData.id}`)
-      .then(() => alert("لینک گزارش کپی شد!"))
-      .catch((error) => console.error("Failed to copy:", error));
-  };
-  
   const handleLike = async () => {
     try {
-      const response = await fetch(
+      const res = await fetch(
         `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/like/`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include credentials
-          body: JSON.stringify({
-            CityProblemID: reportData.id,
-            Like: true, // Like action
-          }),
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ CityProblemID: reportData.id, Like: true }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit like");
-      }
-
-      if(likeStatus)
-      {
+      if (!res.ok) throw new Error();
+      // به‌روزرسانی لوکال
+      if (likeStatus === true) {
         setLikeStatus(null);
-        setLikes((prev) => prev - 1);
-      }
-      else
-      {
+        setLikes((l) => l - 1);
+      } else {
+        if (likeStatus === false) setDislikes((d) => d - 1);
         setLikeStatus(true);
-        setLikes((prev) => prev + 1);
+        setLikes((l) => l + 1);
       }
-
-      if (likeStatus === false) {
-        setDislikes((prev) => prev - 1); // Remove the previous dislike
-      }
-    } catch (error) {
-      console.error("Error submitting like:", error.message);
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const handleDislike = async () => {
     try {
-      const response = await fetch(
+      const res = await fetch(
         `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/like/`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include credentials
-          body: JSON.stringify({
-            CityProblemID: reportData.id,
-            Like: false, // Dislike action
-          }),
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ CityProblemID: reportData.id, Like: false }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit dislike");
+      if (!res.ok) throw new Error();
+      // به‌روزرسانی لوکال
+      if (likeStatus === false) {
+        setLikeStatus(null);
+        setDislikes((d) => d - 1);
+      } else {
+        if (likeStatus === true) setLikes((l) => l - 1);
+        setLikeStatus(false);
+        setDislikes((d) => d + 1);
       }
-
-      if(likeStatus === false)
-        {
-          setLikeStatus(null);
-          setDislikes((prev) => prev - 1);
-        }
-        else
-        {
-          setLikeStatus(false);
-          setDislikes((prev) => prev + 1);
-        }
-
-      if (likeStatus === true) {
-        setLikes((prev) => prev - 1); // Remove the previous like
-      }
-    } catch (error) {
-      console.error("Error submitting dislike:", error.message);
+    } catch (e) {
+      console.error(e);
     }
   };
 
+  const handleShare = () => {
+    navigator.clipboard
+      .writeText(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_FRONT}/reports/${reportData.id}`
+      )
+      .then(() => alert("لینک گزارش کپی شد!"))
+      .catch((e) => console.error(e));
+  };
+
   return (
+    <>
+      <Box
+  sx={{
+    p: isMobile ? 2 : 3,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: "16px",
+    borderBottomRightRadius: "16px",
+  }}
+>
+
+        <CardContent>
+        <Grid container spacing={2} alignItems="flex-start">
+        <Grid item xs={12} md={8}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 1,
+                  cursor: "pointer",
+                }}
+                onClick={() => setDialogOpen(true)}
+              >
+                <LocationOnIcon color="action" fontSize="small" sx={{ mr: 1  , ml : 0.1}} />
+                <Typography variant="body2" color="textSecondary">
+                  {reportData.ProvinceName}
+                  {"، "}
+                  {reportData.CityName}
+                  {"، "}
+                  {reportData.FullAddress}{" "}
+                  <Box
+                    component="span"
+                    sx={{
+                      color: "success.main",
+                      textDecoration: "underline",
+                      fontSize: "0.75rem",
+                      ml: 0.5,
+                    }}
+                  >
+                    (نمایش بر نقشه)
+                  </Box>
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
+  {reportData.ReporterPicture ? (
     <Box
-      sx={
-        isMobile
-          ? {
-              marginTop: "10px",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }
-          : {
-              marginTop: "10px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "20px",
-            }
-      }
+      component="img"
+      src={`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${reportData.ReporterPicture}`}
+      alt={reportData.ReporterName}
+      sx={{
+        width: 42,
+        height: 42,
+        borderRadius: "50%",
+        objectFit: "cover",
+        border: "2px solid #00cc88",
+      }}
+    />
+  ) : (
+    <Avatar
+      sx={{
+        width: 42,
+        height: 42,
+        bgcolor: "#00cc88",
+        fontWeight: 600,
+        fontSize: "0.95rem",
+      }}
     >
-      <Box>
-        {/* Location Section */}
-        <Box
-          sx={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}
-          onClick={handleShowMap}
-        >
-          <LocationOnIcon sx={{ color: "#999", fontSize: "large", cursor: "pointer" }} />
-          <Typography sx={{ color: "#666", fontSize: "0.9rem", cursor: "pointer" }}>
-            {reportData.ProvinceName}، {reportData.CityName}، {reportData.FullAddress}{" "}
-            <span style={{ color: "blue", textDecoration: "underline" }}>(نمایش بر نقشه)</span>
-          </Typography>
-        </Box>
+      {reportData.ReporterName?.[0] || "؟"}
+    </Avatar>
+  )}
+  <Typography
+    variant="body2"
+    color="textSecondary"
+    sx={{ lineHeight: 1.4 }}
+  >
+    {reportData.ReporterName}
+  </Typography>
+</Box>
 
-        {/* Reporter Section */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <PersonIcon sx={{ color: "#999", fontSize: "large" }} />
-          <Typography sx={{ color: "#666", fontSize: "0.9rem" }}>{reportData.ReporterName}</Typography>
-        </Box>
+
+            </Grid>
+
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{
+                display: "flex",
+                justifyContent: isMobile ? "flex-start" : "flex-end",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ textAlign: "center" }}>
+                <Tooltip title="پسندیدن">
+                  <IconButton
+                    onClick={handleLike}
+                    color={likeStatus === true ? "success" : "default"}
+                  >
+                    <ThumbUpIcon />
+                  </IconButton>
+                </Tooltip>
+                <Count>{likes}</Count>
+              </Box>
+              <Box sx={{ textAlign: "center" }}>
+                <Tooltip title="نپسندیدن">
+                  <IconButton
+                    onClick={handleDislike}
+                    color={likeStatus === false ? "error" : "default"}
+                  >
+                    <ThumbDownIcon />
+                  </IconButton>
+                </Tooltip>
+                <Count>{dislikes}</Count>
+              </Box>
+              <Box sx={{ textAlign: "center" }}>
+                <Tooltip title="اشتراک‌گذاری">
+                  <IconButton onClick={handleShare} color="primary">
+                    <ShareIcon />
+                  </IconButton>
+                </Tooltip>
+                <Count>اشتراک‌گذاری</Count>
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
       </Box>
 
-      {/* Like/Dislike/Share Section */}
-      <Box sx={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        <Box>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          موقعیت روی نقشه
           <IconButton
-            onClick={handleLike}
-            sx={{
-              color: likeStatus === true ? "#4CAF50" : "#999",
-              "&:hover": { color: "#4CAF50" },
-            }}
+            onClick={() => setDialogOpen(false)}
+            sx={{ position: "absolute", right: 8, top: 8 }}
           >
-            <ThumbUpIcon sx={{ fontSize: "1.5rem" }} />
+            <CloseIcon />
           </IconButton>
-          <Typography sx={{ color: "#666", fontSize: "0.7rem" }}>{likes}</Typography>
-        </Box>
-        <Box>
-          <IconButton
-            onClick={handleDislike}
-            sx={{
-              color: likeStatus === false ? "#F44336" : "#999",
-              "&:hover": { color: "#F44336" },
-            }}
-          >
-            <ThumbDownIcon sx={{ fontSize: "1.5rem" }} />
-          </IconButton>
-          <Typography sx={{ color: "#666", fontSize: "0.7rem" }}>{dislikes}</Typography>
-        </Box>
-        <Box>
-          <IconButton
-          onClick={handleShare}
-            sx={{
-              color: "#999",
-              "&:hover": { color: "#1976D2" },
-            }}
-          >
-            <ShareIcon sx={{ fontSize: "1.5rem" }} />
-          </IconButton>
-          <Typography sx={{ color: "#666", fontSize: "0.7rem" }}>اشتراک‌گذاری</Typography>
-        </Box>
-      </Box>
-
-      {/* Map Dialog */}
-      {dialogOpen && (
-        <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="md" fullWidth>
-          <DialogTitle>
-            موقعیت روی نقشه
-            <IconButton onClick={handleDialogClose} sx={{ position: "absolute", right: 8, top: 8 }}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ height: 0, pt: "56.25%", position: "relative" }}>
             <NeshanMap
-              style={{ width: "100%", height: "400px" }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              }}
               options={{
                 key: MAP_API_KEY,
                 center: [reportData.Latitude, reportData.Longitude],
                 zoom: 14,
               }}
-              onInit={(L, myMap) => {
+              onInit={(L, map) => {
                 if (mapRef.current) return;
-
-                mapRef.current = myMap;
-
-                // Add marker at the provided coordinates
-                L.marker([reportData.Latitude, reportData.Longitude]).addTo(myMap);
+                mapRef.current = map;
+                L.marker([reportData.Latitude, reportData.Longitude]).addTo(map);
               }}
             />
-          </DialogContent>
-        </Dialog>
-      )}
-    </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
-
-export default EngagementSection;

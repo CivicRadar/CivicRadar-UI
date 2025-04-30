@@ -47,11 +47,11 @@ import { getCity, getProvince } from "../services/admin-api"; // فرض بر ا�
 import { DialogTitle } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SortIcon from "@mui/icons-material/Sort";
 import logo from "../assets/lgo.png";
 
-
-export default function Reports({ReportClick}) {
+export default function Reports({ ReportClick }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState(null);
   const [mapOpen, setMapOpen] = useState(false);
@@ -85,8 +85,16 @@ export default function Reports({ReportClick}) {
   const [editedCity, setEditedCity] = useState("");
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [activeVideos, setActiveVideos] = useState([]); // آرایه‌ای برای نگهداری شناسه ویدیوهای فعال
+  const [sortAnchorEl, setSortAnchorEl] = useState(null);
+  const [sortOptions, setSortOptions] = useState([]); // مثل: ['priority', 'likes']
 
-
+  const toggleSortOption = (option) => {
+    setSortOptions((prev) =>
+      prev.includes(option)
+        ? prev.filter((opt) => opt !== option)
+        : [...prev, option]
+    );
+  };
 
   useEffect(() => {
     getProvince()
@@ -167,8 +175,18 @@ export default function Reports({ReportClick}) {
       const result = await response.json();
 
       if (response.ok) {
-        Swal.fire("حذف موفق", result.success, "success");
-
+        Swal.fire({
+          icon: "success",
+          title: "تیم با موفقیت حذف شد",
+          background: "#e6f4ea",
+          color: "#1b5e20",
+          confirmButtonText: "باشه",
+          confirmButtonColor: "#388e3c",
+          customClass: {
+            confirmButton: "swal-confirm-btn",
+            title: "swal-title",
+          },
+        });
         // به روز رسانی لیست تیم‌ها بعد از حذف
         setTeamList((prevList) =>
           prevList.filter((team) => team.id !== selectedTeamID)
@@ -231,7 +249,20 @@ export default function Reports({ReportClick}) {
           .then((data) => setTeamList(data)) // لیست تیم‌ها به‌روز می‌شود
           .catch((err) => console.error("خطا در دریافت تیم‌ها:", err));
 
-        Swal.fire("ویرایش موفق", "اطلاعات تیم با موفقیت ویرایش شد", "success");
+        Swal.fire({
+          icon: "success",
+          title: "ویرایش با موفقیت انجام شد",
+          text: "اطلاعات تیم با موفقیت ویرایش شد",
+          background: "#e6f4ea",
+          color: "#1b5e20",
+          confirmButtonText: "باشه",
+          confirmButtonColor: "#388e3c",
+          customClass: {
+            confirmButton: "swal-confirm-btn",
+            title: "swal-title",
+          },
+        });
+
         setEditTeamOpen(false);
       } else {
         Swal.fire(
@@ -308,7 +339,7 @@ export default function Reports({ReportClick}) {
         setEditNoteDialogOpen(false);
         setEditNoteText("");
         setEditNoteId(null);
-        handleOpenViewNotesDialog(); 
+        handleOpenViewNotesDialog();
       })
       .catch((err) => {
         console.error("خطا در ویرایش:", err);
@@ -338,7 +369,7 @@ export default function Reports({ReportClick}) {
         console.error("❌ خطا در گرفتن تیم‌ها:", err);
       });
 
-    handleMenuClose(); 
+    handleMenuClose();
   };
 
   const resetFilters = () => {
@@ -483,8 +514,8 @@ export default function Reports({ReportClick}) {
               NoteOwnerPicture: note.NoteOwnerPicture?.startsWith("/Media")
                 ? `${fullBaseUrl}${note.NoteOwnerPicture}`
                 : note.NoteOwnerPicture
-                ? `${fullBaseUrl}/Media/Profile_Pictures/${note.NoteOwnerPicture}`
-                : null,
+                  ? `${fullBaseUrl}/Media/Profile_Pictures/${note.NoteOwnerPicture}`
+                  : null,
             }))
           : [];
 
@@ -547,7 +578,7 @@ export default function Reports({ReportClick}) {
   const handleReportClick = () => {
     ReportClick(selectedReport.id);
   };
-  
+
   const handleOpenStatusDialog = () => {
     setTempStatus(selectedReport.status);
     setStatusDialogOpen(true);
@@ -613,42 +644,62 @@ export default function Reports({ReportClick}) {
       case "Garbage":
       case "garbage":
         return "زباله";
-      case "Others":
-      case "others":
+      case "Other":
+      case "other":
         return "سایر";
       default:
         return type;
     }
   };
 
-  const filteredReports = reports.filter((r) => {
-    const reportDate = new DateObject({
-      date: new Date(r.DateTime),
-      calendar: persian,
-      locale: persian_fa,
+  const finalReports = [...reports]
+    .filter((r) => {
+      const reportDate = new DateObject({
+        date: new Date(r.DateTime),
+        calendar: persian,
+        locale: persian_fa,
+      });
+      const fromDateObj = dateFrom
+        ? new DateObject(dateFrom).set({ hour: 0, minute: 0, second: 0 })
+        : null;
+      const toDateObj = dateTo
+        ? new DateObject(dateTo).set({ hour: 23, minute: 59, second: 59 })
+        : null;
+
+      return (
+        (selectedType === "" || translateType(r.Type) === selectedType) &&
+        (selectedProvince === "" || r.ProvinceName === selectedProvince) &&
+        (selectedCity === "" || r.CityName === selectedCity) &&
+        (selectedStatus === "" ||
+          translateStatus(r.Status) === selectedStatus) &&
+        (selectedPriority === "" || r.Priority === selectedPriority) &&
+        (searchQuery === "" ||
+          r.Information.includes(searchQuery) ||
+          r.ReporterName.includes(searchQuery)) &&
+        (!fromDateObj || reportDate >= fromDateObj) &&
+        (!toDateObj || reportDate <= toDateObj)
+      );
+    })
+    .sort((a, b) => {
+      for (let option of sortOptions) {
+        if (option === "priority") {
+          const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+          const diff =
+            (priorityOrder[a.Priority] || 4) - (priorityOrder[b.Priority] || 4);
+          if (diff !== 0) return diff;
+        } else if (option === "likes") {
+          const diff = (b.Likes || 0) - (a.Likes || 0);
+          if (diff !== 0) return diff;
+        } else if (option === "dislikes") {
+          const diff = (b.Dislikes || 0) - (a.Dislikes || 0);
+          if (diff !== 0) return diff;
+        } else if (option === "date") {
+          const diff = new Date(b.DateTime) - new Date(a.DateTime);
+          if (diff !== 0) return diff;
+        }
+      }
+      return 0;
     });
-
-    const fromDateObj = dateFrom
-      ? new DateObject(dateFrom).set({ hour: 0, minute: 0, second: 0 })
-      : null;
-
-    const toDateObj = dateTo
-      ? new DateObject(dateTo).set({ hour: 23, minute: 59, second: 59 })
-      : null;
-
-    return (
-      (selectedType === "" || translateType(r.Type) === selectedType) &&
-      (selectedProvince === "" || r.ProvinceName === selectedProvince) &&
-      (selectedCity === "" || r.CityName === selectedCity) &&
-      (selectedStatus === "" || translateStatus(r.Status) === selectedStatus) &&
-      (selectedPriority === "" || r.Priority === selectedPriority) &&
-      (searchQuery === "" ||
-        r.Information.includes(searchQuery) ||
-        r.ReporterName.includes(searchQuery)) &&
-      (!fromDateObj || reportDate >= fromDateObj) &&
-      (!toDateObj || reportDate <= toDateObj)
-    );
-  });
 
   useEffect(() => {
     const fullBaseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${
@@ -673,14 +724,14 @@ export default function Reports({ReportClick}) {
           Picture: item.Picture?.startsWith("/Media")
             ? `${fullBaseUrl}${item.Picture}`
             : item.Picture
-            ? `${fullBaseUrl}/Media/CivicProblem_Pictures/${item.Picture}`
-            : null,
+              ? `${fullBaseUrl}/Media/CivicProblem_Pictures/${item.Picture}`
+              : null,
 
           Video: item.Video?.startsWith("/Media")
             ? `${fullBaseUrl}${item.Video}`
             : item.Video
-            ? `${fullBaseUrl}/Media/CivicProblem_Videos/${item.Video}`
-            : null,
+              ? `${fullBaseUrl}/Media/CivicProblem_Videos/${item.Video}`
+              : null,
 
           Status: item.Status || "در انتظار بررسی",
         }));
@@ -753,22 +804,77 @@ export default function Reports({ReportClick}) {
         گزارشات دریافتی
       </Typography>
 
-      <Button
-        variant="contained"
-        startIcon={<FilterAltIcon sx={{ ml: 0.5 }} />}
-        onClick={() => setShowFilters((prev) => !prev)}
-        sx={{
-          mb: 2,
-          backgroundColor: "green",
-          "&:hover": { backgroundColor: "#2e7d32" },
-          borderRadius: 2,
-          px: { xs: 2, sm: 3 },
-          py: { xs: 1, sm: 1.5 },
-          fontSize: { xs: "0.8rem", sm: "1rem" },
-        }}
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 2 }}>
+        <Button
+          variant="contained"
+          startIcon={<FilterAltIcon sx={{ ml: 0.5 }} />}
+          onClick={() => setShowFilters((prev) => !prev)}
+          sx={{
+            backgroundColor: "green",
+            "&:hover": { backgroundColor: "#2e7d32" },
+            borderRadius: 2,
+            px: { xs: 2, sm: 3 },
+            py: { xs: 1, sm: 1.5 },
+            fontSize: { xs: "0.8rem", sm: "1rem" },
+          }}
+        >
+          فیلتر گزارشات
+        </Button>
+
+        <Button
+          variant="contained"
+          startIcon={<SortIcon sx={{ ml: 0.7 }} />} // فاصله بین آیکون و متن
+          onClick={(e) => setSortAnchorEl(e.currentTarget)}
+          sx={{
+            backgroundColor: "green",
+            "&:hover": { backgroundColor: "#2e7d32" },
+            borderRadius: 2,
+            px: { xs: 2, sm: 3 },
+            py: { xs: 1, sm: 1.5 },
+            fontSize: { xs: "0.8rem", sm: "1rem" },
+          }}
+        >
+          مرتب‌سازی
+        </Button>
+      </Box>
+
+      <Menu
+        anchorEl={sortAnchorEl}
+        open={Boolean(sortAnchorEl)}
+        onClose={() => setSortAnchorEl(null)}
       >
-        فیلتر گزارشات
-      </Button>
+        {[
+          { value: "priority", label: "بر اساس اهمیت" },
+          { value: "likes", label: "بر اساس تأیید" },
+          { value: "dislikes", label: "بر اساس عدم تأیید" },
+          { value: "date", label: "بر اساس تاریخ" },
+        ].map(({ value, label }) => (
+          <MenuItem key={value} onClick={() => toggleSortOption(value)}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              width="100%"
+            >
+              {label}
+              {sortOptions.includes(value) && (
+                <CheckCircleIcon fontSize="small" sx={{ color: "green" }} />
+              )}
+            </Box>
+          </MenuItem>
+        ))}
+
+        <MenuItem
+          onClick={() => setSortOptions([])}
+          sx={{
+            color: "red",
+            fontWeight: "bold",
+            justifyContent: "center",
+          }}
+        >
+          🔄 بازنشانی مرتب‌سازی
+        </MenuItem>
+      </Menu>
 
       <Collapse in={showFilters}>
         <Box
@@ -848,6 +954,7 @@ export default function Reports({ReportClick}) {
               <MenuItem value="خیابان">خرابی خیابان</MenuItem>
               <MenuItem value="روشنایی">مشکل روشنایی</MenuItem>
               <MenuItem value="زباله">زباله رها شده</MenuItem>
+              <MenuItem value="سایر"> سایر </MenuItem>
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -947,7 +1054,7 @@ export default function Reports({ReportClick}) {
             onClick={resetFilters}
             startIcon={<ClearAllIcon />}
           >
-            ریست
+            بازنشانی
           </Button>
         </Box>
       </Collapse>
@@ -957,7 +1064,7 @@ export default function Reports({ReportClick}) {
         className="my-masonry-grid"
         columnClassName="my-masonry-grid_column"
       >
-        {filteredReports.map((report) => (
+        {finalReports.map((report) => (
           <Card
             key={report.id}
             sx={{
@@ -973,7 +1080,6 @@ export default function Reports({ReportClick}) {
               background: "linear-gradient(to top left, #f8fdf8, #ffffff)",
             }}
           >
-
             <CardContent
               sx={{ display: "flex", flexDirection: "column", p: 2.5 }}
             >
@@ -1013,18 +1119,6 @@ export default function Reports({ReportClick}) {
                 </Box>
               </Box>
 
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  my: 1,
-                  color: "#333",
-                  textAlign: "right",
-                }}
-              >
-                {report.Information}
-              </Typography>
-
               {report.Picture && (
                 <Box
                   sx={{
@@ -1052,115 +1146,117 @@ export default function Reports({ReportClick}) {
                 </Box>
               )}
 
-{report.Video && (
-  <Box
-    sx={{
-      border: "1px solid rgba(255,255,255,0.2)", // حاشیه شفاف‌تر برای هماهنگی
-      borderRadius: 2,
-      overflow: "hidden",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-      my: 1,
-      cursor: "pointer",
-      position: "relative",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      "&:hover": {
-        transform: "scale(1.02)",
-        boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
-      },
-    }}
-    onClick={() => {
-      setActiveVideos((prevActiveVideos) =>
-        prevActiveVideos.includes(report.id)
-          ? prevActiveVideos
-          : [...prevActiveVideos, report.id]
-      );
-    }}
-  >
-    {activeVideos.includes(report.id) ? (
-      <video
-        controls
-        style={{
-          width: "100%",
-          maxHeight: 180,
-          objectFit: "cover",
-          borderBottomLeftRadius: 8,
-          borderBottomRightRadius: 8,
-        }}
-      >
-        <source src={report.Video} type="video/mp4" />
-        مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
-      </video>
-    ) : (
-      <Box
-        sx={{
-          width: "100%",
-          height: 180,
-          background: `linear-gradient(135deg, rgba(30,60,114,0.8) 0%, rgba(42,82,152,0.8) 100%)`, // گرادیان شفاف‌تر
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "relative",
-          overflow: "hidden",
-          // اضافه کردن افکت بلوری و هاله
-          backdropFilter: "blur(8px)", // افکت بلور شیشه‌ای
-          WebkitBackdropFilter: "blur(8px)", // پشتیبانی از مرورگرهای مختلف
-          boxShadow: "0 0 20px rgba(66,133,244,0.5), 0 0 40px rgba(30,60,114,0.3)", // هاله ترکیبی
-          border: "1px solid rgba(255,255,255,0.3)", // حاشیه نئونی ملایم
-        }}
-      >
-        {/* تصویر پیش‌نمایش (اختیاری) */}
-        {logo && (
-          <Box
-            component="img"
-            src={logo}
-            sx={{
-              width: "100%",
-              height: "100%",
-              position: "absolute",
-              top: 0,
-              left: 0,
-              opacity: 0.6, // کمی محو‌تر برای هماهنگی با هاله
-              filter: "blur(2px)", // بلور ملایم روی تصویر
-            }}
-          />
-        )}
-        {/* لایه رویی برای افکت گرادیان */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.4)", // لایه تیره‌تر برای کنتراست
-          }}
-        />
-        {/* دکمه پخش با هاله بلوری */}
-        <IconButton
-          sx={{
-            color: "#fff",
-            background: "rgba(0,0,0,0.6)",
-            border: "2px solid rgba(255,255,255,0.7)",
-            boxShadow: "0 0 15px rgba(66,133,244,0.6), 0 0 25px rgba(255,255,255,0.3)", // هاله نئونی
-            "&:hover": {
-              background: "rgba(0,0,0,0.8)",
-              transform: "scale(1.1)",
-              boxShadow: "0 0 20px rgba(66,133,244,0.8), 0 0 30px rgba(255,255,255,0.5)",
-            },
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            zIndex: 1,
-            backdropFilter: "blur(4px)", // بلور روی دکمه
-            WebkitBackdropFilter: "blur(4px)",
-          }}
-        >
-          <PlayArrowIcon fontSize="large" />
-        </IconButton>
-      </Box>
-    )}
-  </Box>
-)}
-
-
+              {report.Video && (
+                <Box
+                  sx={{
+                    border: "1px solid rgba(255,255,255,0.2)", // حاشیه شفاف‌تر برای هماهنگی
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    my: 1,
+                    cursor: "pointer",
+                    position: "relative",
+                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.02)",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                  onClick={() => {
+                    setActiveVideos((prevActiveVideos) =>
+                      prevActiveVideos.includes(report.id)
+                        ? prevActiveVideos
+                        : [...prevActiveVideos, report.id]
+                    );
+                  }}
+                >
+                  {activeVideos.includes(report.id) ? (
+                    <video
+                      controls
+                      style={{
+                        width: "100%",
+                        maxHeight: 180,
+                        objectFit: "cover",
+                        borderBottomLeftRadius: 8,
+                        borderBottomRightRadius: 8,
+                      }}
+                    >
+                      <source src={report.Video} type="video/mp4" />
+                      مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+                    </video>
+                  ) : (
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: 180,
+                        background: `linear-gradient(135deg, rgba(30,60,114,0.8) 0%, rgba(42,82,152,0.8) 100%)`, // گرادیان شفاف‌تر
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        position: "relative",
+                        overflow: "hidden",
+                        // اضافه کردن افکت بلوری و هاله
+                        backdropFilter: "blur(8px)", // افکت بلور شیشه‌ای
+                        WebkitBackdropFilter: "blur(8px)", // پشتیبانی از مرورگرهای مختلف
+                        boxShadow:
+                          "0 0 20px rgba(66,133,244,0.5), 0 0 40px rgba(30,60,114,0.3)", // هاله ترکیبی
+                        border: "1px solid rgba(255,255,255,0.3)", // حاشیه نئونی ملایم
+                      }}
+                    >
+                      {/* تصویر پیش‌نمایش (اختیاری) */}
+                      {logo && (
+                        <Box
+                          component="img"
+                          src={logo}
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            opacity: 0.6, // کمی محو‌تر برای هماهنگی با هاله
+                            filter: "blur(2px)", // بلور ملایم روی تصویر
+                          }}
+                        />
+                      )}
+                      {/* لایه رویی برای افکت گرادیان */}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          background: "rgba(0,0,0,0.4)", // لایه تیره‌تر برای کنتراست
+                        }}
+                      />
+                      {/* دکمه پخش با هاله بلوری */}
+                      <IconButton
+                        sx={{
+                          color: "#fff",
+                          background: "rgba(0,0,0,0.6)",
+                          border: "2px solid rgba(255,255,255,0.7)",
+                          boxShadow:
+                            "0 0 15px rgba(66,133,244,0.6), 0 0 25px rgba(255,255,255,0.3)", // هاله نئونی
+                          "&:hover": {
+                            background: "rgba(0,0,0,0.8)",
+                            transform: "scale(1.1)",
+                            boxShadow:
+                              "0 0 20px rgba(66,133,244,0.8), 0 0 30px rgba(255,255,255,0.5)",
+                          },
+                          transition:
+                            "transform 0.2s ease, box-shadow 0.2s ease",
+                          zIndex: 1,
+                          backdropFilter: "blur(4px)", // بلور روی دکمه
+                          WebkitBackdropFilter: "blur(4px)",
+                        }}
+                      >
+                        <PlayArrowIcon fontSize="large" />
+                      </IconButton>
+                    </Box>
+                  )}
+                </Box>
+              )}
 
               <Box
                 display="flex"
@@ -1177,29 +1273,28 @@ export default function Reports({ReportClick}) {
                   gap={1}
                 >
                   <Box display="flex" alignItems="center">
-  {/* Check if ReporterPicture exists and convert to full URL if needed */}
-  {report.ReporterPicture ? (
-    <Box
-      component="img"
-      src={`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${report.ReporterPicture}`}
-      alt="گزارش‌دهنده"
-      sx={{
-        width: 32,
-        height: 32,
-        borderRadius: "50%",
-        objectFit: "cover",
-        border: "1px solid #ccc",
-        marginRight: 1, // فواصل بین عکس و متن
-      }}
-    />
-  ) : (
-    <PersonIcon fontSize="small" sx={{ ml: 0.5 }} />
-  )}
-  <Typography variant="caption" sx={{ marginRight: 1 }}>
-    گزارش‌دهنده: {report.ReporterName}
-  </Typography>
-</Box>
+                    {report.ReporterPicture ? (
+                      <Box
+                        component="img"
+                        src={`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${report.ReporterPicture}`}
+                        alt="گزارش‌دهنده"
+                        sx={{
+                          width: 42,
+                          height: 42,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "1px solid #ccc",
+                          marginRight: 1, // فواصل بین عکس و متن
+                        }}
+                      />
+                    ) : (
+                      <PersonIcon fontSize="medium" sx={{ ml: 0.5 }} />
+                    )}
 
+                    <Typography variant="caption" sx={{ marginRight: 1 }}>
+                      گزارش‌دهنده: {report.ReporterName}
+                    </Typography>
+                  </Box>
 
                   <Box
                     display="flex"
@@ -1222,22 +1317,22 @@ export default function Reports({ReportClick}) {
                         report.Status === "IssueResolved"
                           ? "حل‌شده"
                           : report.Status === "UnderConsideration"
-                          ? "در حال بررسی"
-                          : "در انتظار بررسی"
+                            ? "در حال بررسی"
+                            : "در انتظار بررسی"
                       }
                       sx={{
                         backgroundColor:
                           report.Status === "IssueResolved"
                             ? "#e8f5e9"
                             : report.Status === "UnderConsideration"
-                            ? "#fffde7"
-                            : "#e3f2fd",
+                              ? "#fffde7"
+                              : "#e3f2fd",
                         color:
                           report.Status === "IssueResolved"
                             ? "#2e7d32"
                             : report.Status === "UnderConsideration"
-                            ? "#f57f17"
-                            : "#1565c0",
+                              ? "#f57f17"
+                              : "#1565c0",
                         fontWeight: 500,
                         borderRadius: "12px",
                         px: 1.5,
@@ -1251,10 +1346,10 @@ export default function Reports({ReportClick}) {
                         report.Priority === "High"
                           ? "زیاد"
                           : report.Priority === "Medium"
-                          ? "متوسط"
-                          : report.Priority === "Low"
-                          ? "کم"
-                          : "تعیین نشده"
+                            ? "متوسط"
+                            : report.Priority === "Low"
+                              ? "کم"
+                              : "تعیین نشده"
                       }`}
                       variant="outlined"
                       size="small"
@@ -1267,18 +1362,18 @@ export default function Reports({ReportClick}) {
                           report.Priority === "High"
                             ? "#ffebee"
                             : report.Priority === "Medium"
-                            ? "#fff8e1"
-                            : report.Priority === "Low"
-                            ? "#f5f5f5"
-                            : "#eeeeee",
+                              ? "#fff8e1"
+                              : report.Priority === "Low"
+                                ? "#f5f5f5"
+                                : "#eeeeee",
                         color:
                           report.Priority === "High"
                             ? "#c62828"
                             : report.Priority === "Medium"
-                            ? "#f9a825"
-                            : report.Priority === "Low"
-                            ? "#616161"
-                            : "#9e9e9e",
+                              ? "#f9a825"
+                              : report.Priority === "Low"
+                                ? "#616161"
+                                : "#9e9e9e",
                         border: "none",
                         alignSelf: { xs: "flex-start", sm: "center" },
                         mt: { xs: 1, sm: 0 },
@@ -1291,33 +1386,67 @@ export default function Reports({ReportClick}) {
                   display="flex"
                   flexDirection="column"
                   color="gray"
-                  alignItems="flex-start"
-                  textAlign="left"
+                  alignItems="flex-end"
+                  textAlign="right"
+                  sx={{
+                    direction: "rtl",
+                    minWidth: 160, // حفظ تراز افقی
+                    minHeight: 64, // حفظ تراز عمودی در کارت‌ها
+                    justifyContent: "center",
+                  }}
                 >
-                  <Box display="flex" alignItems="center" mb={0.5}>
-                    <LocationOnIcon
-                      fontSize="small"
-                      sx={{ ml: 0.5, color: "#2e7d32" }}
-                    />
-                    <Typography variant="caption">
-                      {report.CityName}، {report.ProvinceName}
-                    </Typography>
-                  </Box>
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="flex-start"
+                    sx={{
+                      direction: "rtl",
+                      width: "100%",
+                      px: 2, // فاصله از طرفین
+                      textAlign: "right",
+                    }}
+                  >
+                    <Box display="flex" alignItems="center" mb={0.5}>
+                      <LocationOnIcon
+                        fontSize="small"
+                        sx={{ ml: 0.5, color: "#2e7d32" }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 500,
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {report.CityName}، {report.ProvinceName}
+                      </Typography>
+                    </Box>
 
-                  {report.FullAdress && (
                     <Typography
                       variant="caption"
-                      color="green"
+                      color={report.FullAdress ? "green" : "text.secondary"}
                       sx={{
-                        pl: 3,
-                        cursor: "pointer",
-                        "&:hover": { textDecoration: "underline" },
+                        width: "100%",
+                        textAlign: "right",
+                        direction: "rtl",
+                        fontWeight: 400,
+                        wordBreak: "break-word",
+                        whiteSpace: "normal",
+                        lineHeight: 1.5,
+                        cursor: report.FullAdress ? "pointer" : "default",
+                        transition: "color 0.2s ease-in-out",
+                        "&:hover": report.FullAdress && {
+                          textDecoration: "underline",
+                          color: "#1b5e20",
+                        },
                       }}
-                      onClick={() => setSelectedReportForMap(report)}
+                      onClick={() =>
+                        report.FullAdress && setSelectedReportForMap(report)
+                      }
                     >
-                      {report.FullAdress}
+                      {report.FullAdress || "آدرس ثبت نشده"}
                     </Typography>
-                  )}
+                  </Box>
                 </Box>
               </Box>
             </CardContent>
@@ -1379,7 +1508,7 @@ export default function Reports({ReportClick}) {
                 borderTopRightRadius: "8px",
               },
               "& .ql-picker-label::after": {
-                display: "none", 
+                display: "none",
               },
               backgroundColor: "#fff",
               borderRadius: "8px",
@@ -1480,7 +1609,7 @@ export default function Reports({ReportClick}) {
                       variant="caption"
                       fontWeight="bold"
                       color="text.secondary"
-                      sx={{ overflowWrap: "anywhere", textAlign: "right" }} 
+                      sx={{ overflowWrap: "anywhere", textAlign: "right" }}
                     >
                       یادداشت {index + 1} توسط {note.NoteOwnerName}
                     </Typography>
@@ -1490,7 +1619,7 @@ export default function Reports({ReportClick}) {
                     variant="caption"
                     color="text.secondary"
                     mb={1}
-                    textAlign="right" 
+                    textAlign="right"
                     sx={{
                       direction: "ltr",
                       fontSize: "0.8rem",
@@ -1730,7 +1859,7 @@ export default function Reports({ReportClick}) {
           sx={{
             fontWeight: "bold",
             textAlign: "center",
-            color: "#black", 
+            color: "#black",
           }}
         >
           🎯 انتخاب درجه اهمیت
@@ -1759,7 +1888,7 @@ export default function Reports({ReportClick}) {
                   fontWeight: 500,
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#a5d6a7", 
+                  borderColor: "#a5d6a7",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#81c784",
@@ -1803,7 +1932,7 @@ export default function Reports({ReportClick}) {
         fullWidth
         BackdropProps={{
           sx: {
-            backgroundColor: "rgba(0, 0, 0, 0.25)", 
+            backgroundColor: "rgba(0, 0, 0, 0.25)",
           },
         }}
       >
@@ -1811,7 +1940,7 @@ export default function Reports({ReportClick}) {
           sx={{
             fontWeight: "bold",
             textAlign: "center",
-            color: "black", 
+            color: "black",
           }}
         >
           وضعیت گزارش
@@ -1919,26 +2048,28 @@ export default function Reports({ReportClick}) {
                   {team.Type === "Waste"
                     ? "زباله"
                     : team.Type === "Water"
-                    ? "آب"
-                    : team.Type === "Gas"
-                    ? "گاز"
-                    : team.Type === "Electricity"
-                    ? "برق"
-                    : team.Type}
+                      ? "آب"
+                      : team.Type === "Gas"
+                        ? "گاز"
+                        : team.Type === "Electricity"
+                          ? "برق"
+                          : team.Type}
                 </Typography>
 
                 <Box display="flex" justifyContent="flex-end">
-  <IconButton onClick={() => handleEdit(team)} sx={{ color: 'green' }}>
-    <EditIcon />
-  </IconButton>
-  <IconButton
-    onClick={() => handleDelete(team.id)}
-    color="error"
-  >
-    <DeleteIcon />
-  </IconButton>
-</Box>
-
+                  <IconButton
+                    onClick={() => handleEdit(team)}
+                    sx={{ color: "green" }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(team.id)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
 
                 <Typography
                   variant="body2"

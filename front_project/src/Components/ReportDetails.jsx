@@ -38,6 +38,7 @@ function ReportDetails() {
       try {
         setLoading(true);
         const data = await getReportData(id); // Call the API using the extracted 'id'
+        // console.log(data);
         setReportData(data);
       } catch (err) {
         setError(err.message || "Failed to fetch report data");
