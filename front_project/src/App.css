@@ -17,6 +17,15 @@
 .swal-title {
   font-family: "Vazir", "IranSans", "IRANYekan", "Vazirmatn", "Shabnam", sans-serif !important;
 }
+.swal-text {
+  font-family: "Vazir", "IranSans", "IRANYekan", "Vazirmatn", "Shabnam", sans-serif !important;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #333;
+  text-align: center;
+  line-height: 1.7;
+}
+
 .swal2-container {
   z-index: 2000 !important; /* اطمینان از بالاتر بودن نسبت به بقیه */
   backdrop-filter: blur(2px);
@@ -49,6 +58,8 @@
   fill: none !important;
   stroke: none !important;
 }
+
+
 
 
 
