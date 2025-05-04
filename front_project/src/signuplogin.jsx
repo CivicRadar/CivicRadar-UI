@@ -44,7 +44,7 @@ const AuthPage = () => {
   const { ui64, token } = useParams(); // Extract token and ui64 from URL
 
   const [showPassword, setShowPassword] = useState(false);
-  const [authType, setAuthType] = useState("user");
+  // const [authType, setAuthType] = useState("user");
   const [isSignup, setIsSignup] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isResetPassword, setIsResetPassword] = useState(!!token && !!ui64); // Set based on URL params
@@ -55,11 +55,13 @@ const AuthPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState("");
-  const [errorMessages, setErrorMessages] = useState({
-    user: "",
-    manager: "",
-    admin: "",
-  });
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // const [errorMessages, setErrorMessages] = useState({
+  //   user: "",
+  //   manager: "",
+  //   admin: "",
+  // });
 
   // Update resetFormData when token changes (e.g., on page load)
   useEffect(() => {
@@ -86,194 +88,130 @@ const AuthPage = () => {
     return minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    setErrorMessages((prev) => ({ ...prev, [authType]: "" }));
+    setErrorMessage("");
 
     if (isSignup && formData.FullName.trim() === "") {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]: "نام کامل نمی‌تواند خالی باشد ❌",
-      }));
+      setErrorMessage("نام کامل نمی‌تواند خالی باشد ❌");
       return;
     }
-
     if (!formData.Email.includes("@")) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]: "فرمت ایمیل نامعتبر است ❌",
-      }));
+      setErrorMessage("فرمت ایمیل نامعتبر است ❌");
       return;
     }
-
     if (isSignup && !isStrongPassword(formData.Password)) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]:
-          "رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و کاراکتر خاص باشد ❌",
-      }));
+      setErrorMessage(
+        "رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و کاراکتر خاص باشد ❌"
+      );
       return;
     }
 
     try {
       let response;
-
-      if (authType === "user") {
-        if (isSignup) {
-          console.log("Citizen Signup Data:", formData);
-          response = await signupCitizen(formData);
-          console.log("Citizen Signup Success:", response);
-          Swal.fire({
-            icon: "success",
-            title: "ثبت‌نام موفقیت‌آمیز بود!",
-            text: "برای تایید اکانت، ایمیل فرستاده شده را بررسی کنید.",
-            confirmButtonText: "باشه",
-          });
-          
-        } else {
-          console.log("Citizen Login Data:", formData);
-          response = await loginCitizenapi({
-            Email: formData.Email,
-            Password: formData.Password,
-            Type: "Citizen",
-          });
-
-          console.log("Citizen Login Response:", response);
-
-          if (response.jwt) {
-            loginCitizen(response);
-            console.log("JWT Token Saved:", response.jwt);
-            Swal.fire({
-              icon: "success",
-              title: "!ورود موفقیت‌آمیز بود",
-              confirmButtonText: "باشه",
-              customClass: {
-                confirmButton: 'swal-confirm-btn',
-                title: 'swal-title',
-              }
-            });
-            
-            navigate("/CitizenDashboard");
-          } else {
-            console.log(response.fail);
-            const errorMsg =
-              response.fail || "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
-            setErrorMessages((prev) => ({ ...prev, [authType]: errorMsg }));
-          }
-        }
-      } else if (authType === "manager") {
-        console.log("Mayor Login Data:", formData);
-        response = await loginCitizenapi({
-          Email: formData.Email,
-          Password: formData.Password,
-          Type: "Mayor",
+      if (isSignup) {
+        response = await signupCitizen(formData);
+        Swal.fire({
+          icon: "success",
+          title: "!ثبت‌نام موفقیت‌آمیز بود",
+          text: ".برای تایید اکانت، ایمیل فرستاده شده را بررسی کنید",
+          confirmButtonText: "باشه",
+          customClass: {
+            confirmButton: "swal-confirm-btn",
+            title: "swal-title",
+            htmlContainer: "swal-text"  
+          },
         });
-
-        console.log("Mayor Login Response:", response);
-
-        if (response.jwt) {
-          loginMayor(response);
-          console.log("JWT Token Saved (Mayor):", response.jwt);
-          Swal.fire({
-            icon: "success",
-            title: "!ورود شهردار موفقیت‌آمیز بود",
-            confirmButtonText: "باشه",
-            customClass: {
-              confirmButton: 'swal-confirm-btn',
-              title: 'swal-title',
-            }
-          });
-          
-          navigate("/MayorDashboard");
-        } else {
-          const errorMsg =
-            response.fail || "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
-          setErrorMessages((prev) => ({ ...prev, [authType]: errorMsg }));
-        }
-      } else if (authType === "admin") {
-        console.log("Admin Login Data:", formData);
-        response = await loginCitizenapi({
-          Email: formData.Email,
-          Password: formData.Password,
-          Type: "Admin",
-        });
-
-        console.log("Admin Login Response:", response);
-
-        if (response.jwt) {
-          loginAdmin(response);
-          console.log("JWT Token Saved (Admin):", response.jwt);
-          Swal.fire({
-            icon: "success",
-            title: "!ورود ادمین موفقیت‌آمیز بود",
-            confirmButtonText: "باشه",
-            customClass: {
-              confirmButton: 'swal-confirm-btn',
-              title: 'swal-title',
-            }
-          });
-          navigate("/AdminDashboard");
-        } else {
-          const errorMsg =
-            response.fail || "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
-          setErrorMessages((prev) => ({ ...prev, [authType]: errorMsg }));
-        }
+        
       } else {
-        console.log("Invalid user type selected.");
+        response = await loginCitizenapi({
+          Email: formData.Email,
+          Password: formData.Password,
+        });
+
+        if (response.jwt && response.usertype) {
+          switch (response.usertype) {
+            case "Citizen":
+              loginCitizen(response);
+              navigate("/CitizenDashboard");
+              break;
+            case "Mayor":
+              loginMayor(response);
+              navigate("/MayorDashboard");
+              break;
+            case "Admin":
+              loginAdmin(response);
+              navigate("/AdminDashboard");
+              break;
+            default:
+              Swal.fire({
+                icon: "error",
+                title: "نوع کاربری نامعتبر است!",
+                confirmButtonText: "باشه",
+                customClass: {
+                  confirmButton: "swal-confirm-btn",
+                  title: "swal-title",
+                  customClass: {
+                    confirmButton: "swal-confirm-btn",
+                    title: "swal-title",
+                    htmlContainer: "swal-text"  
+                  },
+                },
+              });
+              return;
+          }
+          Swal.fire({
+            icon: "success",
+            title: "!ورود موفقیت‌آمیز بود",
+            confirmButtonText: "باشه",
+            customClass: {
+              confirmButton: "swal-confirm-btn",
+              title: "swal-title",
+            },
+          });
+        } else {
+          setErrorMessage(response.fail || "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید");
+        }
       }
       setTimeout(() => setIsLoading(false), 3000);
     } catch (error) {
-      console.error("Authentication Error:", error.response?.data || error.message);
-
-      let errorMessage = "مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید.";
-
-      if (error.message === "user with this Email already exists.") {
-        errorMessage = "کاربری با این ایمیل وجود دارد.";
-      } else if (error.message === "your email or password is incorrect") {
-        errorMessage = "ایمیل یا رمز عبور نادرست است.";
-      } else if (error.message === "Please verify your account via Email.") {
-        errorMessage = "برای تایید اکانت ایمیل فرستاده شده را تایید کنید.";
-      }
-
-      setErrorMessages((prev) => ({ ...prev, [authType]: errorMessage }));
+      console.error(error);
+      let msg = ".مشکلی پیش آمد! ❌ لطفاً دوباره تلاش کنید";
+      if (error.message === "user with this Email already exists.")
+        msg = ".کاربری با این ایمیل وجود دارد";
+      else if (error.message === "your email or password is incorrect")
+        msg = ".ایمیل یا رمز عبور نادرست است";
+      else if (error.message === "Please verify your account via Email.")
+        msg = ".برای تایید اکانت ایمیل فرستاده شده را تایید کنید";
+      setErrorMessage(msg);
     }
   };
 
-  const handleForgotPasswordSubmit = async (e) => {
+
+  const handleForgotPasswordSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
     setEmailSentMessage("");
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/request-reset-email/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Email: formData.Email,
-          Type: "Citizen",
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setEmailSentMessage("ایمیل بازنشانی رمز عبور با موفقیت ارسال شد. لطفاً ایمیل خود را بررسی کنید.");
-        setTimeout(() => {
-          setIsForgotPassword(false); // Return to login page
-        }, 2000);
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/request-reset-email/`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Email: formData.Email, Type: "Citizen" }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setEmailSentMessage(
+          "ایمیل بازنشانی رمز عبور با موفقیت ارسال شد لطفاً ایمیل خود را بررسی کنید"
+        );
+        setTimeout(() => setIsForgotPassword(false), 2000);
       } else {
-        setErrorMessages((prev) => ({
-          ...prev,
-          [authType]: data.error || "مشکلی در ارسال ایمیل رخ داد. دوباره تلاش کنید.",
-        }));
+        setErrorMessage(data.error || ".مشکلی در ارسال ایمیل رخ داد. دوباره تلاش کنید");
       }
-    } catch (error) {
-      setErrorMessages((prev) => ({
-        ...prev,
-        [authType]: "خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.",
-      }));
+    } catch {
+      setErrorMessage(".خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید");
     } finally {
       setIsLoading(false);
     }
@@ -294,27 +232,29 @@ const AuthPage = () => {
   });
 
   const errorTranslations = {
-    "your email or password is incorrect": "ایمیل یا رمز عبور نادرست است.",
-    "User not found": "کاربری با این مشخصات یافت نشد.",
+    "your email or password is incorrect": ".ایمیل یا رمز عبور نادرست است",
+    "User not found": ".کاربری با این مشخصات یافت نشد",
     "check pass":
       "رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و کاراکتر خاص باشد",
-    "Invalid email format": "فرمت ایمیل نامعتبر است.",
-    "user with this Email already exists.": "کاربری با این ایمیل وجود دارد.",
+    "Invalid email format": ".فرمت ایمیل نامعتبر است",
+    "user with this Email already exists.": ".کاربری با این ایمیل وجود دارد",
     "pass fail":
-      "تعداد زیادی تلاش ناموفق انجام شده است. لطفاً بعداً دوباره امتحان کنید.",
-    "full name eror": "لطفا نام کامل خود را وارد کنید.",
-    "Please verify your account via Email.": "برای تایید اکانت ایمیل فرستاده شده را تایید کنید.",
+      ".تعداد زیادی تلاش ناموفق انجام شده است. لطفاً بعداً دوباره امتحان کنید",
+    "full name eror": ".لطفا نام کامل خود را وارد کنید.",
+    "Please verify your account via Email.": ".برای تایید اکانت ایمیل فرستاده شده را تایید کنید",
   };
 
-  const errorMessageText = errorMessages[authType]
-    ? typeof errorMessages[authType] === "string"
-      ? errorMessages[authType]
-      : JSON.stringify(errorMessages[authType])
-    : "";
+  const translatedError = errorMessage ? errorTranslations[errorMessage] || errorMessage : "";
 
-  const translatedErrorMessage = errorMessageText
-    ? errorTranslations[errorMessageText] || errorMessageText
-    : "";
+  // const errorMessageText = errorMessages[authType]
+  //   ? typeof errorMessages[authType] === "string"
+  //     ? errorMessages[authType]
+  //     : JSON.stringify(errorMessages[authType])
+  //   : "";
+
+  // const translatedErrorMessage = errorMessageText
+  //   ? errorTranslations[errorMessageText] || errorMessageText
+  //   : "";
 
   const sliderSettings = {
     dots: true,
@@ -330,17 +270,17 @@ const AuthPage = () => {
   };
   const sliderRef = useRef(null);
 
-  const handlePrev = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickPrev();
-    }
-  };
+  // const handlePrev = () => {
+  //   if (sliderRef.current) {
+  //     sliderRef.current.slickPrev();
+  //   }
+  // };
 
-  const handleNext = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickNext();
-    }
-  };
+  // const handleNext = () => {
+  //   if (sliderRef.current) {
+  //     sliderRef.current.slickNext();
+  //   }
+  // };
 
   return (
     <ThemeProvider theme={theme}>
@@ -472,63 +412,26 @@ const AuthPage = () => {
                 </Typography>
               </Box>
 
-              <ToggleButtonGroup
-                value={authType}
-                exclusive
-                onChange={(e, newValue) => {
-                  if (newValue) {
-                    setAuthType(newValue);
-                    setIsSignup(false);
-                    setIsForgotPassword(false);
-                    setIsResetPassword(false);
-                  }
-                }}
-                sx={{
-                  marginBottom: 3,
-                  flexWrap: "wrap",
-                  width: "100%",
-                  "& .MuiToggleButton-root": {
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    padding: "10px",
-                  },
-                }}
-              >
-                <ToggleButton value="user" sx={{ flex: 1, minWidth: "100px" }}>
-                  <Person sx={{ marginRight: 1 }} /> شهروند
-                </ToggleButton>
-                <ToggleButton value="manager" sx={{ flex: 1, minWidth: "100px" }}>
-                  <SupervisorAccount sx={{ marginRight: 1 }} /> مسئول
-                </ToggleButton>
-                <ToggleButton value="admin" sx={{ flex: 1, minWidth: "100px" }}>
-                  <AdminPanelSettings sx={{ marginRight: 1 }} /> ادمین
-                </ToggleButton>
-              </ToggleButtonGroup>
+              
 
-              <Typography variant="h5" fontWeight="bold" sx={{ marginBottom: 1 }}>
-                {isForgotPassword
-                  ? "بازنشانی رمز عبور"
-                  : isResetPassword
-                  ? "تغییر رمز عبور"
-                  : authType === "user"
-                  ? isSignup
-                    ? "ثبت‌نام شهروند"
-                    : "ورود شهروند"
-                  : authType === "manager"
-                  ? "ورود مسئول"
-                  : "ورود ادمین"}
-              </Typography>
+              <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
+  {isForgotPassword
+    ? "بازنشانی رمز عبور"
+    : isResetPassword
+    ? "تغییر رمز عبور"
+    : isSignup
+    ? "ثبت‌نام شهروند"
+    : "ورود به حساب کاربری"}
+</Typography>
 
-              <Typography variant="body2" color="gray" sx={{ marginBottom: 3 }}>
+              <Typography variant="body2" color="gray" sx={{ mb: 3 }}>
                 {isForgotPassword
                   ? "ایمیل مربوط به حساب کاربری خود را وارد کنید"
                   : isResetPassword
                   ? "رمز عبور جدید خود را وارد کنید"
-                  : authType === "user"
-                  ? isSignup
-                    ? "یک حساب کاربری بسازید تا ادامه دهید"
-                    : "برای ادامه، وارد شوید"
-                  : "اطلاعات ورود خود را وارد کنید"}
+                  : isSignup
+                  ? "یک حساب کاربری بسازید تا ادامه دهید"
+                  : "برای ادامه، وارد شوید"}
               </Typography>
 
               <form
@@ -545,39 +448,49 @@ const AuthPage = () => {
                 {isForgotPassword ? (
                   <>
                     <TextField
-                      label="ایمیل"
-                      name="Email"
-                      type="email"
-                      value={formData.Email}
-                      onChange={handleChange}
-                      fullWidth
-                      required
-                      margin="normal"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          "& fieldset": {
-                            borderColor: "#ccc",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "#aaa",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "#4a90e2",
-                          },
-                        },
-                        "& input:-webkit-autofill": {
-                          WebkitBoxShadow: "0 0 0px 1000px white inset !important",
-                          backgroundColor: "white !important",
-                        },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Email />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
+  placeholder="ایمیل"
+  name="Email"
+  type="email"
+  value={formData.Email}
+  onChange={handleChange}
+  fullWidth
+  required
+  margin="normal"
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <Email />
+      </InputAdornment>
+    ),
+    sx: {
+      flexDirection: "row-reverse",
+      textAlign: "right",
+      "& input": {
+        textAlign: "right",
+      },
+    },
+  }}
+  sx={{
+    direction: "rtl",
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#ccc",
+      },
+      "&:hover fieldset": {
+        borderColor: "#aaa",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#ccc", // حذف رنگ آبی
+        boxShadow: "none",
+      },
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+      backgroundColor: "white !important",
+    },
+  }}
+/>
+
                   </>
                 ) : isResetPassword ? (
                   <>
@@ -636,119 +549,200 @@ const AuthPage = () => {
                   </>
                 ) : (
                   <>
-                    {authType === "user" && isSignup && (
+                    {isSignup && (
                       <TextField
-                        label="نام کامل"
-                        name="FullName"
-                        type="text"
-                        value={formData.FullName}
-                        onChange={handleChange}
-                        fullWidth
-                        required
-                        margin="normal"
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            "& fieldset": {
-                              borderColor: "#ccc",
-                            },
-                            "&:hover fieldset": {
-                              borderColor: "#aaa",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#4a90e2",
-                            },
-                          },
-                          "& input:-webkit-autofill": {
-                            WebkitBoxShadow: "0 0 0px 1000px white inset !important",
-                            backgroundColor: "white !important",
-                          },
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Person />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    )}
-
-                    <TextField
-                      label="ایمیل"
-                      name="Email"
-                      type="email"
-                      value={formData.Email}
+                      placeholder="نام کامل"
+                      name="FullName"
+                      type="text"
+                      value={formData.FullName}
                       onChange={handleChange}
                       fullWidth
                       required
                       margin="normal"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          "& fieldset": {
-                            borderColor: "#ccc",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "#aaa",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "#4a90e2",
-                          },
-                        },
-                        "& input:-webkit-autofill": {
-                          WebkitBoxShadow: "0 0 0px 1000px white inset !important",
-                          backgroundColor: "white !important",
+                      dir="rtl"
+                      inputProps={{
+                        style: {
+                          textAlign: "right",
+                          fontFamily: "inherit",
                         },
                       }}
                       InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Email />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    <TextField
-                      label="رمز عبور"
-                      name="Password"
-                      type={showPassword ? "text" : "password"}
-                      value={formData.Password}
-                      onChange={handleChange}
-                      fullWidth
-                      required
-                      margin="normal"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          "& fieldset": {
-                            borderColor: "#ccc",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "#aaa",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "#4a90e2",
-                          },
-                        },
-                        "& input:-webkit-autofill": {
-                          WebkitBoxShadow: "0 0 0px 1000px white inset !important",
-                          backgroundColor: "white !important",
-                        },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Lock />
-                          </InputAdornment>
-                        ),
                         endAdornment: (
                           <InputAdornment position="end">
-                            <IconButton onClick={togglePasswordVisibility}>
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
+                            <Person />
                           </InputAdornment>
                         ),
+                        sx: {
+                          flexDirection: "row-reverse",
+                        },
                       }}
+                      sx={{
+                        direction: "rtl",
+                        "& .MuiOutlinedInput-root": {
+                          flexDirection: "row-reverse", // آیکون بیاد سمت راست
+                          "& input": {
+                            textAlign: "right", // متن داخل input راست‌چین
+                          },
+                          "& fieldset": {
+                            borderColor: "#ccc !important",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "#aaa !important",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#ccc !important", // حذف رنگ آبی
+                            boxShadow: "none !important",
+                          },
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ccc !important",
+                        },
+                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ccc !important",
+                          boxShadow: "none !important",
+                        },
+                        "& input:-webkit-autofill": {
+                          WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+                          backgroundColor: "white !important",
+                        },
+                      }}
+                      
+                      
                     />
+                    
+                    )}
+
+<TextField
+  placeholder="ایمیل"
+  name="Email"
+  type="email"
+  value={formData.Email}
+  onChange={handleChange}
+  fullWidth
+  required
+  margin="normal"
+  dir="rtl"
+  inputProps={{
+    style: {
+      textAlign: "right",
+      fontFamily: "inherit",
+    },
+  }}
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <Email />
+      </InputAdornment>
+    ),
+    sx: {
+      flexDirection: "row-reverse",
+    },
+  }}
+  sx={{
+    direction: "rtl",
+    "& .MuiOutlinedInput-root": {
+      flexDirection: "row-reverse", // آیکون بیاد سمت راست
+      "& input": {
+        textAlign: "right", // متن داخل input راست‌چین
+      },
+      "& fieldset": {
+        borderColor: "#ccc !important",
+      },
+      "&:hover fieldset": {
+        borderColor: "#aaa !important",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#ccc !important", // حذف رنگ آبی
+        boxShadow: "none !important",
+      },
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#ccc !important",
+    },
+    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#ccc !important",
+      boxShadow: "none !important",
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+      backgroundColor: "white !important",
+    },
+  }}
+  
+  
+/>
+
+
+<TextField
+  placeholder="رمز عبور"
+  name="Password"
+  type={showPassword ? "text" : "password"}
+  value={formData.Password}
+  onChange={handleChange}
+  fullWidth
+  required
+  margin="normal"
+  dir="rtl"
+  inputProps={{
+    style: {
+      textAlign: "right",
+      fontFamily: "inherit",
+    },
+  }}
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <Lock />
+      </InputAdornment>
+    ),
+    startAdornment: (
+      <InputAdornment position="start">
+        <IconButton onClick={togglePasswordVisibility}>
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    ),
+    sx: {
+      flexDirection: "row-reverse",
+    },
+  }}
+  sx={{
+    direction: "rtl",
+    "& .MuiOutlinedInput-root": {
+      flexDirection: "row-reverse", // آیکون بیاد سمت راست
+      "& input": {
+        textAlign: "right", // متن داخل input راست‌چین
+      },
+      "& fieldset": {
+        borderColor: "#ccc !important",
+      },
+      "&:hover fieldset": {
+        borderColor: "#aaa !important",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#ccc !important", // حذف رنگ آبی
+        boxShadow: "none !important",
+      },
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#ccc !important",
+    },
+    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#ccc !important",
+      boxShadow: "none !important",
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+      backgroundColor: "white !important",
+    },
+  }}
+  
+  
+  
+/>
+
+
+
                     {isSignup && (
                       <Typography
                         variant="body2"
@@ -787,7 +781,27 @@ const AuthPage = () => {
                   </Typography>
                 )}
 
-                {translatedErrorMessage && (
+{translatedError && (
+  <Typography
+                    variant="body1"
+                    color="error"
+                    sx={{
+                      backgroundColor: "#ffebee",
+                      color: "#d32f2f",
+                      padding: "10px",
+                      borderRadius: "5px",
+                      textAlign: "center",
+                      marginBottom: "15px",
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      boxShadow: "0px 0px 5px rgba(211, 47, 47, 0.5)",
+                      margin: 2,
+                    }}
+                  >                    {translatedError}
+                  </Typography>
+                )}
+
+                {/* {translatedErrorMessage && (
                   <Typography
                     variant="body1"
                     color="error"
@@ -806,7 +820,7 @@ const AuthPage = () => {
                   >
                     {translatedErrorMessage}
                   </Typography>
-                )}
+                )} */}
 
                 <Button
                   type="button"
@@ -859,7 +873,7 @@ const AuthPage = () => {
                 </Button>
               </form>
 
-              {authType === "user" && !isForgotPassword && !isResetPassword && (
+              {!isForgotPassword && !isResetPassword && (
                 <>
                   <Typography
                     variant="body1"
@@ -946,7 +960,7 @@ const AuthPage = () => {
                   }}
                   onClick={() => {
                     setIsResetPassword(false);
-                    navigate("/"); // Redirect to login page
+                    navigate("/"); 
                   }}
                 >
                   بازگشت به ورود

@@ -68,14 +68,14 @@ export default function ConfirmPassword() {
     setLoading(true);
 
     if (Password !== ConfirmPassword) {
-      setError("رمزهای عبور وارد شده مطابقت ندارند.");
+      setError("رمزهای عبور وارد شده مطابقت ندارند");
       setLoading(false);
       return;
     }
 
     if (!isStrongPassword(Password)) {
       setError(
-        "رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و کاراکتر خاص باشد."
+        "رمز عبور باید حداقل ۸ کاراکتر، شامل حروف بزرگ، کوچک، عدد و کاراکتر خاص باشد"
       );
       setLoading(false);
       return;
@@ -100,14 +100,14 @@ export default function ConfirmPassword() {
 
       if (response.ok) {
         const data = await response.json();
-        setSuccess(data.success || "رمز عبور با موفقیت تغییر یافت. اکنون می‌توانید وارد شوید.");
+        setSuccess("رمز عبور با موفقیت تغییر یافت اکنون می‌توانید وارد شوید");
         setTimeout(() => navigate("/signuplogin"), 2000);
       } else {
         const data = await response.json();
-        setError(data.message || "خطایی در تغییر رمز عبور رخ داد.");
+        setError(data.message || "خطایی در تغییر رمز عبور رخ داد");
       }
     } catch (err) {
-      setError("خطایی رخ داد. لطفاً دوباره تلاش کنید.");
+      setError("خطایی رخ داد. لطفاً دوباره تلاش کنید");
     } finally {
       setLoading(false);
     }
@@ -267,78 +267,112 @@ export default function ConfirmPassword() {
               </Typography>
 
               <form onSubmit={handleSubmit} style={{ width: "100%", boxSizing: "border-box" }} noValidate>
-                <TextField
-                  label="رمز عبور جدید"
-                  type={showPassword ? "text" : "password"}
-                  value={Password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  fullWidth
-                  required
-                  margin="normal"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#ccc",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#aaa",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#4a90e2",
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={togglePasswordVisibility}>
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  label="تکرار رمز عبور"
-                  type={showPassword ? "text" : "password"}
-                  value={ConfirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  fullWidth
-                  required
-                  margin="normal"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#ccc",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#aaa",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#4a90e2",
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={togglePasswordVisibility}>
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+              <TextField
+  placeholder="رمز عبور جدید"
+  type={showPassword ? "text" : "password"}
+  value={Password}
+  onChange={(e) => setPassword(e.target.value)}
+  fullWidth
+  required
+  margin="normal"
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <IconButton onClick={togglePasswordVisibility}>
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    ),
+    endAdornment: (
+      <InputAdornment position="end">
+        <Lock />
+      </InputAdornment>
+    ),
+  }}
+  inputProps={{
+    style: {
+      textAlign: "right",
+      direction: "rtl",
+    },
+  }}
+  sx={{
+    direction: "rtl",
+    "& .MuiOutlinedInput-root": {
+      flexDirection: "row-reverse", // قرینه‌سازی کل ردیف
+      "& fieldset": {
+        borderColor: "#ccc",
+      },
+      "&:hover fieldset": {
+        borderColor: "#aaa",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#ccc", // حذف رنگ آبی
+        boxShadow: "none",
+      },
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+      backgroundColor: "white !important",
+    },
+  }}
+/>
+
+
+<TextField
+  placeholder="تکرار رمز عبور"
+  type={showPassword ? "text" : "password"}
+  value={ConfirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}
+  fullWidth
+  required
+  margin="normal"
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <IconButton onClick={togglePasswordVisibility}>
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    ),
+    endAdornment: (
+      <InputAdornment position="end">
+        <Lock />
+      </InputAdornment>
+    ),
+  }}
+  inputProps={{
+    style: {
+      textAlign: "right",
+      direction: "rtl",
+      paddingRight: "10px",
+    },
+  }}
+  sx={{
+    direction: "rtl",
+    "& .MuiOutlinedInput-root": {
+      flexDirection: "row-reverse", // آیکون‌ها و ورودی را قرینه کن
+      "& fieldset": {
+        borderColor: "#ccc",
+      },
+      "&:hover fieldset": {
+        borderColor: "#aaa",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#aaa",
+      },
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+      backgroundColor: "white !important",
+    },
+  }}
+/>
+
+
+
+
+
+
                 <Typography
                   variant="body2"
                   sx={{
