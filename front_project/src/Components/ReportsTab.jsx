@@ -50,12 +50,16 @@ import EditIcon from "@mui/icons-material/Edit";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SortIcon from "@mui/icons-material/Sort";
 import logo from "../assets/lgo.png";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Reports({ ReportClick }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState(null);
   const [mapOpen, setMapOpen] = useState(false);
   const [selectedReportForMap, setSelectedReportForMap] = useState(null);
+  const navigate = useNavigate();
+
 
   const [reports, setReports] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -839,42 +843,56 @@ export default function Reports({ ReportClick }) {
       </Box>
 
       <Menu
-        anchorEl={sortAnchorEl}
-        open={Boolean(sortAnchorEl)}
-        onClose={() => setSortAnchorEl(null)}
+  anchorEl={sortAnchorEl}
+  open={Boolean(sortAnchorEl)}
+  onClose={() => setSortAnchorEl(null)}
+  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+  transformOrigin={{ vertical: "top", horizontal: "left" }}
+  sx={{ direction: "rtl" }}
+>
+  {[
+    { value: "priority", label: "بر اساس اهمیت" },
+    { value: "likes", label: "بر اساس تأیید" },
+    { value: "dislikes", label: "بر اساس عدم تأیید" },
+    { value: "date", label: "بر اساس تاریخ" },
+  ].map(({ value, label }) => (
+    <MenuItem
+      key={value}
+      onClick={() => toggleSortOption(value)}
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        textAlign: "right",
+      }}
+    >
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: sortOptions.includes(value) ? "bold" : "normal" }}
       >
-        {[
-          { value: "priority", label: "بر اساس اهمیت" },
-          { value: "likes", label: "بر اساس تأیید" },
-          { value: "dislikes", label: "بر اساس عدم تأیید" },
-          { value: "date", label: "بر اساس تاریخ" },
-        ].map(({ value, label }) => (
-          <MenuItem key={value} onClick={() => toggleSortOption(value)}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              width="100%"
-            >
-              {label}
-              {sortOptions.includes(value) && (
-                <CheckCircleIcon fontSize="small" sx={{ color: "green" }} />
-              )}
-            </Box>
-          </MenuItem>
-        ))}
+        {label}
+      </Typography>
+      {sortOptions.includes(value) && (
+        <CheckCircleIcon fontSize="small" sx={{ color: "green", ml: 1 }} />
+      )}
+    </MenuItem>
+  ))}
 
-        <MenuItem
-          onClick={() => setSortOptions([])}
-          sx={{
-            color: "red",
-            fontWeight: "bold",
-            justifyContent: "center",
-          }}
-        >
-          🔄 بازنشانی مرتب‌سازی
-        </MenuItem>
-      </Menu>
+  <MenuItem
+    onClick={() => setSortOptions([])}
+    sx={{
+      color: "red",
+      fontWeight: "bold",
+      display: "flex",
+      justifyContent: "flex-start",
+      gap: 1,
+      textAlign: "right",
+    }}
+  >
+    <ClearAllIcon fontSize="small" />
+    بازنشانی مرتب‌سازی
+  </MenuItem>
+</Menu>
+
 
       <Collapse in={showFilters}>
         <Box
@@ -1479,7 +1497,9 @@ export default function Reports({ ReportClick }) {
         open={Boolean(noteAnchor)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleReportClick}>رفتن به صفحه گزارش</MenuItem>
+<MenuItem onClick={() => navigate(`/mayor_reports/${selectedReport.id}`)}>
+  رفتن به صفحه گزارش
+</MenuItem>
         <MenuItem onClick={handleOpenNoteDialog}>افزودن یادداشت داخلی</MenuItem>
         <MenuItem onClick={handleOpenViewNotesDialog}>
           نمایش یادداشت‌های ثبت شده

@@ -39,6 +39,8 @@ import LogoutDialog from "./LogoutDialog";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Swal from "sweetalert2";
 import IranMapSection from "../Components/iranmap";
+import PersonIcon from "@mui/icons-material/Person";
+import AddIcon from "@mui/icons-material/Add";
 
 
 import AdminProfileSection from "../Components/adminProfileSection";
@@ -277,49 +279,54 @@ export default function AdminDashboard() {
 
       {/* دکمه اختصاصی برای ثبت مسئولین */}
       <Button
-        onClick={() => setSelectedItem("registerform")}
+  onClick={() => setSelectedItem("registerform")}
+  variant="contained"
+  color="success"
+  fullWidth
+  sx={{
+    borderRadius: "12px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    py: 1.2,
+    mt: 2,
+    mb: 2,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 1.2, // فاصله بین آیکون و متن
+    textTransform: "none",
+  }}
+  startIcon={
+    <Box
+      sx={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 24,
+        height: 24,
+      }}
+    >
+      <PersonIcon sx={{ fontSize: 22 }} />
+      <AddIcon
         sx={{
-          bgcolor: selectedItem === "registerform" ? "transparent" : "#007E33",
-          color: selectedItem === "registerform" ? "#007E33" : "white",
-          fontWeight: "bold",
-          border: selectedItem === "registerform"
-            ? "2px solid #007E33"
-            : "none",
-          borderRadius: "25px",
-          padding: "10px 24px",
-          minWidth: "240px",
-          display: "flex",
-          alignItems: "center",
-          textTransform: "none",
-          fontSize: "16px",
-          "&:hover": {
-            bgcolor:
-              selectedItem === "registerform"
-                ? "rgba(0, 126, 51, 0.1)"
-                : "#005a24",
-          },
-          mt: 2,
-          mb: 2,
+          fontSize: 14,
+          position: "absolute",
+          top: -4,
+          right: -4,
+          backgroundColor: "white",
+          borderRadius: "50%",
+          padding: "1px",
+          color: "green",
+          boxShadow: "0 0 0 1px #ccc",
         }}
-      >
-        ثبت نام مسئولین
-        {
-          <span style={{ position: "relative", display: "inline-block" }}>
-            <Person sx={{ fontSize: 24 }} />
-            <Add
-              sx={{
-                fontSize: 14,
-                position: "absolute",
-                top: 0,
-                left: -5,
-                backgroundColor: "white",
-                borderRadius: "50%",
-                color: "green",
-              }}
-            />
-          </span>
-        }
-      </Button>
+      />
+    </Box>
+  }
+>
+  ثبت نام مسئولین
+</Button>
+
 
       {menuItems.map((item) => (
         <Button

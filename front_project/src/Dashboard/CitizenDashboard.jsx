@@ -47,6 +47,9 @@ import ProfileSection from "../Components/ProfileSection";
 import CitizenNotification from "./CitizenNotification";
 import CitizenStats from "./CitizenStats";
 import IranMapSection from "../Components/iranmap";
+import { useLocation } from "react-router-dom";
+import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt"; // بالا اضافه کن
+
 
 // Create a styled component for the main content area
 const MainContent = styled(Box)(({ theme }) => ({
@@ -126,6 +129,8 @@ export default function CitizenDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [reports, setReports] = useState([]);
   const fileInputRef = useRef();
+  const location = useLocation(); // اضافه کن
+
 
   const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
@@ -153,6 +158,7 @@ export default function CitizenDashboard() {
         navigate("/signuplogin");
       }
     };
+    
 
     const fetchReports = async () => {
       try {
@@ -174,6 +180,13 @@ export default function CitizenDashboard() {
     fetchProfile();
     fetchReports();
   }, [navigate]);
+
+
+  useEffect(() => {
+    if (location.state?.page) {
+      setSelectedItem(location.state.page); // به تب درست برو
+    }
+  }, [location.state]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -350,20 +363,28 @@ export default function CitizenDashboard() {
       </Box>
 
       <Box sx={{ width: "100%", mt: 2 }}>
-  <Button
-    variant="contained"
-    color="success"
-    fullWidth
-    sx={{
-      py: 1.2,
-      borderRadius: "10px",
-      fontWeight: "bold",
-      fontSize: "16px",
-    }}
-    onClick={() => setSelectedItem("map")}
-  >
-    ثبت گزارشات
-  </Button>
+      <Button
+  variant="contained"
+  color="success"
+  fullWidth
+  startIcon={
+    <Box sx={{ display: "flex", alignItems: "center", ml: 0.5 }}>
+      <AddLocationAltIcon />
+    </Box>
+  }
+  sx={{
+    py: 1.2,
+    borderRadius: "10px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    justifyContent: "center",
+    gap: 1.2, // فاصله بین آیکون و متن
+  }}
+  onClick={() => setSelectedItem("map")}
+>
+  ثبت گزارشات
+</Button>
+
 </Box>
 
 

@@ -157,18 +157,21 @@ export default function ProfileSection({
                   برای تغییر عکس پروفایل روی تصویر بالا کلیک کنید.
                 </Typography>
 
-                <TextField
-                  fullWidth
-                  label="نام کامل"
-                  value={editedProfile.FullName}
-                  onChange={(e) =>
-                    setEditedProfile((prev) => ({
-                      ...prev,
-                      FullName: e.target.value,
-                    }))
-                  }
-                  sx={{ mt: 2, mb: 2 }}
-                />
+                <div className={`form-group ${editedProfile.FullName ? "filled" : ""}`}>
+  <input
+    type="text"
+    value={editedProfile.FullName}
+    onChange={(e) =>
+      setEditedProfile((prev) => ({
+        ...prev,
+        FullName: e.target.value,
+      }))
+    }
+    required
+  />
+  <label>نام کامل</label>
+</div>
+
               </>
             ) : (
               <>
@@ -367,6 +370,56 @@ export default function ProfileSection({
           </Box>
         )}
       </Box>
+      <style>
+{`
+  @font-face {
+    font-family: 'Vazir';
+    src: url('/fonts/Vazir.woff2') format('woff2'),
+         url('/fonts/Vazir.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  .form-group {
+    position: relative;
+    margin: 20px 0;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Vazir', sans-serif;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 16px 12px 8px 12px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    text-align: right;
+    font-family: 'Vazir', sans-serif;
+  }
+
+  .form-group label {
+    position: absolute;
+    right: 12px;
+    top: 14px;
+    background: #fff;
+    padding: 0 6px;
+    font-size: 16px;
+    color: #888;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    font-family: 'Vazir', sans-serif;
+  }
+
+  .form-group input:focus + label,
+  .form-group input:not(:placeholder-shown) + label {
+    top: -8px;
+    font-size: 13px;
+    color: #007E33;
+  }
+`}
+</style>
     </Box>
   );
 }

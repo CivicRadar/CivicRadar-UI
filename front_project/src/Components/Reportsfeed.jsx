@@ -53,21 +53,39 @@ const ReportFeed = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogImage, setDialogImage] = useState("");
+  const [userLikeStatusMap, setUserLikeStatusMap] = useState({}); 
+  const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
+
+
+  
+
 
   useEffect(() => {
-    fetch(
-      `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/all-citizen-report/`
-    )
-      .then((res) => res.json())
-      .then((data) => {
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/all-citizen-report/`)
+      .then(res => res.json())
+      .then(async (data) => {
         setReports(data);
   
-        const uniqueProvinces = [
-          ...new Set(data.map((r) => r.ProvinceName).filter(Boolean)),
-        ];
+        // گرفتن وضعیت لایک برای همه گزارش‌ها
+        // بعد از setReports(data):
+const statusMap = {};
+for (let r of data) {
+  const res = await fetch(`${BASE}/communicate/like/?CityProblemID=${r.id}`, {
+    method: "GET", credentials: "include"
+  });
+  if (res.ok) {
+    const { Like } = await res.json();
+    statusMap[r.id] = Like; // true|false|null
+  }
+}
+setUserLikeStatusMap(statusMap);
+
+  
+        const uniqueProvinces = [...new Set(data.map(r => r.ProvinceName).filter(Boolean))];
         setProvinces(uniqueProvinces);
       });
   }, []);
+  
 
   useEffect(() => {
     if (!selectedProvince) {
@@ -122,6 +140,100 @@ const ReportFeed = () => {
         return status;
     }
   };
+// … بقیه‌ی ایمپورت‌ها و stateها
+
+const handleLikeToggle = async (reportId) => {
+  const current = userLikeStatusMap[reportId];
+  const sendingValue = true;
+
+  try {
+    await fetch(`${BASE}/communicate/like/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        CityProblemID: reportId,
+        Like: sendingValue,
+      }),
+    });
+
+    const updatedStatus = current === true ? null : true;
+
+    setUserLikeStatusMap((m) => ({ ...m, [reportId]: updatedStatus }));
+
+    setReports((rs) =>
+      rs.map((r) => {
+        if (r.id !== reportId) return r;
+        let Likes = r.Likes || 0;
+        let Dislikes = r.Dislikes || 0;
+
+        if (current === true) {
+          Likes -= 1; // برداشتن لایک
+        } else if (current === false) {
+          Dislikes -= 1;
+          Likes += 1; // از دیسلایک به لایک
+        } else {
+          Likes += 1; // لایک جدید
+        }
+
+        return { ...r, Likes, Dislikes };
+      })
+    );
+  } catch (e) {
+    console.error("handleLikeToggle error", e);
+  }
+};
+
+
+const handleDislikeToggle = async (reportId) => {
+  const current = userLikeStatusMap[reportId];
+  const sendingValue = false;
+
+  try {
+    await fetch(`${BASE}/communicate/like/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        CityProblemID: reportId,
+        Like: sendingValue,
+      }),
+    });
+
+    const updatedStatus = current === false ? null : false;
+
+    setUserLikeStatusMap((m) => ({ ...m, [reportId]: updatedStatus }));
+
+    setReports((rs) =>
+      rs.map((r) => {
+        if (r.id !== reportId) return r;
+        let Likes = r.Likes || 0;
+        let Dislikes = r.Dislikes || 0;
+
+        if (current === false) {
+          Dislikes -= 1; // برداشتن دیسلایک
+        } else if (current === true) {
+          Likes -= 1;
+          Dislikes += 1; // از لایک به دیسلایک
+        } else {
+          Dislikes += 1; // دیسلایک جدید
+        }
+
+        return { ...r, Likes, Dislikes };
+      })
+    );
+  } catch (e) {
+    console.error("handleDislikeToggle error", e);
+  }
+};
+
+
+
+
+
+
+  
+  
 
   const toggleSortOption = (option) =>
     setSortOptions((prev) =>
@@ -414,31 +526,51 @@ const ReportFeed = () => {
       </Collapse>
 
       <Menu
-        anchorEl={sortAnchorEl}
-        open={Boolean(sortAnchorEl)}
-        onClose={() => setSortAnchorEl(null)}
+  anchorEl={sortAnchorEl}
+  open={Boolean(sortAnchorEl)}
+  onClose={() => setSortAnchorEl(null)}
+  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+  transformOrigin={{ vertical: "top", horizontal: "left" }}
+  sx={{ direction: "rtl" }}
+>
+  {[
+    { key: "likes", label: "بر اساس تأیید" },
+    { key: "dislikes", label: "بر اساس عدم تأیید" },
+    { key: "date", label: "بر اساس تاریخ" },
+  ].map(({ key, label }) => (
+    <MenuItem
+      key={key}
+      onClick={() => toggleSortOption(key)}
+      sx={{ display: "flex", justifyContent: "space-between", textAlign: "right" }}
+    >
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: sortOptions.includes(key) ? "bold" : "normal" }}
       >
-        {[
-          { key: "likes", label: "بر اساس تأیید" },
-          { key: "dislikes", label: "بر اساس عدم تأیید" },
-          { key: "date", label: "بر اساس تاریخ" },
-        ].map(({ key, label }) => (
-          <MenuItem key={key} onClick={() => toggleSortOption(key)}>
-            <Box display="flex" justifyContent="space-between" width="100%">
-              {label}
-              {sortOptions.includes(key) && (
-                <CheckCircleIcon fontSize="small" sx={{ color: "green" }} />
-              )}
-            </Box>
-          </MenuItem>
-        ))}
-        <MenuItem
-          onClick={() => setSortOptions([])}
-          sx={{ color: "red", fontWeight: "bold", justifyContent: "center" }}
-        >
-          🔄 بازنشانی مرتب‌سازی
-        </MenuItem>
-      </Menu>
+        {label}
+      </Typography>
+      {sortOptions.includes(key) && (
+        <CheckCircleIcon fontSize="small" sx={{ color: "green", ml: 1 }} />
+      )}
+    </MenuItem>
+  ))}
+
+  <MenuItem
+    onClick={() => setSortOptions([])}
+    sx={{
+      color: "red",
+      fontWeight: "bold",
+      justifyContent: "flex-start",
+      display: "flex",
+      textAlign: "right",
+      gap: 1,
+    }}
+  >
+    <ClearAllIcon fontSize="small" />
+    بازنشانی مرتب‌سازی
+  </MenuItem>
+</Menu>
+
 
       <Dialog
       open={dialogOpen}
@@ -650,18 +782,28 @@ const ReportFeed = () => {
   </Box>
 
   <Box display="flex" alignItems="center" gap={0.5}>
-    <IconButton size="small">
-      <ThumbDownAltIcon fontSize="small" sx={{ color: "#c62828" }} />
-    </IconButton>
-    <Typography variant="body2" color="text.secondary">
-      {r.Dislikes || 0}
-    </Typography>
-    <IconButton size="small">
-      <ThumbUpAltIcon fontSize="small" sx={{ color: "#2e7d32" }} />
-    </IconButton>
-    <Typography variant="body2" color="text.secondary">
-      {r.Likes || 0}
-    </Typography>
+  <IconButton
+  size="small"
+  onClick={() => handleDislikeToggle(r.id, userLikeStatusMap[r.id])}
+  color={userLikeStatusMap[r.id] === false ? "error" : "default"}
+>
+  <ThumbDownAltIcon fontSize="small" />
+</IconButton>
+<Typography variant="body2" color="text.secondary">
+  {r.Dislikes || 0}
+</Typography>
+
+<IconButton
+  size="small"
+  onClick={() => handleLikeToggle(r.id, userLikeStatusMap[r.id])}
+  color={userLikeStatusMap[r.id] === true ? "success" : "default"}
+>
+  <ThumbUpAltIcon fontSize="small" />
+</IconButton>
+<Typography variant="body2" color="text.secondary">
+  {r.Likes || 0}
+</Typography>
+
   </Box>
 </Box>
 
@@ -710,7 +852,7 @@ const ReportFeed = () => {
 </Box> 
             <Button
               variant="contained"
-              href={`/report/${r.id}`}
+              href={`/citizen_reports/${r.id}`}
               fullWidth
               sx={{
                 backdropFilter: "blur(10px)",

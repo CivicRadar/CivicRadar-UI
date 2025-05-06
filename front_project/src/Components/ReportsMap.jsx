@@ -118,7 +118,7 @@ export default function ReportsMap() {
           const button = document.getElementById(`btn-${report.id}`);
           if (button) {
             button.onclick = () => {
-              window.open(`/reports/${report.id}`, "_blank");
+              window.open(`/mayor_reports/${report.id}`, "_blank");
             };
           }
         });
