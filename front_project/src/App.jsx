@@ -11,6 +11,7 @@ import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن Priva
 import VerifyEmail from "./verifyemail";
 import ConfirmPassword from "./ConfirmPassword"; // Import the new component
 import ReportPageCon from "./Components/ReportPage";
+import ReportPageCon2 from "./Components/ReportPage2";
 
 
 import "./App.css"
@@ -47,11 +48,22 @@ function App() {
             } 
           />
           <Route 
-            path="/reports/:id" 
-            element={
-                <ReportPageCon />              
-            } 
-          />
+  path="/mayor_reports/:id" 
+  element={
+    <PrivateRoute role="Mayor">
+      <ReportPageCon />
+    </PrivateRoute>
+  }
+/>
+<Route 
+  path="/citizen_reports/:id" 
+  element={
+    <PrivateRoute role="Citizen">
+      <ReportPageCon2 />
+    </PrivateRoute>
+  }
+/>
+
            <Route 
             path="/AdminDashboard" 
             element={

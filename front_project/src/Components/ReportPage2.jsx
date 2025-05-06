@@ -32,7 +32,7 @@ import LogoutDialog from "../Dashboard/LogoutDialog";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
-import ReportDetails from "./ReportDetails";
+import ReportDetails2 from "./ReportDetails2";
 
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
@@ -75,7 +75,7 @@ export default function ReportPageCon() {
   };
 
   const handleProfileClick = () => {
-    navigate(`/MayorDashboard`, { state: { page: "profile" } });
+    navigate(`/CitizenDashboard`, { state: { page: "profile" } });
  };
 
   const fetchProfile = async () => {
@@ -245,7 +245,7 @@ export default function ReportPageCon() {
   
     <>
       <TabPanel value={selectedItem} index="reports">
-        <ReportDetails/>
+        <ReportDetails2/>
       </TabPanel>
     </>
   

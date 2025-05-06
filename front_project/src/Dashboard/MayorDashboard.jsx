@@ -36,6 +36,8 @@ import ProfileSection from "../Components/mayerProfileSection";
 import { useLocation } from "react-router-dom";
 import IranMapSection from "../Components/iranmap";
 import ReportsMap from "../Components/ReportsMap";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+
 
 
 const MainContent = styled(Box)(({ theme }) => ({
@@ -282,16 +284,24 @@ export default function MayorDashboard() {
           }}
         />
       </Box>
-      <Button
+      
+<Button
   variant="contained"
   color="success"
   fullWidth
+  startIcon={
+    <Box sx={{ display: "flex", alignItems: "center", ml: 0.5 }}>
+      <GroupAddIcon />
+    </Box>
+  }
   sx={{
     mb: 2,
     borderRadius: "12px",
     fontWeight: "bold",
     fontSize: "16px",
-    mt: 1, // فاصله از لوگو
+    mt: 1,
+    justifyContent: "center",
+    gap: 1.2, // فاصله مناسب بین آیکون و متن
   }}
   onClick={handleShowTeamForm}
 >
