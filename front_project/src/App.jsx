@@ -48,22 +48,11 @@ function App() {
             } 
           />
           <Route 
-  path="/mayor_reports/:id" 
-  element={
-    <PrivateRoute role="Mayor">
-      <ReportPageCon />
-    </PrivateRoute>
-  }
-/>
-<Route 
-  path="/citizen_reports/:id" 
-  element={
-    <PrivateRoute role="Citizen">
-      <ReportPageCon2 />
-    </PrivateRoute>
-  }
-/>
-
+            path="/reports/:id" 
+            element={
+                <ReportPageCon />
+            }
+          />
            <Route 
             path="/AdminDashboard" 
             element={

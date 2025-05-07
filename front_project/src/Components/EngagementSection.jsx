@@ -5,15 +5,19 @@ import {
   Grid,
   Box,
   Typography,
+  Button,
   IconButton,
   Dialog,
+  DialogActions,
   DialogTitle,
+  DialogContentText,
   DialogContent,
   useMediaQuery,
   Tooltip,
 } from "@mui/material";
 import { styled, useTheme } from "@mui/system";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import { useNavigate } from "react-router-dom";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ShareIcon from "@mui/icons-material/Share";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -33,7 +37,9 @@ const Count = styled(Typography)(({ theme }) => ({
 export default function EngagementSection({ reportData }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loginDialogOpen, setloginDialogOpen] = useState(false);
   const [likeStatus, setLikeStatus] = useState(null); // true, false, null
   const [likes, setLikes] = useState(reportData.Likes || 0);
   const [dislikes, setDislikes] = useState(reportData.Dislikes || 0);
@@ -84,6 +90,7 @@ export default function EngagementSection({ reportData }) {
       }
     } catch (e) {
       console.error(e);
+      setloginDialogOpen(true)
     }
   };
 
@@ -110,6 +117,7 @@ export default function EngagementSection({ reportData }) {
       }
     } catch (e) {
       console.error(e);
+      setloginDialogOpen(true)
     }
   };
 
@@ -121,6 +129,14 @@ export default function EngagementSection({ reportData }) {
       .then(() => alert("لینک گزارش کپی شد!"))
       .catch((e) => console.error(e));
   };
+
+  const handlelogin = () => {
+    navigate("/signuplogin");
+  }
+
+  const handleloginclose = () => {
+    setloginDialogOpen(false);
+  }
 
   return (
     <>
@@ -289,6 +305,36 @@ export default function EngagementSection({ reportData }) {
           </Box>
         </DialogContent>
       </Dialog>
+      <Dialog open={loginDialogOpen} onClose={() => setloginDialogOpen(false)} dir="rtl">
+      <DialogTitle sx={{ textAlign: "right" }}>باید وارد حساب خود شوید.</DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ textAlign: "right" }}>
+          به صفحه ورود برویم؟
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ justifyContent: "flex-start", px: 3 }}>
+        <Button
+          onClick={handlelogin}
+          sx={{ 
+            color: "#007E33",
+            fontWeight: "bold" }}
+        >
+          بله
+        </Button>
+        <Button
+          onClick={handleloginclose}
+          color="error"
+          sx={{
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "rgba(2, 41, 18, 0.1)",
+            },
+          }}
+        >
+          خیر
+        </Button>
+      </DialogActions>
+    </Dialog>
     </>
   );
 }

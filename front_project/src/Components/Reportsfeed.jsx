@@ -944,7 +944,7 @@ const handleDislikeToggle = async (reportId) => {
 </Box> 
             <Button
               variant="contained"
-              href={`/citizen_reports/${r.id}`}
+              href={`/reports/${r.id}`}
               fullWidth
               sx={{
                 backdropFilter: "blur(10px)",

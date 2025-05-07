@@ -1622,7 +1622,7 @@ export default function Reports({ ReportClick }) {
     }
   }}
 >
-  <MenuItem onClick={() => navigate(`/mayor_reports/${selectedReport.id}`)}>
+  <MenuItem onClick={() => navigate(`/reports/${selectedReport.id}`)}>
     رفتن به صفحه گزارش
   </MenuItem>
   <MenuItem onClick={handleOpenNoteDialog}>افزودن یادداشت داخلی</MenuItem>
