@@ -58,6 +58,11 @@
   fill: none !important;
   stroke: none !important;
 }
+.custom-datepicker {
+  font-family: 'Vazir', sans-serif !important;
+  direction: rtl;
+  text-align: right;
+}
 
 
 

@@ -961,21 +961,70 @@ export default function Reports({ ReportClick }) {
             )}
           </Box>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>نوع گزارش</InputLabel>
-            <Select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              label="نوع گزارش"
-            >
-              <MenuItem value="">همه</MenuItem>
-              <MenuItem value="خیابان">خرابی خیابان</MenuItem>
-              <MenuItem value="روشنایی">مشکل روشنایی</MenuItem>
-              <MenuItem value="زباله">زباله رها شده</MenuItem>
-              <MenuItem value="سایر"> سایر </MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl
+  size="small"
+  sx={{
+    minWidth: 200,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}
+>
+  <InputLabel>نوع گزارش</InputLabel>
+  <Select
+    value={selectedType}
+    onChange={(e) => setSelectedType(e.target.value)}
+    label="نوع گزارش"
+  >
+    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
+    <MenuItem value="خیابان" sx={{ textAlign: 'right' }}>خرابی خیابان</MenuItem>
+    <MenuItem value="روشنایی" sx={{ textAlign: 'right' }}>مشکل روشنایی</MenuItem>
+    <MenuItem value="زباله" sx={{ textAlign: 'right' }}>زباله رها شده</MenuItem>
+    <MenuItem value="سایر" sx={{ textAlign: 'right' }}>سایر</MenuItem>
+  </Select>
+</FormControl>
+
+
+          <FormControl size="small"  sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>استان</InputLabel>
             <Select
               value={selectedProvince}
@@ -990,7 +1039,29 @@ export default function Reports({ ReportClick }) {
               ))}
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small"  sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>شهر</InputLabel>
             <Select
               value={selectedCity}
@@ -1006,7 +1077,29 @@ export default function Reports({ ReportClick }) {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small"  sx={{
+    minWidth: 200,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>وضعیت گزارش</InputLabel>
             <Select
               value={selectedStatus}
@@ -1019,7 +1112,29 @@ export default function Reports({ ReportClick }) {
               <MenuItem value="حل‌شده">حل‌شده</MenuItem>
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small"  sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>درجه اهمیت</InputLabel>
             <Select
               value={selectedPriority}
@@ -1034,36 +1149,39 @@ export default function Reports({ ReportClick }) {
           </FormControl>
 
           <DatePicker
-            value={dateFrom}
-            onChange={setDateFrom}
-            calendar={persian}
-            locale={persian_fa}
-            calendarPosition="bottom-right"
-            placeholder="از تاریخ"
-            style={{
-              height: "40px",
-              width: "150px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              padding: "0 10px",
-            }}
-          />
+  value={dateFrom}
+  onChange={setDateFrom}
+  calendar={persian}
+  locale={persian_fa}
+  calendarPosition="bottom-right"
+  placeholder="از تاریخ"
+  style={{
+    height: "40px",
+    width: "150px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    padding: "0 10px",
+  }}
+  inputClass="custom-datepicker"
+/>
 
-          <DatePicker
-            value={dateTo}
-            onChange={setDateTo}
-            calendar={persian}
-            locale={persian_fa}
-            calendarPosition="bottom-right"
-            placeholder="تا تاریخ"
-            style={{
-              height: "40px",
-              width: "150px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              padding: "0 10px",
-            }}
-          />
+<DatePicker
+  value={dateTo}
+  onChange={setDateTo}
+  calendar={persian}
+  locale={persian_fa}
+  calendarPosition="bottom-right"
+  placeholder="تا تاریخ"
+  style={{
+    height: "40px",
+    width: "150px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    padding: "0 10px",
+  }}
+  inputClass="custom-datepicker"
+/>
+
 
           <Button
             variant="outlined"
@@ -1492,22 +1610,30 @@ export default function Reports({ ReportClick }) {
         />
       )}
 
-      <Menu
-        anchorEl={noteAnchor}
-        open={Boolean(noteAnchor)}
-        onClose={handleMenuClose}
-      >
-<MenuItem onClick={() => navigate(`/mayor_reports/${selectedReport.id}`)}>
-  رفتن به صفحه گزارش
-</MenuItem>
-        <MenuItem onClick={handleOpenNoteDialog}>افزودن یادداشت داخلی</MenuItem>
-        <MenuItem onClick={handleOpenViewNotesDialog}>
-          نمایش یادداشت‌های ثبت شده
-        </MenuItem>
-        <MenuItem onClick={handleOpenStatusDialog}>تغییر وضعیت گزارش</MenuItem>
-        <MenuItem onClick={handleOpenPriorityDialog}>تغییر درجه اهمیت</MenuItem>
-        <MenuItem onClick={handleOpenTeamsDialog}>نمایش تیم‌های مسئول</MenuItem>
-      </Menu>
+<Menu
+  anchorEl={noteAnchor}
+  open={Boolean(noteAnchor)}
+  onClose={handleMenuClose}
+  sx={{
+    '& .MuiPaper-root': {
+      direction: 'rtl',
+      textAlign: 'right',
+      fontFamily: 'Vazir, sans-serif',
+    }
+  }}
+>
+  <MenuItem onClick={() => navigate(`/mayor_reports/${selectedReport.id}`)}>
+    رفتن به صفحه گزارش
+  </MenuItem>
+  <MenuItem onClick={handleOpenNoteDialog}>افزودن یادداشت داخلی</MenuItem>
+  <MenuItem onClick={handleOpenViewNotesDialog}>
+    نمایش یادداشت‌های ثبت شده
+  </MenuItem>
+  <MenuItem onClick={handleOpenStatusDialog}>تغییر وضعیت گزارش</MenuItem>
+  <MenuItem onClick={handleOpenPriorityDialog}>تغییر درجه اهمیت</MenuItem>
+  <MenuItem onClick={handleOpenTeamsDialog}>نمایش تیم‌های مسئول</MenuItem>
+</Menu>
+
 
       <Dialog
         open={notesDialogOpen}
@@ -1726,7 +1852,7 @@ export default function Reports({ ReportClick }) {
 
       <Dialog open={statusDialogOpen} onClose={handleCloseStatusDialog}>
         <DialogContent>
-          <FormControl fullWidth>
+          <FormControl fullWidth >
             <InputLabel>وضعیت گزارش</InputLabel>
             <Select
               value={tempStatus}
@@ -1898,7 +2024,28 @@ export default function Reports({ ReportClick }) {
         </DialogTitle>
 
         <DialogContent>
-          <FormControl fullWidth sx={{ mt: 2 }}>
+          <FormControl fullWidth sx={{ mt: 2 ,
+              direction: 'rtl',
+              '& label': {
+                right: 30,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 27,
+                left: 'auto',
+              },
+              '& .MuiSelect-select': {
+                textAlign: 'right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiSelect-icon': {
+                left: 8,
+                right: 'auto',
+              }
+          }}>
             <InputLabel
               sx={{
                 color: "#2e7d32",
@@ -1979,7 +2126,30 @@ export default function Reports({ ReportClick }) {
         </DialogTitle>
 
         <DialogContent>
-          <FormControl fullWidth sx={{ mt: 2 }}>
+          <FormControl fullWidth sx={{ mt: 2 ,
+             
+              direction: 'rtl',
+              '& label': {
+                right: 30,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 27,
+                left: 'auto',
+              },
+              '& .MuiSelect-select': {
+                textAlign: 'right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiSelect-icon': {
+                left: 8,
+                right: 'auto',
+              }
+           
+          }}>
             <InputLabel
               sx={{
                 color: "#2e7d32",
@@ -2189,7 +2359,9 @@ export default function Reports({ ReportClick }) {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>ویرایش تیم</DialogTitle>
+<DialogTitle sx={{ direction: 'rtl', textAlign: 'right' }}>
+  ویرایش تیم
+</DialogTitle>
         <DialogContent>
           <TextField
             label="نام مسئول"
@@ -2202,6 +2374,32 @@ export default function Reports({ ReportClick }) {
             }
             fullWidth
             margin="normal"
+            sx={{
+              direction: 'rtl',
+              '& input': {
+                textAlign: 'right',
+              },
+              '& label': {
+                right: 54,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 30, // تنظیم برای حالت شناور (shrink)
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiOutlinedInput-root': {
+                justifyContent: 'flex-end',
+              },
+              '& .MuiSvgIcon-root': {
+                left: 12, // فلش سمت چپ
+                right: 'auto',
+              },
+            }}
           />
 
           <TextField
@@ -2215,6 +2413,32 @@ export default function Reports({ ReportClick }) {
             }
             fullWidth
             margin="normal"
+            sx={{
+              direction: 'rtl',
+              '& input': {
+                textAlign: 'right',
+              },
+              '& label': {
+                right: 54,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 30, // تنظیم برای حالت شناور (shrink)
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiOutlinedInput-root': {
+                justifyContent: 'flex-end',
+              },
+              '& .MuiSvgIcon-root': {
+                left: 12, // فلش سمت چپ
+                right: 'auto',
+              },
+            }}
           />
 
           <TextField
@@ -2228,9 +2452,58 @@ export default function Reports({ ReportClick }) {
             }
             fullWidth
             margin="normal"
+            sx={{
+              direction: 'rtl',
+              '& input': {
+                textAlign: 'right',
+              },
+              '& label': {
+                right: 54,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 30, // تنظیم برای حالت شناور (shrink)
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiOutlinedInput-root': {
+                justifyContent: 'flex-end',
+              },
+              '& .MuiSvgIcon-root': {
+                left: 12, // فلش سمت چپ
+                right: 'auto',
+              },
+            }}
           />
 
-          <FormControl fullWidth margin="normal">
+          <FormControl fullWidth margin="normal" sx={{ 
+             
+             direction: 'rtl',
+             '& label': {
+               right: 30,
+               left: 'auto',
+               transformOrigin: 'top right',
+             },
+             '& .MuiInputLabel-shrink': {
+               right: 27,
+               left: 'auto',
+             },
+             '& .MuiSelect-select': {
+               textAlign: 'right',
+             },
+             '& legend': {
+               textAlign: 'right',
+             },
+             '& .MuiSelect-icon': {
+               left: 8,
+               right: 'auto',
+             }
+          
+         }}>
             <InputLabel>نوع سازمان</InputLabel>
             <Select
               value={selectedTeam?.Type || ""}
@@ -2246,7 +2519,30 @@ export default function Reports({ ReportClick }) {
             </Select>
           </FormControl>
 
-          <FormControl fullWidth margin="normal">
+          <FormControl fullWidth margin="normal" sx={{ 
+             
+             direction: 'rtl',
+             '& label': {
+               right: 30,
+               left: 'auto',
+               transformOrigin: 'top right',
+             },
+             '& .MuiInputLabel-shrink': {
+               right: 27,
+               left: 'auto',
+             },
+             '& .MuiSelect-select': {
+               textAlign: 'right',
+             },
+             '& legend': {
+               textAlign: 'right',
+             },
+             '& .MuiSelect-icon': {
+               left: 8,
+               right: 'auto',
+             }
+          
+         }}>
             <InputLabel>استان</InputLabel>
             <Select
               value={editedProvince?.Name || ""}
@@ -2265,7 +2561,30 @@ export default function Reports({ ReportClick }) {
             </Select>
           </FormControl>
 
-          <FormControl fullWidth margin="normal">
+          <FormControl fullWidth margin="normal" sx={{ mt: 2 ,
+             
+             direction: 'rtl',
+             '& label': {
+               right: 30,
+               left: 'auto',
+               transformOrigin: 'top right',
+             },
+             '& .MuiInputLabel-shrink': {
+               right: 27,
+               left: 'auto',
+             },
+             '& .MuiSelect-select': {
+               textAlign: 'right',
+             },
+             '& legend': {
+               textAlign: 'right',
+             },
+             '& .MuiSelect-icon': {
+               left: 8,
+               right: 'auto',
+             }
+          
+         }}>
             <InputLabel>شهر</InputLabel>
             <Select
               value={editedCity?.Name || ""}
