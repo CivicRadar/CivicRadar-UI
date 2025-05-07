@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import Swal from "sweetalert2";
-
+import CropDialog from './CropDialog';
 
 import { MyLocation, Delete as DeleteIcon, AddPhotoAlternate, VideoLibrary,Close,Place } from '@mui/icons-material';
 import NeshanMap from 'react-neshan-map-leaflet';
@@ -54,8 +54,8 @@ const ReportForm = () => {
   const mapDialogRef = useRef(null);
   const [mapLoading, setMapLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null); // null یا عدد بین 0 تا 100
-
-
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [rawImage, setRawImage] = useState(null);
 
 useEffect(() => {
   // When the component unmounts or activeStep changes, reset the map view
@@ -322,10 +322,16 @@ useEffect(() => {
     setActiveStep(prev => prev - 1);
   };
 
+  const handleCropComplete = (croppedImageUrl) => {
+    handleChange("image", croppedImageUrl);
+  };
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      handleChange('image', URL.createObjectURL(file));
+      const fileURL = URL.createObjectURL(file);
+      setRawImage(fileURL);
+      setCropDialogOpen(true);
     }
   };
 
@@ -1310,7 +1316,12 @@ useEffect(() => {
 
     `}
   </style>
-
+  <CropDialog
+  imageSrc={rawImage}
+  open={cropDialogOpen}
+  onClose={() => setCropDialogOpen(false)}
+  onCropComplete={handleCropComplete}
+/>
 
     </Box>
   );
