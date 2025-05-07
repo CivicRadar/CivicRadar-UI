@@ -394,8 +394,29 @@ const handleDislikeToggle = async (reportId) => {
               ),
             }}
           />
-
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+<FormControl size="small"  sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>نوع</InputLabel>
             <Select
               value={selectedType}
@@ -411,7 +432,31 @@ const handleDislikeToggle = async (reportId) => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+
+
+          <FormControl size="small" sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
   <InputLabel>استان</InputLabel>
   <Select
     value={selectedProvince}
@@ -430,7 +475,30 @@ const handleDislikeToggle = async (reportId) => {
   </Select>
 </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+
+<FormControl size="small" sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
   <InputLabel>شهر</InputLabel>
   <Select
     value={selectedCity}
@@ -446,7 +514,30 @@ const handleDislikeToggle = async (reportId) => {
   </Select>
 </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+
+<FormControl size="small" sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>وضعیت</InputLabel>
             <Select
               value={selectedStatus}
@@ -459,6 +550,7 @@ const handleDislikeToggle = async (reportId) => {
               <MenuItem value="حل‌شده">حل‌شده</MenuItem>
             </Select>
           </FormControl>
+
 
           <Box>
   <Typography variant="caption" fontWeight={500} mb={0.5} display="block">
@@ -885,6 +977,64 @@ const handleDislikeToggle = async (reportId) => {
         );
       })}
     </Masonry>
+
+    <style>
+    {`
+      @font-face {
+  font-family: 'Vazir';
+  src: url('/fonts/Vazir.woff2') format('woff2');
+  font-display: swap;
+}
+
+.form-group {
+  position: relative;
+  margin: 20px 0;
+  direction: rtl;
+  text-align: right;
+  font-family: 'Vazir', sans-serif;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 14px 10px 6px 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  background: white;
+  text-align: right;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+  background-size: 16px;
+}
+
+.form-group label {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  background: #fff;
+  padding: 0 4px;
+  font-size: 15px;
+  color: #888;
+  pointer-events: none;
+  transition: 0.2s ease all;
+  font-family: inherit;
+}
+
+.form-group select:focus + label,
+.form-group.filled select + label {
+  top: -8px;
+  font-size: 13px;
+  color: #007E33;
+}
+
+    `}
+  </style>
 
 
     </Box>

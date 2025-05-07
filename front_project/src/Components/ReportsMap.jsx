@@ -230,16 +230,64 @@ export default function ReportsMap() {
           }}
         >
           <TextField
-            label="جستجو"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            size="small"
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
-            }}
-          />
+  label="جستجو"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  size="small"
+  sx={{
+    direction: 'rtl',
+    '& input': {
+      textAlign: 'right',
+    },
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 26,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-root': {
+      justifyContent: 'flex-end',
+    },
+  }}
+  InputProps={{
+    startAdornment: (
+      <SearchIcon sx={{ ml: 1, mr: 0, color: 'gray' }} />
+    ),
+  }}
+  InputLabelProps={{ sx: { direction: 'rtl' } }}
+/>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+
+          <FormControl size="small" sx={{
+    minWidth: 200,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>نوع گزارش</InputLabel>
             <Select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} label="نوع گزارش">
               <MenuItem value="">همه</MenuItem>
@@ -250,7 +298,29 @@ export default function ReportsMap() {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>استان</InputLabel>
             <Select value={selectedProvince} onChange={(e) => setSelectedProvince(e.target.value)} label="استان">
               <MenuItem value="">همه</MenuItem>
@@ -262,7 +332,29 @@ export default function ReportsMap() {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>شهر</InputLabel>
             <Select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} label="شهر">
               <MenuItem value="">همه</MenuItem>
@@ -274,7 +366,29 @@ export default function ReportsMap() {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{
+    minWidth: 150,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
             <InputLabel>اهمیت</InputLabel>
             <Select value={selectedPriority} onChange={(e) => setSelectedPriority(e.target.value)} label="اهمیت">
               <MenuItem value="">همه</MenuItem>
@@ -283,7 +397,29 @@ export default function ReportsMap() {
               <MenuItem value="Low">کم</MenuItem>
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+          <FormControl size="small" sx={{
+    minWidth: 200,
+    direction: 'rtl',
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    }
+  }}>
   <InputLabel>وضعیت گزارش</InputLabel>
   <Select
     value={selectedStatus}
@@ -313,6 +449,8 @@ export default function ReportsMap() {
               border: "1px solid #ccc",
               padding: "0 10px",
             }}
+            inputClass="custom-datepicker"
+
           />
 
           <DatePicker
@@ -329,10 +467,12 @@ export default function ReportsMap() {
               border: "1px solid #ccc",
               padding: "0 10px",
             }}
+            inputClass="custom-datepicker"
+
           />
 
           <Button variant="outlined" color="error" size="small" startIcon={<ClearAllIcon />} onClick={resetFilters}>
-            ریست
+            بازنشانی
           </Button>
         </Box>
       </Collapse>

@@ -616,6 +616,32 @@ const MayorsList = () => {
               FullName: e.target.value, // Update FullName in state
             }))
           }
+          sx={{
+            direction: 'rtl',
+            '& input': {
+              textAlign: 'right',
+            },
+            '& label': {
+              right: 54,
+              left: 'auto',
+              transformOrigin: 'top right',
+            },
+            '& .MuiInputLabel-shrink': {
+              right: 30,
+              left: 'auto',
+              transformOrigin: 'top right',
+            },
+            '& legend': {
+              textAlign: 'right',
+            },
+            '& .MuiOutlinedInput-root': {
+              justifyContent: 'flex-end',
+            },
+            '& .MuiSvgIcon-root': {
+              left: 12,
+              right: 'auto',
+            },
+          }}
         />
 
         {/* Email Field */}
@@ -631,6 +657,32 @@ const MayorsList = () => {
               Email: e.target.value, // Update Email in state
             }))
           }
+          sx={{
+            direction: 'rtl',
+            '& input': {
+              textAlign: 'right',
+            },
+            '& label': {
+              right: 54,
+              left: 'auto',
+              transformOrigin: 'top right',
+            },
+            '& .MuiInputLabel-shrink': {
+              right: 30,
+              left: 'auto',
+              transformOrigin: 'top right',
+            },
+            '& legend': {
+              textAlign: 'right',
+            },
+            '& .MuiOutlinedInput-root': {
+              justifyContent: 'flex-end',
+            },
+            '& .MuiSvgIcon-root': {
+              left: 12,
+              right: 'auto',
+            },
+          }}
         />
         {/* Password Field */}
         <TextField
@@ -646,52 +698,81 @@ const MayorsList = () => {
               Password: e.target.value, // Update Password in state
             }))
           }
+          sx={{
+            direction: 'rtl',
+            '& input': {
+              textAlign: 'right',
+            },
+            '& label': {
+              right: 54,
+              left: 'auto',
+              transformOrigin: 'top right',
+            },
+            '& .MuiInputLabel-shrink': {
+              right: 30,
+              left: 'auto',
+              transformOrigin: 'top right',
+            },
+            '& legend': {
+              textAlign: 'right',
+            },
+            '& .MuiOutlinedInput-root': {
+              justifyContent: 'flex-end',
+            },
+            '& .MuiSvgIcon-root': {
+              left: 12,
+              right: 'auto',
+            },
+          }}
         />
           {/* Current cities */}
-          <Typography variant="body2" sx={{ marginTop: "10px" }}>
-            شهرهای فعلی:
-          </Typography>
-          <Box
-            display="flex"
-            flexWrap="wrap"
-            gap="8px"
-            sx={{ marginTop: "8px" }}
-          >
-            {selectedcities.map((city) => (
-              <Box
-                key={city.id}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "4px 8px",
-                  backgroundColor: "#f5f5f5",
-                  borderRadius: "20px",
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  {city.Name} {/* Display city name */}
-                </Typography>
-                <IconButton
-                  onClick={() => handleRemoveCity(city)} // Call the remove function
-                  size="small"
-                  sx={{
-                    color: "red",
-                    "&:hover": {
-                      backgroundColor: "#ffe5e5",
-                    },
-                  }}
-                >
-                  <DeleteIcon fontSize="small" /> {/* Red trash icon */}
-                </IconButton>
-              </Box>
-            ))}
-          </Box>
+          <Typography variant="body2" sx={{ marginTop: "10px", textAlign: 'right' }}>:
+  شهرهای فعلی
+</Typography>
+
+<Box
+  display="flex"
+  flexWrap="wrap"
+  gap="8px"
+  justifyContent="flex-end" // راست‌چین کل باکس‌ها
+  sx={{ marginTop: "8px" }}
+  mb={1}
+>
+  {selectedcities.map((city) => (
+    <Box
+      key={city.id}
+      sx={{
+        display: "flex",
+        flexDirection: "row-reverse", // آیکون حذف در سمت چپ قرار می‌گیرد
+        alignItems: "center",
+        gap: "6px",
+        padding: "4px 8px",
+        backgroundColor: "#f5f5f5",
+        borderRadius: "20px",
+      }}
+    >
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: "bold" }}
+      >
+        {city.Name}
+      </Typography>
+      <IconButton
+        onClick={() => handleRemoveCity(city)}
+        size="small"
+        sx={{
+          color: "red",
+          "&:hover": {
+            backgroundColor: "#ffe5e5",
+          },
+        }}
+      >
+        <DeleteIcon fontSize="small" />
+      </IconButton>
+    </Box>
+  ))}
+</Box>
+
           {/* Province Dropdown */}
           <Autocomplete
             options={provinces}
@@ -699,7 +780,33 @@ const MayorsList = () => {
             value={selectedProvince}
             onChange={handleProvinceChange}
             renderInput={(params) => (
-              <TextField {...params} label="استان" fullWidth margin="dense" />
+              <TextField {...params} label="استان" fullWidth margin="dense" 
+              sx={{
+                direction: 'rtl',
+                '& input': {
+                  textAlign: 'right',
+                },
+                '& label': {
+                  right: 54,
+                  left: 'auto',
+                  transformOrigin: 'top right',
+                },
+                '& .MuiInputLabel-shrink': {
+                  right: 30,
+                  left: 'auto',
+                  transformOrigin: 'top right',
+                },
+                '& legend': {
+                  textAlign: 'right',
+                },
+                '& .MuiOutlinedInput-root': {
+                  justifyContent: 'flex-end',
+                },
+                '& .MuiSvgIcon-root': {
+                  left: 12,
+                  right: 'auto',
+                },
+              }}/>
             )}
           />
 
@@ -712,7 +819,32 @@ const MayorsList = () => {
               if (newCity) handleAddCity(newCity);
             }}
             renderInput={(params) => (
-              <TextField {...params} label="افزودن شهر جدید" fullWidth margin="dense" />
+              <TextField {...params} label="افزودن شهر جدید" fullWidth margin="dense"sx={{
+                direction: 'rtl',
+                '& input': {
+                  textAlign: 'right',
+                },
+                '& label': {
+                  right: 54,
+                  left: 'auto',
+                  transformOrigin: 'top right',
+                },
+                '& .MuiInputLabel-shrink': {
+                  right: 30,
+                  left: 'auto',
+                  transformOrigin: 'top right',
+                },
+                '& legend': {
+                  textAlign: 'right',
+                },
+                '& .MuiOutlinedInput-root': {
+                  justifyContent: 'flex-end',
+                },
+                '& .MuiSvgIcon-root': {
+                  left: 12,
+                  right: 'auto',
+                },
+              }}/>
             )}
           />
         </DialogContent>

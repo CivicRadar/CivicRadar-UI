@@ -575,26 +575,56 @@ useEffect(() => {
         {activeStep === 0 && (
           <>
             <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6}>
+  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+    موضوع گزارش:
+  </Typography>
+  <TextField
+  select
+  fullWidth
+  value={formData.reportSubject}
+  onChange={(e) => handleChange('reportSubject', e.target.value)}
+  error={!!errors.reportSubject}
+  label="موضوع گزارش"
+  sx={{
+    direction: 'rtl',
+    '& input': {
+      textAlign: 'right',
+    },
+    '& label': {
+      right: 54,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-root': {
+      justifyContent: 'flex-end',
+    },
+    '& .MuiSvgIcon-root': {
+      left: 16,
+      right: 'auto',
+    },
+  }}
+  InputLabelProps={{ sx: { direction: 'rtl' } }}
+>
+  <MenuItem value="Lighting" sx={{ direction: 'rtl', textAlign: 'right' }}>نور</MenuItem>
+  <MenuItem value="Street" sx={{ direction: 'rtl', textAlign: 'right' }}>خیابان</MenuItem>
+  <MenuItem value="Garbage" sx={{ direction: 'rtl', textAlign: 'right' }}>زباله</MenuItem>
+  <MenuItem value="Other" sx={{ direction: 'rtl', textAlign: 'right' }}>سایر</MenuItem>
+</TextField>
+
+</Grid>
+
               <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  موضوع گزارش:
-                </Typography>
-                <TextField
-                  select
-                  fullWidth
-                  value={formData.reportSubject}
-                  onChange={(e) => handleChange('reportSubject', e.target.value)}
-                  error={!!errors.reportSubject}
-                  label="موضوع گزارش"
+                <Typography variant="subtitle1" gutterBottom     sx={{ fontWeight: 'bold', mb: 2 /* معادل 16px */ }}
                 >
-                  <MenuItem value="Lighting">نور </MenuItem>
-                  <MenuItem value="Street">خیابان</MenuItem>
-                  <MenuItem value="Garbage">زباله</MenuItem>
-                  <MenuItem value="Other">سایر</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
                   عنوان گزارش:
                 </Typography>
                 <TextField
@@ -625,38 +655,97 @@ useEffect(() => {
         {activeStep === 1 && (
           <Grid container spacing={3} sx={{ flex: 1 }}>
             <Grid item xs={12} md={6}>
-              <Box sx={{ mb: 3 }}>
-                <Autocomplete
-                  options={provinces}
-                  getOptionLabel={(option) => option.Name}
-                  value={formData.province}
-                  onChange={(e, newValue) => handleChange('province', newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="استان"
-                      error={!!errors.province}
-                    />
-                  )}
-                />
-              </Box>
+            <Box sx={{ mb: 3 }}>
+            <Autocomplete
+  options={provinces}
+  getOptionLabel={(option) => option.Name}
+  value={formData.province}
+  onChange={(e, newValue) => handleChange('province', newValue)}
+  renderInput={(params) => (
+    <TextField
+  {...params}
+  label="استان"
+  error={!!errors.province}
+  sx={{
+    direction: 'rtl',
+    '& input': {
+      textAlign: 'right',
+    },
+    '& label': {
+      right: 54,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 30, // تنظیم برای حالت شناور (shrink)
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-root': {
+      justifyContent: 'flex-end',
+    },
+    '& .MuiSvgIcon-root': {
+      left: 12, // فلش سمت چپ
+      right: 'auto',
+    },
+  }}
+  InputLabelProps={{ sx: { direction: 'rtl' } }}
+/>
 
-              <Box sx={{ mb: 3 }}>
-                <Autocomplete
-                  options={cities}
-                  getOptionLabel={(option) => option.Name}
-                  value={formData.city}
-                  onChange={(e, newValue) => handleChange('city', newValue)}
-                  disabled={!formData.province}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="شهر"
-                      error={!!errors.city}
-                    />
-                  )}
-                />
-              </Box>
+
+  )}
+/>
+
+</Box>
+
+
+<Box sx={{ mb: 3 }}>
+  <Autocomplete
+    options={cities}
+    getOptionLabel={(option) => option.Name}
+    value={formData.city}
+    onChange={(e, newValue) => handleChange('city', newValue)}
+    disabled={!formData.province}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="شهر"
+        error={!!errors.city}
+        sx={{
+          direction: 'rtl',
+          '& input': {
+            textAlign: 'right',
+          },
+          '& label': {
+            right: 54,
+            left: 'auto',
+            transformOrigin: 'top right',
+          },
+          '& .MuiInputLabel-shrink': {
+            right: 30,
+            left: 'auto',
+            transformOrigin: 'top right',
+          },
+          '& legend': {
+            textAlign: 'right',
+          },
+          '& .MuiOutlinedInput-root': {
+            justifyContent: 'flex-end',
+          },
+          '& .MuiSvgIcon-root': {
+            left: 16,
+            right: 'auto',
+          },
+        }}
+        InputLabelProps={{ sx: { direction: 'rtl' } }}
+      />
+    )}
+  />
+</Box>
+
 
               <Box sx={{ mb: 2 }}>
                 <Button 
@@ -678,16 +767,45 @@ useEffect(() => {
               </Box>
 
               <TextField
-                label="آدرس کامل"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={8}
-                value={formData.fullAddress}
-                onChange={(e) => handleChange('fullAddress', e.target.value)}
-                error={!!errors.fullAddress}
-                placeholder="آدرس دقیق را وارد کنید (خیابان، کوچه، نشانی و...)"
-              />
+  label="آدرس کامل"
+  variant="outlined"
+  fullWidth
+  multiline
+  rows={8}
+  value={formData.fullAddress}
+  onChange={(e) => handleChange('fullAddress', e.target.value)}
+  error={!!errors.fullAddress}
+  placeholder="آدرس دقیق را وارد کنید (خیابان، کوچه، نشانی و...)"
+  sx={{
+    direction: 'rtl',
+    '& input': {
+      textAlign: 'right',
+    },
+    '& label': {
+      right: 54,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-root': {
+      justifyContent: 'flex-end',
+    },
+    '& .MuiSvgIcon-root': {
+      left: 16,
+      right: 'auto',
+    },
+  }}
+  InputLabelProps={{ sx: { direction: 'rtl' } }}
+/>
+
+
             </Grid>
 
             {!isMobile && (
@@ -1145,6 +1263,54 @@ useEffect(() => {
     </Button>
   )}
 </Box>
+<style>
+    {`
+      .form-group {
+  position: relative;
+  direction: rtl;
+  margin-top: 4px;
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+.form-group select {
+  width: 100%;
+  height: 59px; /* هماهنگ با MUI TextField */
+  padding: 16.5px 14px;
+  font-size: 16px;
+  border: 1px solid #c4c4c4;
+  border-radius: 4px;
+  outline: none;
+  background: white;
+  appearance: none;
+  font-family: 'Vazir', sans-serif;
+  box-sizing: border-box;
+}
+
+.form-group label {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 0 4px;
+  font-size: 16px;
+  color: #888;
+  pointer-events: none;
+  font-family: 'Vazir', sans-serif;
+  transition: 0.2s ease all;
+}
+
+.form-group select:focus + label,
+.form-group select:valid + label {
+  top: -8px;
+  font-size: 13px;
+  color: #007E33;
+  transform: none;
+}
+
+    `}
+  </style>
+
 
     </Box>
   );

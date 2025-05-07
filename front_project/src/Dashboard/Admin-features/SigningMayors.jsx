@@ -12,6 +12,8 @@ const SignUpForm = ({gotoregisted}) => {
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [cities, setCities] = useState([]);
   const [selectedCities, setSelectedCities] = useState([]); // For multiple cities
+  const [selectedCityInput, setSelectedCityInput] = useState(null);
+
 
   // Form data state
   const [fullName, setFullName] = useState("");
@@ -199,6 +201,32 @@ const SignUpForm = ({gotoregisted}) => {
             onChange={(e) => setFullName(e.target.value)}
             error={!!errorMessages.fullName}
             helperText={errorMessages.fullName}
+            sx={{
+              direction: 'rtl',
+              '& input': {
+                textAlign: 'right',
+              },
+              '& label': {
+                right: 54,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 30, // تنظیم برای حالت شناور (shrink)
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiOutlinedInput-root': {
+                justifyContent: 'flex-end',
+              },
+              '& .MuiSvgIcon-root': {
+                left: 12, // فلش سمت چپ
+                right: 'auto',
+              },
+            }}
           />
           <TextField
             label="ایمیل"
@@ -209,6 +237,32 @@ const SignUpForm = ({gotoregisted}) => {
             onChange={(e) => setEmail(e.target.value)}
             error={!!errorMessages.email}
             helperText={errorMessages.email}
+            sx={{
+              direction: 'rtl',
+              '& input': {
+                textAlign: 'right',
+              },
+              '& label': {
+                right: 54,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 30, // تنظیم برای حالت شناور (shrink)
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiOutlinedInput-root': {
+                justifyContent: 'flex-end',
+              },
+              '& .MuiSvgIcon-root': {
+                left: 12, // فلش سمت چپ
+                right: 'auto',
+              },
+            }}
           />
           <TextField
             label="رمز عبور"
@@ -220,6 +274,32 @@ const SignUpForm = ({gotoregisted}) => {
             onChange={(e) => setPassword(e.target.value)}
             error={!!errorMessages.password}
             helperText={errorMessages.password}
+            sx={{
+              direction: 'rtl',
+              '& input': {
+                textAlign: 'right',
+              },
+              '& label': {
+                right: 54,
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 30, // تنظیم برای حالت شناور (shrink)
+                left: 'auto',
+                transformOrigin: 'top right',
+              },
+              '& legend': {
+                textAlign: 'right',
+              },
+              '& .MuiOutlinedInput-root': {
+                justifyContent: 'flex-end',
+              },
+              '& .MuiSvgIcon-root': {
+                left: 12, // فلش سمت چپ
+                right: 'auto',
+              },
+            }}
           />
         </FormGroup>
       </Box>
@@ -250,26 +330,85 @@ const SignUpForm = ({gotoregisted}) => {
                 margin="normal"
                 error={!!errorMessages.province}
                 helperText={errorMessages.province}
+                sx={{
+                  direction: 'rtl',
+                  '& input': {
+                    textAlign: 'right',
+                  },
+                  '& label': {
+                    right: 54,
+                    left: 'auto',
+                    transformOrigin: 'top right',
+                  },
+                  '& .MuiInputLabel-shrink': {
+                    right: 30, // تنظیم برای حالت شناور (shrink)
+                    left: 'auto',
+                    transformOrigin: 'top right',
+                  },
+                  '& legend': {
+                    textAlign: 'right',
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    justifyContent: 'flex-end',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    left: 12, // فلش سمت چپ
+                    right: 'auto',
+                  },
+                }}
               />
             )}
           />
 
-          <Autocomplete
-            options={cities}
-            getOptionLabel={(option) => option.Name}
-            onChange={handleCitySelect}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="شهر"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                error={!!errorMessages.city}
-                helperText={errorMessages.city}
-              />
-            )}
-          />
+<Autocomplete
+  options={cities}
+  getOptionLabel={(option) => option.Name}
+  value={selectedCityInput}
+  onChange={(event, newValue) => {
+    setSelectedCityInput(null); // reset input field
+    if (newValue && !selectedCities.find((city) => city.id === newValue.id)) {
+      setSelectedCities((prev) => [...prev, newValue]);
+    }
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="شهر"
+      variant="outlined"
+      fullWidth
+      margin="normal"
+      error={!!errorMessages.city}
+      helperText={errorMessages.city}
+      sx={{
+        direction: 'rtl',
+        '& input': {
+          textAlign: 'right',
+        },
+        '& label': {
+          right: 54,
+          left: 'auto',
+          transformOrigin: 'top right',
+        },
+        '& .MuiInputLabel-shrink': {
+          right: 30,
+          left: 'auto',
+          transformOrigin: 'top right',
+        },
+        '& legend': {
+          textAlign: 'right',
+        },
+        '& .MuiOutlinedInput-root': {
+          justifyContent: 'flex-end',
+        },
+        '& .MuiSvgIcon-root': {
+          left: 12,
+          right: 'auto',
+        },
+      }}
+    />
+  )}
+/>
+
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, marginTop: 2 }}>
           {selectedCities.map((city) => (
             <Box
@@ -340,6 +479,8 @@ const SignUpForm = ({gotoregisted}) => {
       setSelectedCities([]);
       setCities([]);
       setErrorMessages({});
+      setSelectedCityInput(null);
+
     }}
   >
     از سرگیری
