@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Typography, CircularProgress, Box } from "@mui/material";
-import { getReportData } from "../services/mayor-api";
+import { getReportData, getReportDataPublic } from "../services/mayor-api";
 import MediaSlider from "./slider";
 import ReportContent from "./ReportContent";
 import EngagementSection from "./EngagementSection";
@@ -37,7 +37,7 @@ function ReportDetails() {
     const fetchReport = async () => {
       try {
         setLoading(true);
-        const data = await getReportData(id); // Call the API using the extracted 'id'
+        const data = await getReportDataPublic(id); // Call the API using the extracted 'id'
         // console.log(data);
         setReportData(data);
       } catch (err) {

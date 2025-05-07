@@ -33,6 +33,8 @@ import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material
 import TeamRegistrationForm from "../Components/TeamRegistrationForm";
 import ProfileSection from "../Components/mayerProfileSection";
 import ReportDetails from "./ReportDetails";
+import { useCitizen } from "../context/CitizenContext";
+import { useMayor } from "../context/MayorContext";
 
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
@@ -56,8 +58,8 @@ export default function ReportPageCon() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState(null);
-
+  const { citizen } = useCitizen();
+  const { mayor } = useMayor();
   const [profile, setProfile] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width:900px)");
@@ -75,7 +77,16 @@ export default function ReportPageCon() {
   };
 
   const handleProfileClick = () => {
-    navigate(`/MayorDashboard`, { state: { page: "profile" } });
+    if (citizen){
+      navigate(`/MayorDashboard`, { state: { page: "profile" } });
+
+    }
+    else if (mayor) {
+      navigate(`/CitizenDashboard`, { state: { page: "profile" } });
+    }
+    else{
+      navigate(`/Signuplogin`, { state: { page: "profile" } });
+    }
  };
 
   const fetchProfile = async () => {
@@ -94,7 +105,7 @@ export default function ReportPageCon() {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
-      navigate("/signuplogin");
+      //navigate("/signuplogin");
     }
   };
 
@@ -178,12 +189,6 @@ export default function ReportPageCon() {
       setDeleteDialogOpen(false);
     }
   };
- 
-  const handleReportClick = (repid) =>
-    {
-      setSelectedReport(repid)
-      navigate(`/mayorreports/${repid}`);
-    }
 
   return (
     <ThemeProvider theme={theme}>
@@ -229,10 +234,10 @@ export default function ReportPageCon() {
                       border: "2px solid #4caf50",
                     }}
                   />
-                </IconButton>
-                <Typography variant="body1" sx={{ marginLeft: 1 }}>
-                  {profile ? profile.FullName : "نام کاربر"}
+                  <Typography variant="body1" sx={{ marginLeft: 1 }}>
+                  {profile ? profile.FullName : "ثبت نام / ورود"}
                 </Typography>
+                </IconButton>
               </Box>
 
               <IconButton color="inherit">

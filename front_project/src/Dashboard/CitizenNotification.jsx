@@ -203,7 +203,7 @@ export default function CitizenNotification() {
                         </Typography>
                       </Box>
                       <Link
-                        href={`/citizen_reports/${notif.CityProblemID}`}
+                        href={`/reports/${notif.CityProblemID}`}
                         sx={{
                           color: '#4CAF50',
                           display: 'flex',
