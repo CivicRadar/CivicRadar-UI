@@ -78,11 +78,10 @@ export default function ReportPageCon() {
 
   const handleProfileClick = () => {
     if (citizen){
-      navigate(`/MayorDashboard`, { state: { page: "profile" } });
-
+      navigate(`/CitizenDashboard`, { state: { page: "profile" } });
     }
     else if (mayor) {
-      navigate(`/CitizenDashboard`, { state: { page: "profile" } });
+      navigate(`/MayorDashboard`, { state: { page: "profile" } });
     }
     else{
       navigate(`/Signuplogin`, { state: { page: "profile" } });
