@@ -18,17 +18,30 @@ const LogoutDialog = ({ open, onClose }) => {
   const { logoutCitizen, citizen } = useCitizen();
   const { logoutMayor, mayor } = useMayor();
 
-  const handleLogout = () => {
-    if (admin) {
-      logoutAdmin();
-    } else if (citizen) {
-      logoutCitizen();
-    } else if (mayor) {
-      logoutMayor();
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/logout/`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+  
+      const data = await res.json();
+      console.log(" Logout response:", data); // اضافه کن برای تست
+  
+      // پاک‌سازی سمت کلاینت
+      if (admin) logoutAdmin();
+      else if (citizen) logoutCitizen();
+      else if (mayor) logoutMayor();
+  
+      navigate("/signuplogin");
+    } catch (error) {
+      console.error("Logout request failed:", error);
     }
-
-    navigate("/signuplogin");
   };
+  
 
   return (
     <Dialog open={open} onClose={onClose} dir="rtl">
