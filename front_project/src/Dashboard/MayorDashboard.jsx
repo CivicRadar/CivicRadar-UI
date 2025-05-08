@@ -22,6 +22,10 @@ import {
   AccountCircle,
   Campaign,
   Notifications,
+  
+    // ...
+    BarChart,  // ← آیکون برای آمار و اطلاعات
+  
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/lgo.png";
@@ -37,7 +41,7 @@ import { useLocation } from "react-router-dom";
 import IranMapSection from "../Components/iranmap";
 import ReportsMap from "../Components/ReportsMap";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
-
+import MayorStatsPanel from "../Components/mayorstatpanel";
 
 
 const MainContent = styled(Box)(({ theme }) => ({
@@ -248,7 +252,7 @@ export default function MayorDashboard() {
     { id: "overview", label: "نمای کلی", icon: <Map /> },  // نمای کلی (جدید)
     { id: "reports", label: "گزارشات", icon: <Campaign /> },
     { id: "map", label: "نقشه", icon: <Map /> },
-    { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
+    { id: "stats", label: "آمار و اطلاعات", icon: <BarChart /> },
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
 
@@ -509,9 +513,10 @@ export default function MayorDashboard() {
 </TabPanel>
 
 
-      <TabPanel value={selectedItem} index="violations">
-        <Typography>اینجا می‌توانید تخلفات را بررسی کنید.</Typography>
-      </TabPanel>
+<TabPanel value={selectedItem} index="stats">
+  <MayorStatsPanel />
+</TabPanel>
+
 
       <TabPanel value={selectedItem} index="profile">
         <ProfileSection
