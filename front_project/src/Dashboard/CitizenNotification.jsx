@@ -42,7 +42,7 @@ export default function CitizenNotification() {
 
       if (response.status === 401 || response.status === 403) {
         console.error("User not authenticated, redirecting to login...");
-        window.location.href = '/login';
+        window.location.href = '/signuplogin';
         return;
       }
 
@@ -65,7 +65,7 @@ export default function CitizenNotification() {
 
   const fetchNotificationActivationState = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/notifs/`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/notifs/`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -87,7 +87,7 @@ export default function CitizenNotification() {
   const toggleNotificationActivation = async () => {
     const newState = !isNotificationActive;
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/notifs/`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/notifs/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,8 +187,8 @@ export default function CitizenNotification() {
       >
         <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'center' }}>
           اعلان‌ها
-          <Tooltip title="غیر فعال کردن اعلان‌ها" arrow>
-            <IconButton
+          <Tooltip title={isNotificationActive ? 'غیر فعال کردن اعلان‌ها' : 'فعال کردن اعلان‌ها'} arrow>
+          <IconButton
               onClick={toggleNotificationActivation}
               sx={{
                 position: 'absolute',

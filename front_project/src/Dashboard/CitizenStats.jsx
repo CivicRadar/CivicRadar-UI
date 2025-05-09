@@ -84,7 +84,7 @@ const CitizenStats = () => {
         // Check for authentication issues
         if (response.status === 401 || response.status === 403) {
           console.error("User not authenticated, redirecting to login...");
-          window.location.href = '/login';
+          window.location.href = '/signuplogin';
           return;
         }
 
