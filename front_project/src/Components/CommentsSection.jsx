@@ -31,14 +31,14 @@ function CommentsSection() {
   // Function to ensure a valid picture URL
   const getValidPictureUrl = (picture) => {
     if (!picture) return "https://picsum.photos/40";
-    return picture.startsWith("http") ? picture : `${API_BASE_URL}${picture}`;
+    return picture.startsWith("http") ? picture : `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/${picture}`;
   };
 
   // Fetch comments and user reactions on mount
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`${COMMENT_API_URL}comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
           headers: {
             "Authorization": `Bearer ${AUTH_TOKEN}`,
           },
@@ -57,7 +57,7 @@ function CommentsSection() {
           }));
 
           // Fetch the user's reaction status for this comment
-          const reactionResponse = await fetch(`${COMMENT_API_URL}comment-reaction/?CommentID=${comment.id}`, {
+          const reactionResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${comment.id}`, {
             headers: {
               "Authorization": `Bearer ${AUTH_TOKEN}`,
             },
@@ -104,7 +104,7 @@ function CommentsSection() {
     };
 
     try {
-      const response = await fetch(`${COMMENT_API_URL}comment/`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,7 +115,7 @@ function CommentsSection() {
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const newCommentData = await response.json();
-      const updatedResponse = await fetch(`${COMMENT_API_URL}comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
+      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
         headers: {
           "Authorization": `Bearer ${AUTH_TOKEN}`,
         },
@@ -132,7 +132,7 @@ function CommentsSection() {
           ...reply,
           SenderPicture: getValidPictureUrl(reply.SenderPicture),
         }));
-        const reactionResponse = await fetch(`${COMMENT_API_URL}comment-reaction/?CommentID=${comment.id}`, {
+        const reactionResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${comment.id}`, {
           headers: {
             "Authorization": `Bearer ${AUTH_TOKEN}`,
           },
@@ -183,7 +183,7 @@ function CommentsSection() {
     const newDislikeStatus = !isLike ? !currentDislikeStatus : false;
 
     try {
-      const response = await fetch(`${COMMENT_API_URL}comment-reaction/`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -199,7 +199,7 @@ function CommentsSection() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       // Fetch updated comment data to ensure counts are accurate
-      const updatedResponse = await fetch(`${COMMENT_API_URL}comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
+      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
         headers: {
           "Authorization": `Bearer ${AUTH_TOKEN}`,
         },
