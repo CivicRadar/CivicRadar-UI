@@ -16,6 +16,7 @@
     "@mui/material": "^6.4.7",
     "@mui/x-data-grid": "^7.28.2",
     "axios": "^1.8.2",
+    "emoji-picker-react": "^4.12.2",
     "framer-motion": "^12.7.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
