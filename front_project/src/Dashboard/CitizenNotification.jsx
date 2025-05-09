@@ -11,10 +11,10 @@ import {
   Divider,
   Link,
   Badge,
+  Tooltip,
 } from '@mui/material';
-import { Notifications, ArrowForward, Refresh } from '@mui/icons-material';
+import { Notifications, ArrowForward, AirplanemodeActive, AirplanemodeInactive } from '@mui/icons-material';
 
-// تبدیل تاریخ به فرمت فارسی و قابل خواندن
 const formatPersianDate = (dateString) => {
   const date = new Date(dateString);
   const persianDate = new Intl.DateTimeFormat('fa-IR', {
@@ -31,8 +31,8 @@ export default function CitizenNotification() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState(null);
+  const [isNotificationActive, setIsNotificationActive] = useState(true);
 
-  // Fetch notifications with polling
   const fetchNotifications = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/notification/`, {
@@ -63,10 +63,56 @@ export default function CitizenNotification() {
     }
   };
 
-  // Mark notifications as seen
+  const fetchNotificationActivationState = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/auth/notifs/`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Notification Activation State:", data);
+        setIsNotificationActive(!data.NotificationDeactivationTime);
+      } else {
+        console.error("Failed to fetch notification activation state:", response.statusText);
+        setError(`خطا در دریافت وضعیت اعلان‌ها: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching notification activation state:", error);
+      setError('خطا در ارتباط با سرور برای وضعیت اعلان‌ها.');
+    }
+  };
+
+  const toggleNotificationActivation = async () => {
+    const newState = !isNotificationActive;
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/auth/notifs/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ Activate: newState }),
+      });
+
+      if (response.ok) {
+        await fetchNotificationActivationState();
+        if (newState) {
+          fetchNotifications();
+        }
+      } else {
+        console.error("Failed to toggle notification activation:", response.statusText);
+        setError(`خطا در تغییر وضعیت اعلان‌ها: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error toggling notification activation:", error);
+      setError('خطا در تغییر وضعیت اعلان‌ها.');
+    }
+  };
+
   const markNotificationsAsSeen = async () => {
     try {
-      // Get all unseen notification IDs
       const unseenNotifications = notifications.filter(notif => !notif.Seen);
       if (unseenNotifications.length === 0) return;
 
@@ -88,7 +134,6 @@ export default function CitizenNotification() {
         }
       }
 
-      // Update local state to mark notifications as seen
       setNotifications((prev) =>
         prev.map((notif) =>
           unseenNotifications.some(unseen => unseen.id === notif.id)
@@ -102,26 +147,27 @@ export default function CitizenNotification() {
     }
   };
 
-  // Polling effect
   useEffect(() => {
-    fetchNotifications(); // Initial fetch
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    fetchNotificationActivationState();
+    fetchNotifications();
+    const interval = setInterval(() => {
+      if (isNotificationActive) {
+        fetchNotifications();
+      }
+    }, 30000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+    return () => clearInterval(interval);
+  }, [isNotificationActive]);
 
-  // Handle opening the notification dialog
   const handleOpen = () => {
     setOpen(true);
-    fetchNotifications(); // Fetch on open for immediate update
-    // Removed markNotificationsAsSeen from here
+    fetchNotifications();
   };
 
-  // Handle closing the notification dialog
   const handleClose = () => {
     setOpen(false);
-    setError(null); // Clear error on close
-    markNotificationsAsSeen(); // Mark notifications as seen when dialog closes
+    setError(null);
+    markNotificationsAsSeen();
   };
 
   return (
@@ -141,12 +187,19 @@ export default function CitizenNotification() {
       >
         <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'center' }}>
           اعلان‌ها
-          <IconButton
-            onClick={fetchNotifications}
-            sx={{ position: 'absolute', left: 8, top: 8 }}
-          >
-            <Refresh />
-          </IconButton>
+          <Tooltip title="غیر فعال کردن اعلان‌ها" arrow>
+            <IconButton
+              onClick={toggleNotificationActivation}
+              sx={{
+                position: 'absolute',
+                left: 8,
+                top: 8,
+                color: isNotificationActive ? '#999' : '#4CAF50', // Gray when active, green when inactive
+              }}
+            >
+              {isNotificationActive ? <AirplanemodeInactive /> : <AirplanemodeActive />}
+            </IconButton>
+          </Tooltip>
         </DialogTitle>
         <DialogContent>
           {error && (
@@ -163,7 +216,7 @@ export default function CitizenNotification() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      opacity: notif.Seen ? 0.5 : 1, // Fade effect for seen notifications
+                      opacity: notif.Seen ? 0.5 : 1,
                     }}
                   >
                     <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -183,7 +236,7 @@ export default function CitizenNotification() {
                                 height: 10,
                                 backgroundColor: 'red',
                                 borderRadius: '50%',
-                                ml: 1, // Margin-left for RTL (places circle to the right of the message)
+                                ml: 1,
                               }}
                             />
                           )}
