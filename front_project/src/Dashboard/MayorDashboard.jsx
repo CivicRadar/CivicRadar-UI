@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import {
   Map,
+  People,
+  Person,
   Warning,
   ExitToApp,
   Menu as MenuIcon,
@@ -42,6 +44,7 @@ import IranMapSection from "../Components/iranmap";
 import ReportsMap from "../Components/ReportsMap";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import MayorStatsPanel from "../Components/mayorstatpanel";
+import { getStats } from "../services/mayor-api";
 
 
 const MainContent = styled(Box)(({ theme }) => ({
@@ -68,7 +71,7 @@ export default function MayorDashboard() {
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
-
+  const [dashboardData, setdashboardData] = useState({ UserCount: 0, MayorCount: 0, DailyReportCount: 0 });
   const [profile, setProfile] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width:900px)");
@@ -87,6 +90,16 @@ export default function MayorDashboard() {
 
   const handleProfileClick = () => {
     setSelectedItem("profile");
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await getStats();
+      console.log(response)
+      setdashboardData(response)
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
   };
 
   const fetchProfile = async () => {
@@ -150,6 +163,10 @@ export default function MayorDashboard() {
     );
   };
 
+  const toPersianNumber = (num) => {
+    return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+  };
+
   const handleSaveProfile = async () => {
     try {
       if (shouldDeletePicture) {
@@ -208,6 +225,7 @@ export default function MayorDashboard() {
 
   useEffect(() => {
     fetchProfile();
+    fetchStats();
   }, [navigate]);
 
   useEffect(() => {
@@ -502,6 +520,45 @@ export default function MayorDashboard() {
   
     <>
     <TabPanel value={selectedItem} index="overview">
+      <Grid container spacing={3}>
+        {[
+          {
+            title: "تعداد کل کاربران",
+            value: dashboardData.UserCount,
+            icon: <Person color="success" />,
+            color: "#E8F5E9",
+          },
+          {
+            title: "تعداد کل مسئولین",
+            value: dashboardData.MayorCount,
+            icon: <People color="error" />,
+            color: "#FFEBEE",
+          },
+          {
+            title: "تعداد گزارشات امروز",
+            value: dashboardData.DailyReportCount,
+            icon: <Campaign color="primary" />,
+            color: "#E3F2FD",
+          },
+        ].map((item, index) => (
+          <Grid item xs={12} sm={4} key={index}>
+            <Card
+              sx={{
+                textAlign: "center",
+                p: 2,
+                boxShadow: 3,
+                bgcolor: item.color,
+              }}
+            >
+              {item.icon}
+              <Typography variant="subtitle1">{item.title}</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                {toPersianNumber(item.value)}
+              </Typography>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     <IranMapSection />
   </TabPanel>
       <TabPanel value={selectedItem} index="reports">

@@ -68,12 +68,6 @@ const ContentContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#F9FAFB"
 }));
 
-const dashboardData = {
-  users: 32,
-  admins: 32,
-  reportsToday: 147,
-};
-
 const toPersianNumber = (num) => {
   return num.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 };
@@ -130,7 +124,7 @@ export default function CitizenDashboard() {
   const [reports, setReports] = useState([]);
   const fileInputRef = useRef();
   const location = useLocation(); // اضافه کن
-
+  const [dashboardData, setdashboardData] = useState({ users: 0, admins: 0, reportsToday: 0 });
 
   const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
@@ -152,7 +146,6 @@ export default function CitizenDashboard() {
         if (response.Picture) {
           setImagePreview(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`);
         }
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching profile:", error);
         navigate("/signuplogin");
@@ -179,6 +172,7 @@ export default function CitizenDashboard() {
 
     fetchProfile();
     fetchReports();
+    setLoading(false);
   }, [navigate]);
 
 
