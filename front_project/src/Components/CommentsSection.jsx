@@ -15,13 +15,13 @@ import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import Picker from "emoji-picker-react";
 
 // Assuming CityProblemID is 1 for this example; you can pass it as a prop if needed
-const CITY_PROBLEM_ID = 1;
+// const CITY_PROBLEM_ID = 1;
 const API_BASE_URL = "http://127.0.0.1:8000";
 const COMMENT_API_URL = `${API_BASE_URL}/communicate/`;
 // Replace with dynamic auth token retrieval (e.g., from context or local storage)
 const AUTH_TOKEN = "your-auth-token-here"; // Should be dynamically fetched
 
-function CommentsSection() {
+function CommentsSection({ cityProblemId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null);
@@ -38,7 +38,7 @@ function CommentsSection() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
+        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`, {
           headers: {
             "Authorization": `Bearer ${AUTH_TOKEN}`,
           },
@@ -97,7 +97,7 @@ function CommentsSection() {
     if (!newComment.trim()) return;
 
     const payload = {
-      CityProblemID: CITY_PROBLEM_ID,
+      CityProblemID: cityProblemId,
       Content: newComment,
       IsAReply: parentId !== null,
       ReplyID: parentId || 0,
@@ -115,7 +115,7 @@ function CommentsSection() {
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const newCommentData = await response.json();
-      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
+      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`, {
         headers: {
           "Authorization": `Bearer ${AUTH_TOKEN}`,
         },
@@ -199,7 +199,7 @@ function CommentsSection() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       // Fetch updated comment data to ensure counts are accurate
-      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${CITY_PROBLEM_ID}`, {
+      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`, {
         headers: {
           "Authorization": `Bearer ${AUTH_TOKEN}`,
         },

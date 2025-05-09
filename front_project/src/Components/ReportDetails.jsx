@@ -120,8 +120,8 @@ function ReportDetails() {
       <MediaSlider reportData={reportData} />
       <ReportContent reportData={reportData} />
       <EngagementSection reportData={reportData} />
-      <CommentsSection />
-    </Box>
+      <CommentsSection cityProblemId={parseInt(id)} />
+      </Box>
   );
 }
 
