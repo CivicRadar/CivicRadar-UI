@@ -30,9 +30,18 @@ function CommentsSection({ cityProblemId }) {
 
   // Function to ensure a valid picture URL
   const getValidPictureUrl = (picture) => {
-    if (!picture) return "https://picsum.photos/40";
-    return picture.startsWith("http") ? picture : `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/${picture}`;
+    const baseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
+  
+    if (!picture || picture === "null" || picture === "undefined" || picture.trim() === "") {
+      return null;
+    }
+  
+    const cleanedPath = picture.replace(/^\/+/, ""); // حذف اسلش اضافه اول مسیر
+    return picture.startsWith("http") ? picture : `${baseUrl}/${cleanedPath}`;
   };
+  
+  
+  
 
   // Fetch comments and user reactions on mount
   useEffect(() => {
