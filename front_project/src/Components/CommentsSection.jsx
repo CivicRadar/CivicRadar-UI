@@ -6,253 +6,251 @@ import {
   TextField,
   Avatar,
   Tooltip,
+  Popover,
 } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ReplyIcon from "@mui/icons-material/Reply";
 import SendIcon from "@mui/icons-material/Send";
+import CloseIcon from "@mui/icons-material/Close";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import Picker from "emoji-picker-react";
+import { useCitizen } from "../context/CitizenContext";
+import { useMayor } from "../context/MayorContext";
+import { Link } from "react-router-dom";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
-// Assuming CityProblemID is 1 for this example; you can pass it as a prop if needed
-// const CITY_PROBLEM_ID = 1;
-const API_BASE_URL = "http://127.0.0.1:8000";
-const COMMENT_API_URL = `${API_BASE_URL}/communicate/`;
-// Replace with dynamic auth token retrieval (e.g., from context or local storage)
-const AUTH_TOKEN = "your-auth-token-here"; // Should be dynamically fetched
 
-function CommentsSection({ cityProblemId }) {
+
+
+
+const AUTH_TOKEN = "your-auth-token-here"; // Fetch dynamically in your app
+
+export default function CommentsSection({ cityProblemId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const commentsContainerRef = useRef(null);
+  const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
+  const commentsContainerRef = useRef();
+  const { citizen } = useCitizen();
+const { mayor } = useMayor();
+const [openLoginDialog, setOpenLoginDialog] = useState(false);
+const navigate = useNavigate();
 
-  // Function to ensure a valid picture URL
+const isLoggedIn = Boolean(citizen || mayor);
+
+
   const getValidPictureUrl = (picture) => {
     const baseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
-  
-    if (!picture || picture === "null" || picture === "undefined" || picture.trim() === "") {
+    if (!picture || picture === "null" || picture === "undefined" || !picture.trim()) {
       return null;
     }
-  
-    const cleanedPath = picture.replace(/^\/+/, ""); // حذف اسلش اضافه اول مسیر
-    return picture.startsWith("http") ? picture : `${baseUrl}/${cleanedPath}`;
+    const cleaned = picture.replace(/^\/+/, "");
+    return picture.startsWith("http") ? picture : `${baseUrl}/${cleaned}`;
   };
-  
-  
-  
 
-  // Fetch comments and user reactions on mount
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`, {
-          headers: {
-            "Authorization": `Bearer ${AUTH_TOKEN}`,
-          },
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        console.log("Fetched comments:", data); // Debug log to check comment data
-
-        const commentsWithDetails = await Promise.all(data.map(async (comment) => {
-          const senderPicture = getValidPictureUrl(comment.SenderPicture);
-          const replies = Array.isArray(comment.Replies) ? comment.Replies : [];
-          const formattedReplies = replies.map((reply) => ({
-            ...reply,
-            SenderPicture: getValidPictureUrl(reply.SenderPicture),
+  const fetchComments = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`,
+        { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
+      );
+      
+      if (!res.ok) throw new Error(res.statusText);
+      const data = await res.json();
+  
+      const detailed = await Promise.all(
+        data.map(async (c) => {
+          const pic = getValidPictureUrl(c.SenderPicture);
+          const replies = Array.isArray(c.Replies) ? c.Replies : [];
+          const formattedReplies = replies.map((r) => ({
+            ...r,
+            SenderPicture: getValidPictureUrl(r.SenderPicture),
           }));
-
-          // Fetch the user's reaction status for this comment
-          const reactionResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${comment.id}`, {
-            headers: {
-              "Authorization": `Bearer ${AUTH_TOKEN}`,
-            },
-            credentials: "include",
-          });
-          if (!reactionResponse.ok) throw new Error(`HTTP error! status: ${reactionResponse.status}`);
-          const reactionData = await reactionResponse.json();
-          console.log(`Reaction for comment ${comment.id}:`, reactionData); // Debug log to check reaction data
+          const rRes = await fetch(
+            `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${c.id}`,
+            { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
+          );
+          if (!rRes.ok) throw new Error(rRes.statusText);
+          const rData = await rRes.json();
+          console.log("reaction", rData);
 
           return {
-            ...comment,
-            SenderPicture: senderPicture,
-            liked: reactionData.Like || false,
-            disliked: reactionData.DisLike || false,
+            ...c,
+            SenderPicture: pic,
+            liked: rData.Like === true,      // دقیقا true
+            disliked: rData.Like === false,  // فقط وقتی false بوده
             Reply: formattedReplies,
           };
-        }));
-        setComments(commentsWithDetails);
-      } catch (error) {
-        console.error("Error fetching comments or reactions:", error);
-      }
-    };
-    fetchComments();
-  }, []);
+          
+        })
+      );
+      setComments(detailed);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  
 
-  // Scroll to bottom only when a new comment is added
   useEffect(() => {
-    if (commentsContainerRef.current && !replyTo) {
+    fetchComments();
+  }, [cityProblemId]);
+  
+
+  useEffect(() => {
+       if (commentsContainerRef.current) {
       commentsContainerRef.current.scrollTo({
         top: commentsContainerRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, [comments.length]);
+     }, [comments.length]);
 
   const handleAddComment = async (parentId = null) => {
     if (!newComment.trim()) return;
-
     const payload = {
       CityProblemID: cityProblemId,
       Content: newComment,
       IsAReply: parentId !== null,
       ReplyID: parentId || 0,
     };
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${AUTH_TOKEN}`,
-        },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const newCommentData = await response.json();
-      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`, {
-        headers: {
-          "Authorization": `Bearer ${AUTH_TOKEN}`,
-        },
-        credentials: "include",
-      });
-      if (!updatedResponse.ok) throw new Error(`HTTP error! status: ${updatedResponse.status}`);
-      const updatedData = await updatedResponse.json();
-      console.log("Updated comments after adding:", updatedData); // Debug log
-
-      const commentsWithDetails = await Promise.all(updatedData.map(async (comment) => {
-        const senderPicture = getValidPictureUrl(comment.SenderPicture);
-        const replies = Array.isArray(comment.Replies) ? comment.Replies : [];
-        const formattedReplies = replies.map((reply) => ({
-          ...reply,
-          SenderPicture: getValidPictureUrl(reply.SenderPicture),
-        }));
-        const reactionResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${comment.id}`, {
+      // POST new comment
+      const postRes = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/`,
+        {
+          method: "POST",
           headers: {
-            "Authorization": `Bearer ${AUTH_TOKEN}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AUTH_TOKEN}`,
           },
           credentials: "include",
-        });
-        if (!reactionResponse.ok) throw new Error(`HTTP error! status: ${reactionResponse.status}`);
-        const reactionData = await reactionResponse.json();
-        console.log(`Reaction for comment ${comment.id} after adding comment:`, reactionData); // Debug log
-
-        return {
-          ...comment,
-          SenderPicture: senderPicture,
-          liked: reactionData.Like || false,
-          disliked: reactionData.DisLike || false,
-          Reply: formattedReplies,
-        };
-      }));
-      setComments(commentsWithDetails);
-
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!postRes.ok) throw new Error(postRes.statusText);
+      // re-fetch comments
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`,
+        { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
+      );
+      if (!res.ok) throw new Error(res.statusText);
+      const data = await res.json();
+      // same mapping as before
+      const detailed = await Promise.all(
+        data.map(async (c) => {
+          const pic = getValidPictureUrl(c.SenderPicture);
+          const replies = Array.isArray(c.Replies) ? c.Replies : [];
+          const formattedReplies = replies.map((r) => ({
+            ...r,
+            SenderPicture: getValidPictureUrl(r.SenderPicture),
+          }));
+          const rRes = await fetch(
+            `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${c.id}`,
+            { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
+          );
+          if (!rRes.ok) throw new Error(rRes.statusText);
+          const rData = await rRes.json();
+          return {
+            ...c,
+            SenderPicture: pic,
+            liked: rData.Like || false,
+            disliked: rData.DisLike || false,
+            Reply: formattedReplies,
+          };
+        })
+      );
+      setComments(detailed);
       setNewComment("");
       setReplyTo(null);
-      setShowEmojiPicker(false);
-    } catch (error) {
-      console.error("Error posting comment:", error);
+      setEmojiAnchorEl(null);
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  const handleKeyDown = (event, parentId = null) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
+  const handleKeyDown = (e, parentId = null) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleAddComment(parentId);
     }
   };
 
-  const handleReaction = async (commentId, reactionType) => {
-    const comment = comments.find((c) => c.id === commentId);
-    if (!comment) return;
-
-    const isLike = reactionType === "like";
-    const currentLikeStatus = comment.liked;
-    const currentDislikeStatus = comment.disliked;
-
-    // Prevent re-liking if already liked
-    if (isLike && currentLikeStatus) return; // Already liked, do nothing
-
-    // Allow dislike action even if already disliked, to toggle off
-    const newLikeStatus = isLike ? true : false;
-    const newDislikeStatus = !isLike ? !currentDislikeStatus : false;
-
+  const handleReaction = async (commentId, type) => {
+    if (!isLoggedIn) {
+      setOpenLoginDialog(true);
+      return;
+    }
+    
+    const isLike = type === "like";
+    const payload = {
+      CommentID: commentId,
+      Like: isLike,
+    };
+  
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${AUTH_TOKEN}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          CommentID: commentId,
-          Like: newLikeStatus,
-          DisLike: newDislikeStatus,
-        }),
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      // Fetch updated comment data to ensure counts are accurate
-      const updatedResponse = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`, {
-        headers: {
-          "Authorization": `Bearer ${AUTH_TOKEN}`,
-        },
-        credentials: "include",
-      });
-      if (!updatedResponse.ok) throw new Error(`HTTP error! status: ${updatedResponse.status}`);
-      const updatedData = await updatedResponse.json();
-      const updatedComment = updatedData.find((c) => c.id === commentId);
-
-      setComments(
-        comments.map((c) =>
+      // ۱. واکنش رو بفرست
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) throw new Error(res.statusText);
+  
+      // ۲. بلافاصله UI رو آپدیت کن
+      setComments(prev =>
+        prev.map(c =>
           c.id === commentId
             ? {
                 ...c,
-                liked: newLikeStatus,
-                Likes: updatedComment.Likes || 0, // Use updated count from API
-                disliked: newDislikeStatus,
-                DisLikes: updatedComment.DisLikes || 0, // Use updated count from API
+                liked: isLike,
+                disliked: !isLike,
+                Likes: isLike ? (c.liked ? c.Likes : c.Likes + 1) : c.Likes - (c.liked ? 1 : 0),
+                DisLikes: !isLike ? (c.disliked ? c.DisLikes : c.DisLikes + 1) : c.DisLikes - (c.disliked ? 1 : 0),
               }
             : c
         )
       );
-    } catch (error) {
-      console.error(`Error updating ${reactionType}:`, error);
+  
+      // ۳. آپدیت واقعی (در پس‌زمینه)، تا هم‌راستا بشه با دیتا اصلی
+      fetchComments();
+  
+    } catch (e) {
+      console.error("Error updating reaction:", e);
     }
   };
+  
 
   const onEmojiClick = (emojiObject) => {
     setNewComment((prev) => prev + emojiObject.emoji);
   };
 
+  const toggleEmojiPicker = (e) => {
+    setEmojiAnchorEl((prev) => (prev ? null : e.currentTarget));
+  };
+
   return (
     <Box
       sx={{
-        marginTop: "30px",
-        padding: "20px",
+        mt: 3,
+        p: 2,
         backgroundColor: "#f5f5f5",
-        borderRadius: "10px",
+        borderRadius: 2,
         direction: "rtl",
         display: "flex",
         flexDirection: "column",
-        height: "600px",
+        height: 600,
         width: "100%",
         boxShadow: "0 0 8px rgba(76, 175, 80, 0.6)",
+        overflow: "hidden",
       }}
     >
       <Typography
@@ -260,339 +258,416 @@ function CommentsSection({ cityProblemId }) {
         sx={{
           fontWeight: "bold",
           textAlign: "center",
-          marginBottom: "15px",
+          mb: 2,
           color: "#388E3C",
         }}
       >
         دیدگاه‌ها
       </Typography>
-
+  
       <Box
         ref={commentsContainerRef}
         sx={{
           flex: 1,
           overflowY: "auto",
-          marginBottom: "15px",
-          maxHeight: "450px",
+          overflowX: "hidden",
+          mb: 2,
+          maxHeight: 450,
+          pr: 1.5,
+          pl: 1,
         }}
       >
-        {comments.map((comment) => {
-          const isMayor = comment.SenderType === "Mayor";
-          return (
-            <Box
-              key={comment.id}
-              sx={{
-                marginBottom: "10px",
-                padding: "10px",
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                ...(isMayor && {
-                  boxShadow: "0 0 15px rgba(76, 175, 80, 0.7)",
-                }),
-              }}
-            >
+       {comments.length === 0 ? (
+  <Box
+    sx={{
+      mt: 5,
+      textAlign: "center",
+      color: "#999",
+      fontStyle: "italic",
+      fontSize: "1rem",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 1,
+    }}
+  >
+    <Box component="span" fontSize="2.2rem">💬</Box>
+    <Typography>هنوز هیچ دیدگاهی ثبت نشده است.</Typography>
+  </Box>
+) : (
+  comments.map((comment, index) => {
+    const isMayor = comment.SenderType === "Mayor";
+    return (
+      <Box
+        key={comment.id}
+        sx={{
+          mb: 2,
+          mt: index === 0 ? 1.5 : 0,
+          p: 2,
+          borderRadius: 2,
+          background: "linear-gradient(to bottom left, #ffffff, #f9f9f9)",
+          border: "1px solid #e0e0e0",
+          boxShadow: isMayor
+            ? "0 0 15px rgba(76, 175, 80, 0.7)"
+            : "0 1px 5px rgba(0,0,0,0.05)",
+          wordBreak: "break-word",
+        }}
+      >
+              {/* Avatar + Name */}
               <Box
-                sx={{ display: "flex", alignItems: "center", marginBottom: "5px" }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 0.5,
+                  borderBottom: "1px solid #eee",
+                  pb: "4px",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
               >
                 <Avatar
                   src={comment.SenderPicture}
+                  sx={{ width: 32, height: 32, boxShadow: "0 0 10px rgba(76,175,80,0.5)" }}
+                />
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: "bold", fontSize: "0.9rem", color: isMayor ? "#4CAF50" : "inherit" }}
+                >
+                  {comment.SenderName || "کاربر ناشناس"}
+                </Typography>
+                <Box
                   sx={{
-                    width: 32,
-                    height: 32,
-                    marginLeft: "8px",
-                    boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: isMayor ? "#4CAF50" : "#000",
                   }}
                 />
-                <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "0.9rem",
-                      color: isMayor ? "#4CAF50" : "inherit",
-                    }}
-                  >
-                    {comment.SenderName || "کاربر ناشناس"}
-                  </Typography>
-                  <Box
-                    sx={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor: isMayor ? "#4CAF50" : "#000",
-                      marginLeft: "4px",
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontSize: "0.8rem",
-                      color: isMayor ? "#4CAF50" : "#666",
-                    }}
-                  >
-                    {isMayor ? "مسئول" : "شهروند"}
-                  </Typography>
-                </Box>
+                <Typography
+                  variant="caption"
+                  sx={{ fontSize: "0.8rem", color: isMayor ? "#4CAF50" : "#666" }}
+                >
+                  {isMayor ? "مسئول" : "شهروند"}
+                </Typography>
               </Box>
+  
               <Typography
                 variant="body2"
-                sx={{
-                  marginBottom: "5px",
-                  fontSize: "0.85rem",
-                  lineHeight: "1.3",
-                  color: isMayor ? "#4CAF50" : "#666",
-                }}
+                sx={{ mb: 0.5, fontSize: "0.85rem", lineHeight: 1.4, color: isMayor ? "#666" : "#666" }}
               >
                 {comment.Content}
               </Typography>
-              <Box sx={{ display: "flex", gap: "8px", alignItems: "center" }}>
+  
+              {/* Reactions */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Tooltip title="تایید کردن" arrow>
-                  <IconButton
-                    sx={{
-                      color: comment.liked ? "#4CAF50" : "#999",
-                      "&:hover": { color: "#4CAF50" },
-                      padding: "4px",
-                    }}
-                    onClick={() => handleReaction(comment.id, "like")}
-                  >
-                    <ThumbUpIcon sx={{ fontSize: "18px" }} />
-                  </IconButton>
-                </Tooltip>
-                <Typography sx={{ fontSize: "0.8rem" }}>{comment.Likes || 0}</Typography>
+                <IconButton
+  onClick={() => handleReaction(comment.id, "like")}
+  sx={{
+    p: 0.5,
+    color: comment.liked ? "success.main" : "text.disabled",
+    "&:hover": { color: "success.main" },
+  }}
+>
+  <ThumbUpIcon fontSize="small" />
+</IconButton>
 
+                </Tooltip>
+                <Typography variant="caption">{comment.Likes || 0}</Typography>
+  
                 <Tooltip title="رد کردن" arrow>
-                  <IconButton
-                    sx={{
-                      color: comment.disliked ? "#F44336" : "#999",
-                      "&:hover": { color: "#F44336" },
-                      padding: "4px",
-                    }}
-                    onClick={() => handleReaction(comment.id, "dislike")}
-                  >
-                    <ThumbDownIcon sx={{ fontSize: "18px" }} />
-                  </IconButton>
-                </Tooltip>
-                <Typography sx={{ fontSize: "0.8rem" }}>{comment.DisLikes || 0}</Typography>
+                <IconButton
+  onClick={() => handleReaction(comment.id, "dislike")}
+  sx={{
+    p: 0.5,
+    color: comment.disliked ? "error.main" : "text.disabled",
+    "&:hover": { color: "error.main" },
+  }}
+>
+  <ThumbDownIcon fontSize="small" />
+</IconButton>
 
+                </Tooltip>
+                <Typography variant="caption">{comment.DisLikes || 0}</Typography>
+  
                 <Tooltip title="پاسخ دادن" arrow>
-                  <IconButton
-                    sx={{ color: "#999", padding: "4px" }}
-                    onClick={() => setReplyTo(comment.id)}
-                  >
-                    <ReplyIcon sx={{ fontSize: "18px" }} />
+                  <IconButton onClick={() => {
+  if (!isLoggedIn) {
+    setOpenLoginDialog(true);
+    return;
+  }
+  setReplyTo(comment.id);
+}}
+ sx={{ p: 0.5, color: "#999" }}>
+                    <ReplyIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
               </Box>
-
+  
+              {/* Replies */}
               {Array.isArray(comment.Reply) &&
-                comment.Reply.map((reply, index) => {
-                  const isReplyMayor = reply.SenderType === "Mayor";
+                comment.Reply.map((reply, idx) => {
+                  const isRepMayor = reply.SenderType === "Mayor";
                   return (
                     <Box
-                      key={reply.id || `reply-${comment.id}-${index}`}
+                      key={`${comment.id}-reply-${idx}`}
                       sx={{
-                        marginTop: "8px",
-                        padding: "8px",
-                        backgroundColor: "#f9f9f9",
-                        borderRadius: "6px",
-                        marginRight: "20px",
-                        ...(isReplyMayor && {
-                          boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
-                        }),
+                        mt: 1,
+                        ml: { xs: 2, sm: 4 },
+                        p: 1.5,
+                        background: "#fcfcfc",
+                        borderRadius: 2,
+                        border: "1px solid #ddd",
+                        boxShadow: isRepMayor
+                          ? "0 0 10px rgba(76,175,80,0.4)"
+                          : "0 0 6px rgba(0,0,0,0.03)",
+                        wordBreak: "break-word",
                       }}
                     >
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          marginBottom: "4px",
+                          mb: 0.5,
+                          borderBottom: "1px solid #eee",
+                          pb: "4px",
+                          gap: 1,
+                          flexWrap: "wrap",
                         }}
                       >
-                        <Avatar
-                          src={reply.SenderPicture}
+                        <Avatar src={reply.SenderPicture} sx={{ width: 24, height: 24 }} />
+                        <Typography
+                          variant="caption"
                           sx={{
-                            width: 24,
-                            height: 24,
-                            marginLeft: "8px",
-                            boxShadow: "0 0 8px rgba(76, 175, 80, 0.4)",
+                            fontWeight: "bold",
+                            fontSize: "0.8rem",
+                            color: isRepMayor ? "#4CAF50" : "inherit",
+                          }}
+                        >
+                          {reply.SenderName || "کاربر ناشناس"}
+                        </Typography>
+                        <Box
+                          sx={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            backgroundColor: isRepMayor ? "#4CAF50" : "#000",
                           }}
                         />
-                        <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              fontWeight: "bold",
-                              fontSize: "0.8rem",
-                              color: isReplyMayor ? "#4CAF50" : "inherit",
-                            }}
-                          >
-                            {reply.SenderName || "کاربر ناشناس"}
-                          </Typography>
-                          <Box
-                            sx={{
-                              width: "6px",
-                              height: "6px",
-                              borderRadius: "50%",
-                              backgroundColor: isReplyMayor ? "#4CAF50" : "#000",
-                              marginLeft: "4px",
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              fontSize: "0.7rem",
-                              color: isReplyMayor ? "#4CAF50" : "#666",
-                            }}
-                          >
-                            {isReplyMayor ? "مسئول" : "شهروند"}
-                          </Typography>
-                        </Box>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontSize: "0.7rem", color: isRepMayor ? "#4CAF50" : "#666" }}
+                        >
+                          {isRepMayor ? "مسئول" : "شهروند"}
+                        </Typography>
                       </Box>
+  
                       <Typography
                         variant="body2"
-                        sx={{
-                          fontSize: "0.8rem",
-                          lineHeight: "1.2",
-                          color: isReplyMayor ? "#4CAF50" : "#666",
-                        }}
+                        sx={{ fontSize: "0.8rem", lineHeight: 1.4, color: isRepMayor ? "#666" : "#666" }}
                       >
                         {reply.Content}
                       </Typography>
                     </Box>
                   );
                 })}
-
+  
+              {/* Reply Input */}
               {replyTo === comment.id && (
-                <Box sx={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-                  <Box sx={{ position: "relative", flex: 1 }}>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      placeholder="پاسخ خود را بنویسید..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(e, comment.id)}
-                      sx={{
-                        backgroundColor: "#fff",
-                        "& .MuiInputBase-root": { 
-                          fontSize: "0.85rem", 
-                          padding: "6px",
-                          boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "rgba(76, 175, 80, 0.3)",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#4CAF50",
-                        },
-                      }}
-                    />
-                    <IconButton
-                      sx={{
-                        position: "absolute",
-                        left: "8px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#4CAF50",
-                        padding: "4px",
-                      }}
-                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    >
-                      <EmojiEmotionsIcon sx={{ fontSize: "18px" }} />
-                    </IconButton>
-                    {showEmojiPicker && (
-                      <Box sx={{ position: "absolute", bottom: "100%", left: 0, zIndex: 1 }}>
-                        <Picker onEmojiClick={onEmojiClick} />
-                      </Box>
-                    )}
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 1,
+                    alignItems: { sm: "center" },
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={1}
+                    maxRows={5}
+                    variant="outlined"
+                    placeholder="پاسخ خود را بنویسید..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, comment.id)}
+                    sx={{
+                      fontSize: "0.85rem",
+                      boxShadow: "0 0 10px rgba(76,175,80,0.5)",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "rgba(76,175,80,0.3)",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#4CAF50",
+                      },
+                    }}
+                  />
+  
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Tooltip title="ایموجی">
+                      <IconButton onClick={toggleEmojiPicker}>
+                        <EmojiEmotionsIcon />
+                      </IconButton>
+                    </Tooltip>
+  
+                    <Tooltip title="ارسال">
+                      <IconButton onClick={() => handleAddComment(comment.id)}>
+                        <SendIcon />
+                      </IconButton>
+                    </Tooltip>
+  
+                    <Tooltip title="لغو پاسخ">
+                      <IconButton
+                        onClick={() => {
+                          setReplyTo(null);
+                          setNewComment("");
+                          setEmojiAnchorEl(null);
+                        }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
-                  <Tooltip title="ارسال" arrow>
-                    <IconButton
-                      sx={{
-                        color: "#4CAF50",
-                        "&:hover": {
-                          color: "#45a049",
-                          boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
-                        },
-                        padding: "4px",
-                        transform: "scaleX(-1)",
-                      }}
-                      onClick={() => handleAddComment(comment.id)}
-                    >
-                      <SendIcon sx={{ fontSize: "18px" }} />
-                    </IconButton>
-                  </Tooltip>
                 </Box>
               )}
             </Box>
           );
-        })}
-      </Box>
-
-      {!replyTo && (
-        <Box sx={{ display: "flex", gap: "8px" }}>
-          <Box sx={{ position: "relative", flex: 1 }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="نظر خود را بنویسید..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e)}
-              sx={{
-                backgroundColor: "#fff",
-                "& .MuiInputBase-root": { 
-                  fontSize: "0.85rem", 
-                  padding: "6px",
-                  boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(76, 175, 80, 0.3)",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#4CAF50",
-                },
-              }}
-            />
-            <IconButton
-              sx={{
-                position: "absolute",
-                left: "8px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#4CAF50",
-                padding: "4px",
-              }}
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              <EmojiEmotionsIcon sx={{ fontSize: "18px" }} />
-            </IconButton>
-            {showEmojiPicker && (
-              <Box sx={{ position: "absolute", bottom: "100%", left: 0, zIndex: 1 }}>
-                <Picker onEmojiClick={onEmojiClick} />
-              </Box>
-            )}
-          </Box>
-          <Tooltip title="ارسال" arrow>
-            <IconButton
-              sx={{
-                color: "#4CAF50",
-                "&:hover": {
-                  color: "#45a049",
-                  boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
-                },
-                padding: "4px",
-                transform: "scaleX(-1)",
-              }}
-              onClick={() => handleAddComment()}
-            >
-              <SendIcon sx={{ fontSize: "18px" }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        })
       )}
+      </Box>
+  
+      {/* New Comment Input */}
+      {!replyTo && (
+          isLoggedIn ? (
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1,
+            mt: 1,
+          }}
+        >
+          <TextField
+            fullWidth
+            multiline
+            minRows={1}
+            maxRows={5}
+            variant="outlined"
+            placeholder="نظر خود را بنویسید..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={handleKeyDown}
+            sx={{
+              fontSize: "0.85rem",
+              boxShadow: "0 0 10px rgba(76,175,80,0.5)",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "rgba(76,175,80,0.3)",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#4CAF50",
+              },
+            }}
+          />
+  
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Tooltip title="ایموجی">
+              <IconButton onClick={toggleEmojiPicker}>
+                <EmojiEmotionsIcon />
+              </IconButton>
+            </Tooltip>
+  
+            <Tooltip title="ارسال">
+              <IconButton onClick={() => handleAddComment()}>
+                <SendIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+          ) : (
+            <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1.5,
+              backgroundColor: "#e8f5e9",
+              border: "1px solid #c8e6c9",
+              borderRadius: 2,
+              px: 4,
+              py: 2.5,
+              mt: 3,
+              mx: "auto",
+              maxWidth: 700,
+            }}
+          >
+            <Box component="span" fontSize="1.8rem">🔓</Box>
+            <Typography
+              sx={{
+                color: "#2e7d32",
+                fontSize: "1.05rem",
+                fontWeight: 600,
+                textAlign: "center",
+              }}
+            >
+              برای ثبت نظر،{" "}
+              <Link
+                to="/signuplogin"
+                style={{
+                  color: "#1b5e20",
+                  textDecoration: "underline",
+                  fontWeight: "bold",
+                }}
+              >
+                وارد حساب کاربری شوید یا ثبت‌نام کنید
+              </Link>
+              .
+            </Typography>
+          </Box>
+
+
+        )
+
+      )}
+  
+      {/* Emoji Picker Popover */}
+      <Popover
+        open={Boolean(emojiAnchorEl)}
+        anchorEl={emojiAnchorEl}
+        onClose={() => setEmojiAnchorEl(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+        PaperProps={{ sx: { p: 0, m: 0, zIndex: 2000 } }}
+      >
+        <Picker onEmojiClick={onEmojiClick} />
+      </Popover>
+
+      <Dialog open={openLoginDialog} onClose={() => setOpenLoginDialog(false)}>
+  <DialogTitle sx={{ fontWeight: "bold", color: "#388E3C", textAlign: "center" }}>
+    ورود یا ثبت‌نام لازم است
+  </DialogTitle>
+  <DialogContent>
+    <Typography variant="body2" sx={{ textAlign: "center", mt: 1 }}>
+      برای ثبت واکنش یا ثبت نظر، ابتدا وارد حساب کاربری خود شوید یا ثبت‌نام کنید
+    </Typography>
+  </DialogContent>
+  <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+    <Button onClick={() => setOpenLoginDialog(false)} variant="outlined">
+      بستن
+    </Button>
+    <Button
+      variant="contained"
+      color="success"
+      onClick={() => navigate("/signuplogin")}
+    >
+      ورود / ثبت‌نام
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </Box>
   );
-}
-
-export default CommentsSection;
+}  
