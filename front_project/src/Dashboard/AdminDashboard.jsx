@@ -41,7 +41,7 @@ import Swal from "sweetalert2";
 import IranMapSection from "../Components/iranmap";
 import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
-
+import ViolationReportFeed from "./Admin-features/ViolationReportFeed";
 
 import AdminProfileSection from "../Components/adminProfileSection";
 
@@ -91,6 +91,34 @@ export default function AdminDashboard() {
   const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
   const fileInputRef = useRef();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState({
+  users: 0,
+  admins: 0,
+  reportsToday: 0,
+});
+
+useEffect(() => {
+  const fetchDashboardStats = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/stats/counter/`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("خطا در دریافت آمار");
+      const data = await res.json();
+      setDashboardData({
+        users: data.UserCount,
+        admins: data.MayorCount,
+        reportsToday: data.DailyReportCount,
+      });
+    } catch (err) {
+      console.error("Dashboard stats error:", err);
+    }
+  };
+
+  fetchDashboardStats();
+}, []);
+
+
 
 
   const isMobile = useMediaQuery("(max-width:900px)");
@@ -247,7 +275,6 @@ export default function AdminDashboard() {
     { id: "profile", label: "پروفایل کاربری", icon: <AccountCircle /> },
     { id: "overview", label: "نمای کلی", icon: <BarChart /> },
     { id: "registered", label: "مسئولین ثبت شده", icon: <People /> },
-    { id: "map", label: "نقشه", icon: <Map /> },
     { id: "violations", label: "بررسی تخلفات", icon: <Warning /> },
     { id: "exit", label: "خروج از حساب", icon: <ExitToApp /> },
   ];
@@ -639,13 +666,12 @@ export default function AdminDashboard() {
               <MayorsList />
             </TabPanel>
   
-            <TabPanel value={selectedItem} index={"map"}>
-              <Typography>اینجا نقشه قرار می‌گیرد</Typography>
-            </TabPanel>
+        
   
             <TabPanel value={selectedItem} index={"violations"}>
-              <Typography>اینجا بررسی تخلفات قرار می‌گیرد</Typography>
-            </TabPanel>
+  <ViolationReportFeed />
+</TabPanel>
+
   
             <TabPanel value={selectedItem} index={"profile"}>
               <AdminProfileSection
