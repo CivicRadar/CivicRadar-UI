@@ -35,6 +35,8 @@ import ProfileSection from "../Components/mayerProfileSection";
 import ReportDetails from "./ReportDetails";
 import { useCitizen } from "../context/CitizenContext";
 import { useMayor } from "../context/MayorContext";
+import { useAdmin } from "../context/AdminContext";
+
 
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
@@ -60,6 +62,8 @@ export default function ReportPageCon() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { citizen } = useCitizen();
   const { mayor } = useMayor();
+  const { admin } = useAdmin();
+
   const [profile, setProfile] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width:900px)");
@@ -76,17 +80,18 @@ export default function ReportPageCon() {
     setSelectedItem("teamForm"); // تغییر دادن مقدار selectedItem به "افزودن تیم"
   };
 
-  const handleProfileClick = () => {
-    if (citizen){
-      navigate(`/CitizenDashboard`, { state: { page: "profile" } });
-    }
-    else if (mayor) {
-      navigate(`/MayorDashboard`, { state: { page: "profile" } });
-    }
-    else{
-      navigate(`/Signuplogin`, { state: { page: "profile" } });
-    }
- };
+const handleProfileClick = () => {
+  if (citizen) {
+    navigate(`/CitizenDashboard`, { state: { page: "profile" } });
+  } else if (mayor) {
+    navigate(`/MayorDashboard`, { state: { page: "profile" } });
+  } else if (admin) {
+    navigate(`/AdminDashboard`, { state: { page: "profile" } });
+  } else {
+    navigate(`/Signuplogin`, { state: { page: "profile" } });
+  }
+};
+
 
   const fetchProfile = async () => {
     try {

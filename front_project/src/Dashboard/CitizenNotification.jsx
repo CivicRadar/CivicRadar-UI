@@ -255,19 +255,22 @@ export default function CitizenNotification() {
                           فرستنده: {notif.SenderFullName || 'نامشخص'}
                         </Typography>
                       </Box>
-                      <Link
-                        href={`/reports/${notif.CityProblemID}`}
-                        sx={{
-                          color: '#4CAF50',
-                          display: 'flex',
-                          alignItems: 'center',
-                          textDecoration: 'none',
-                          ml: 2,
-                        }}
-                      >
-                        <ArrowForward sx={{ ml: 0.5, color: '#4CAF50' }} />
-                        رفتن به صفحه گزارش
-                      </Link>
+                      {notif.CityProblemID && (
+  <Link
+    href={`/reports/${notif.CityProblemID}`}
+    sx={{
+      color: '#4CAF50',
+      display: 'flex',
+      alignItems: 'center',
+      textDecoration: 'none',
+      ml: 2,
+    }}
+  >
+    <ArrowForward sx={{ ml: 0.5, color: '#4CAF50' }} />
+    رفتن به صفحه گزارش
+  </Link>
+)}
+
                     </Box>
                   </ListItem>
                   {index < notifications.length - 1 && <Divider />}

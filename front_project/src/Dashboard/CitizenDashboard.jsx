@@ -51,6 +51,9 @@ import { useLocation } from "react-router-dom";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt"; // بالا اضافه کن
 
 
+const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
+
+
 // Create a styled component for the main content area
 const MainContent = styled(Box)(({ theme }) => ({
   flexGrow: 1,
@@ -132,6 +135,28 @@ export default function CitizenDashboard() {
     Picture: null,
   });
   const isMobile = useMediaQuery('(max-width:900px)');
+
+  useEffect(() => {
+  const fetchDashboardStats = async () => {
+    try {
+      const res = await fetch(`${BASE}/stats/counter/`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("خطا در دریافت آمار");
+      const data = await res.json();
+      setdashboardData({
+        users: data.UserCount,
+        admins: data.MayorCount,
+        reportsToday: data.DailyReportCount,
+      });
+    } catch (err) {
+      console.error("Dashboard stats error:", err);
+    }
+  };
+
+  fetchDashboardStats();
+}, []);
+
 
   useEffect(() => {
     const fetchProfile = async () => {

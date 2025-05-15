@@ -17,6 +17,8 @@ import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import Picker from "emoji-picker-react";
 import { useCitizen } from "../context/CitizenContext";
 import { useMayor } from "../context/MayorContext";
+import { useAdmin } from "../context/AdminContext";
+
 import { Link } from "react-router-dom";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +29,77 @@ import { useNavigate } from "react-router-dom";
 
 const AUTH_TOKEN = "your-auth-token-here"; // Fetch dynamically in your app
 
+const getUserRoleLabel = (type) => {
+  switch (type) {
+    case "Mayor": return "مسئول";
+    case "Admin": return "ادمین";
+    case "Citizen":
+    default:
+      return "شهروند";
+  }
+};
+const getRoleColor = (type) => {
+  switch (type) {
+    case "Mayor":
+      return "#2e7d32"; // سبز برای مسئول
+    case "Admin":
+      return "#1976d2"; // آبی برای ادمین
+    default:
+      return "#555";
+  }
+};
+
+const getRoleBackgroundColor = (type) => {
+  switch (type) {
+    case "Mayor":
+      return "#2e7d32";
+    case "Admin":
+      return "#1976d2";
+    default:
+      return "#000";
+  }
+};
+
+const getRoleTextColor = (type) => {
+  switch (type) {
+    case "Mayor":
+      return "#2e7d32";
+    case "Admin":
+      return "#1976d2";
+    default:
+      return "#666";
+  }
+};
+
+const getUserRoleColor = (type) => {
+  switch (type) {
+    case "Mayor":
+      return "#4CAF50"; // سبز روشن برای مسئول
+    case "Admin":
+      return "#1976d2"; // آبی برای ادمین
+    default:
+      return "#666";
+  }
+};
+
+const getUserDotColor = (type) => {
+  switch (type) {
+    case "Mayor":
+      return "#4CAF50"; // سبز نقطه مسئول
+    case "Admin":
+      return "#1976d2"; // آبی نقطه ادمین
+    default:
+      return "#000";
+  }
+};
+
+
+
+
+
+
+
+
 export default function CommentsSection({ cityProblemId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -35,10 +108,11 @@ export default function CommentsSection({ cityProblemId }) {
   const commentsContainerRef = useRef();
   const { citizen } = useCitizen();
 const { mayor } = useMayor();
+const {admin} = useAdmin() ;
 const [openLoginDialog, setOpenLoginDialog] = useState(false);
 const navigate = useNavigate();
 
-const isLoggedIn = Boolean(citizen || mayor);
+const isLoggedIn = Boolean(citizen || mayor || admin);
 
 
   const getValidPictureUrl = (picture) => {
@@ -296,7 +370,7 @@ const isLoggedIn = Boolean(citizen || mayor);
   </Box>
 ) : (
   comments.map((comment, index) => {
-    const isMayor = comment.SenderType === "Mayor";
+    // const isMayor = comment.SenderType === "Mayor";
     return (
       <Box
         key={comment.id}
@@ -307,9 +381,16 @@ const isLoggedIn = Boolean(citizen || mayor);
           borderRadius: 2,
           background: "linear-gradient(to bottom left, #ffffff, #f9f9f9)",
           border: "1px solid #e0e0e0",
-          boxShadow: isMayor
-            ? "0 0 15px rgba(76, 175, 80, 0.7)"
-            : "0 1px 5px rgba(0,0,0,0.05)",
+          boxShadow: `0 0 15px ${
+  comment.SenderType === "Admin"
+    ? "#1976d2aa" // آبی برای ادمین
+    : comment.SenderType === "Mayor"
+    ? "#2e7d32aa" // سبز برای مسئول
+    : "rgba(0,0,0,0.05)"
+}`,
+
+
+
           wordBreak: "break-word",
         }}
       >
@@ -331,7 +412,11 @@ const isLoggedIn = Boolean(citizen || mayor);
                 />
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: "bold", fontSize: "0.9rem", color: isMayor ? "#4CAF50" : "inherit" }}
+sx={{
+  fontWeight: "bold",
+  fontSize: "0.9rem",
+color: getRoleColor(comment.SenderType)
+}}
                 >
                   {comment.SenderName || "کاربر ناشناس"}
                 </Typography>
@@ -340,20 +425,22 @@ const isLoggedIn = Boolean(citizen || mayor);
                     width: 8,
                     height: 8,
                     borderRadius: "50%",
-                    backgroundColor: isMayor ? "#4CAF50" : "#000",
+backgroundColor: getRoleBackgroundColor(comment.SenderType)
                   }}
                 />
                 <Typography
-                  variant="caption"
-                  sx={{ fontSize: "0.8rem", color: isMayor ? "#4CAF50" : "#666" }}
-                >
-                  {isMayor ? "مسئول" : "شهروند"}
-                </Typography>
+  variant="caption"
+sx={{ fontSize: "0.8rem", color: getRoleTextColor(comment.SenderType) }}
+>
+  {getUserRoleLabel(comment.SenderType)}
+</Typography>
+
               </Box>
   
               <Typography
                 variant="body2"
-                sx={{ mb: 0.5, fontSize: "0.85rem", lineHeight: 1.4, color: isMayor ? "#666" : "#666" }}
+sx={{ mb: 0.5, fontSize: "0.85rem", lineHeight: 1.4, color: "#666" }}
+
               >
                 {comment.Content}
               </Typography>
@@ -418,9 +505,8 @@ const isLoggedIn = Boolean(citizen || mayor);
                         background: "#fcfcfc",
                         borderRadius: 2,
                         border: "1px solid #ddd",
-                        boxShadow: isRepMayor
-                          ? "0 0 10px rgba(76,175,80,0.4)"
-                          : "0 0 6px rgba(0,0,0,0.03)",
+                        boxShadow: `0 0 ${reply.SenderType === "Citizen" ? "6px" : "10px"} ${getUserRoleColor(reply.SenderType)}66`,
+
                         wordBreak: "break-word",
                       }}
                     >
@@ -437,29 +523,31 @@ const isLoggedIn = Boolean(citizen || mayor);
                       >
                         <Avatar src={reply.SenderPicture} sx={{ width: 24, height: 24 }} />
                         <Typography
-                          variant="caption"
-                          sx={{
-                            fontWeight: "bold",
-                            fontSize: "0.8rem",
-                            color: isRepMayor ? "#4CAF50" : "inherit",
-                          }}
-                        >
-                          {reply.SenderName || "کاربر ناشناس"}
-                        </Typography>
+  variant="caption"
+  sx={{
+    fontWeight: "bold",
+    fontSize: "0.8rem",
+    color: getUserRoleColor(reply.SenderType)
+  }}
+>
+  {reply.SenderName || "کاربر ناشناس"}
+</Typography>
+
                         <Box
                           sx={{
                             width: 6,
                             height: 6,
                             borderRadius: "50%",
-                            backgroundColor: isRepMayor ? "#4CAF50" : "#000",
+backgroundColor: getUserDotColor(reply.SenderType)
                           }}
                         />
                         <Typography
-                          variant="caption"
-                          sx={{ fontSize: "0.7rem", color: isRepMayor ? "#4CAF50" : "#666" }}
-                        >
-                          {isRepMayor ? "مسئول" : "شهروند"}
-                        </Typography>
+  variant="caption"
+sx={{ fontSize: "0.7rem", color: getUserRoleColor(reply.SenderType) }}
+>
+  {getUserRoleLabel(reply.SenderType)}
+</Typography>
+
                       </Box>
   
                       <Typography

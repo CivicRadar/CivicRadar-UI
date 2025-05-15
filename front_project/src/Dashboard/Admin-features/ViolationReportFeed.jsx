@@ -38,9 +38,11 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CloseIcon from '@mui/icons-material/Close';
 import ReportIcon from "@mui/icons-material/Report";
 import Swal from "sweetalert2";
+import DeleteIcon from '@mui/icons-material/Delete';
+import { DialogTitle } from "@mui/material";
 
 
-const ReportFeed = () => {
+const ViolationReportFeed = () => {
   const [reports, setReports] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
@@ -58,69 +60,92 @@ const ReportFeed = () => {
   const [dialogImage, setDialogImage] = useState("");
   const [userLikeStatusMap, setUserLikeStatusMap] = useState({}); 
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
-const [reportReason, setReportReason] = useState("");
-const [violationStatus, setViolationStatus] = useState(""); // "" | "reported" | "not_reported"
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [reportToDelete, setReportToDelete] = useState(null);
 
-const [selectedReportId, setSelectedReportId] = useState(null);
-const openViolationDialog = async (reportId) => {
-  setSelectedReportId(reportId);
-  setReportReason("");
-  setViolationStatus(""); 
+
+
+
+
+
+
+
+
+
+
+  
+const handleDeleteReport = async () => {
+  if (!reportToDelete) return;
 
   try {
-    const res = await fetch(`${BASE}/supervise/citizen-report-citizen/?CityProblemID=${reportId}`, {
-      method: "GET",
+    const res = await fetch(`${BASE}/supervise/handle-crc/`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include",
+      body: JSON.stringify({ CityProblemID: reportToDelete }),
     });
-    const data = await res.json();
-    if (data.Answer === "you have reported this problem") {
-      setViolationStatus("reported");
-    } else {
-      setViolationStatus("not_reported");
-    }
-    setReportDialogOpen(true);
-  } catch (err) {
-    console.error("خطا در بررسی گزارش قبلی:", err);
-    alert("خطا در بررسی ثبت قبلی گزارش.");
+
+    if (!res.ok) throw new Error("حذف گزارش با مشکل مواجه شد");
+
+    setReports(prev => prev.filter(r => r.id !== reportToDelete));
+    setDeleteDialogOpen(false);
+    setReportToDelete(null);
+
+    // ✅ پیام موفقیت
+    Swal.fire({
+      icon: "success",
+      title: "!حذف با موفقیت انجام شد",
+      text: ".گزارش با موفقیت از سامانه حذف شد",
+      confirmButtonText: "باشه",
+      customClass: {
+            confirmButton: "swal-confirm-btn",
+            title: "swal-title",
+            htmlContainer: "swal-text"  
+          },
+    });
+
+  } catch (e) {
+    console.error("خطا در حذف گزارش:", e);
   }
 };
 
 
 
 
+useEffect(() => {
+  fetch(`${BASE}/supervise/handle-crc/`, {
+    credentials: 'include'      // ← اضافه کنید
+  })
+    .then(res => res.json())
+    .then(async (data) => {
+      // حالا سرور شما را ادمین تشخیص می‌دهد
+      // و فقط گزارش‌های دارای تخلف (Reports.length>0) را برمی‌گرداند
+      setReports(data);
+      console.log("داده‌ی دریافتی:", data);
 
+      const statusMap = {};
+      for (let r of data) {
+        const res = await fetch(
+          `${BASE}/communicate/like/?CityProblemID=${r.id}`,
+          { method: 'GET', credentials: 'include' }
+        );
+        if (res.ok) {
+          const { Like } = await res.json();
+          statusMap[r.id] = Like;
+        }
+      }
+      setUserLikeStatusMap(statusMap);
 
+      const uniqueProvinces = [
+        ...new Set(data.map((r) => r.ProvinceName).filter(Boolean))
+      ];
+      setProvinces(uniqueProvinces);
+    })
+    .catch((err) => console.error("fetch handle-crc error:", err));
+}, []);
 
-
-  
-
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/all-citizen-report/`)
-      .then(res => res.json())
-      .then(async (data) => {
-        setReports(data);
-  
-        // گرفتن وضعیت لایک برای همه گزارش‌ها
-        // بعد از setReports(data):
-const statusMap = {};
-for (let r of data) {
-  const res = await fetch(`${BASE}/communicate/like/?CityProblemID=${r.id}`, {
-    method: "GET", credentials: "include"
-  });
-  if (res.ok) {
-    const { Like } = await res.json();
-    statusMap[r.id] = Like; // true|false|null
-  }
-}
-setUserLikeStatusMap(statusMap);
-
-  
-        const uniqueProvinces = [...new Set(data.map(r => r.ProvinceName).filter(Boolean))];
-        setProvinces(uniqueProvinces);
-      });
-  }, []);
   
 
   useEffect(() => {
@@ -343,70 +368,7 @@ const handleDislikeToggle = async (reportId) => {
         return { label: status, icon: null, color: "#ccc" };
     }
   };
-const submitViolationReport = async () => {
-  if (!reportReason.trim()) {
-    Swal.fire({
-      icon: "warning",
-      title: "دلیل لازم است",
-      text: "لطفاً دلیل تخلف را وارد کنید.",
-      confirmButtonText: "باشه",
-      customClass: {
-        confirmButton: "swal-confirm-btn",
-        title: "swal-title",
-      },
-    });
-    return;
-  }
 
-  try {
-    const res = await fetch(`${BASE}/supervise/citizen-report-citizen/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        CityProblemID: selectedReportId,
-        Report: reportReason,
-      }),
-    });
-
-    if (res.ok) {
-      Swal.fire({
-        icon: "success",
-        title: "!ثبت شد",
-        text: "✅. گزارش تخلف با موفقیت ثبت شد",
-        confirmButtonText: "باشه",
-        customClass: {
-          confirmButton: "swal-confirm-btn",
-          title: "swal-title",
-        },
-      });
-      setReportDialogOpen(false);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "خطا",
-        text: "❌ ثبت گزارش با مشکل مواجه شد.",
-        confirmButtonText: "باشه",
-        customClass: {
-          confirmButton: "swal-confirm-btn",
-          title: "swal-title",
-        },
-      });
-    }
-  } catch (err) {
-    console.error("خطا در ارسال گزارش:", err);
-    Swal.fire({
-      icon: "error",
-      title: "خطا",
-      text: "⚠️ ارتباط با سرور برقرار نشد.",
-      confirmButtonText: "باشه",
-      customClass: {
-        confirmButton: "swal-confirm-btn",
-        title: "swal-title",
-      },
-    });
-  }
-};
 
 
 
@@ -420,7 +382,7 @@ const submitViolationReport = async () => {
         color="green"
         fontSize={{ xs: "1.8rem", sm: "2.5rem" }}
       >
-        گزارشات دریافتی
+    گزارش‌های ثبت شده دارای تخلف
       </Typography>
 
       <Box display="flex" justifyContent="center" gap={2} mb={2} flexWrap="wrap">
@@ -998,31 +960,7 @@ const submitViolationReport = async () => {
   {r.Likes || 0}
 </Typography>
 
-<Box
-  display="inline-flex"
-  alignItems="center"
-  gap={0.5}
-  px={1}
-  py={0.5}
-  borderRadius={2}
-  onClick={() => openViolationDialog(r.id)}
-  sx={{
-    cursor: "pointer",
-    color: "error.main",
-    transition: "all 0.2s ease-in-out",
-    userSelect: "none",
-    "&:hover": {
-      bgcolor: "#fdecea",
-      boxShadow: "0 0 0 2px #f4433633",
-      transform: "translateY(-1px)",
-    },
-  }}
->
-  <ReportIcon fontSize="small" />
-  <Typography variant="body2" fontWeight={600}>
-    گزارش تخلف
-  </Typography>
-</Box>
+
 
 
 
@@ -1046,6 +984,50 @@ const submitViolationReport = async () => {
             >
               {r.Information}
             </Typography>
+           {r.Reports?.length > 0 && (
+  <Box
+  mt={2}
+  p={2}
+  border="1px solid #ffcdd2"
+  borderRadius={2}
+  bgcolor="#ffebee"
+  boxShadow="0 2px 6px rgba(244, 67, 54, 0.2)"
+>
+  <Typography
+    variant="subtitle2"
+    fontWeight="bold"
+    color="error.main"
+    mb={1}
+    display="flex"
+    alignItems="center"
+    gap={1}
+  >
+    <ReportIcon fontSize="small" />
+    دلایل گزارش تخلف ({r.Reports.length} مورد)
+  </Typography>
+
+  <Box component="ul" sx={{ pr: 3, m: 0 }}>
+    {r.Reports.map((rep, index) => (
+      <Box
+        key={index}
+        component="li"
+        sx={{
+          fontSize: "0.95rem",
+          color: "#c62828",
+          mb: 1,
+          lineHeight: 1.8,
+          listStyleType: "'⚠️  '",
+        }}
+      >
+        {rep}
+      </Box>
+    ))}
+  </Box>
+</Box>
+
+)}
+
+
 
             
         
@@ -1103,70 +1085,79 @@ const submitViolationReport = async () => {
             >
               مشاهده گزارش
             </Button>
+          <Button
+  variant="contained"
+  onClick={() => {
+    setReportToDelete(r.id);
+    setDeleteDialogOpen(true);
+  }}
+  fullWidth
+  startIcon={<DeleteIcon sx={{ fontSize: "1.2rem", ml: 0.5 }} />}
+  sx={{
+    mt: 1.5,
+    borderRadius: "12px",
+    fontWeight: 700,
+    fontSize: "1rem",
+    py: 1.2,
+    backdropFilter: "blur(10px)",
+    background: "linear-gradient(135deg, #fff5f5 0%, #ffebee 100%)", // سفید به صورتی خیلی کمرنگ
+    border: "2px solid #ffcdd2",
+    color: "#c62828", // قرمز ملایم برای متن
+    boxShadow: "0 4px 10px rgba(244, 67, 54, 0.1)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    "&:hover": {
+      background: "linear-gradient(135deg, #ef5350 0%, #7f1d1d 100%)", // قرمز تند
+      borderColor: "#ffffff",
+      color: "#fff",
+      boxShadow: "0 8px 20px rgba(239, 83, 80, 0.5)",
+      transform: "scale(1.02)",
+    },
+    "&:active": {
+      transform: "scale(0.98)",
+      boxShadow: "0 4px 10px rgba(239, 83, 80, 0.2)",
+    },
+    "&:focus": {
+      outline: "none",
+      boxShadow: "0 0 0 4px rgba(239, 83, 80, 0.2)",
+    },
+    textTransform: "none",
+  }}
+>
+  حذف گزارش
+</Button>
+
+
+
+
+            
+
+            
+
           </Box>
         </Box>
         
         );
       })}
     </Masonry>
-   <Dialog
-  open={reportDialogOpen}
-  onClose={() => setReportDialogOpen(false)}
-  maxWidth="sm"
-  fullWidth
-  dir="rtl"
->
-  <DialogContent
-    sx={{
-      direction: "rtl",
-      textAlign: "right",
-      fontFamily: "inherit",
-    }}
-  >
-    {violationStatus === "reported" ? (
-      <Typography color="error" fontWeight={600}>
-        گزارش شما از قبل در سامانه ثبت شده است.
-      </Typography>
-    ) : (
-      <>
-        <Typography fontWeight="bold" mb={2}>
-          دلیل گزارش تخلف
-        </Typography>
 
-        <TextField
-          multiline
-          fullWidth
-          rows={4}
-          placeholder="لطفاً دلیل خود را برای ثبت تخلف وارد کنید…"
-          value={reportReason}
-          onChange={(e) => setReportReason(e.target.value)}
-          sx={{
-            direction: "rtl",
-            "& input, & textarea": {
-              textAlign: "right",
-            },
-          }}
-        />
-
-        <Box display="flex" justifyContent="flex-start" mt={2} gap={1}>
-          <Button onClick={() => setReportDialogOpen(false)} color="primary">
-            انصراف
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={submitViolationReport}
-          >
-            ثبت گزارش
-          </Button>
-        </Box>
-      </>
-    )}
+    <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+  <DialogTitle sx={{ textAlign: "center", fontWeight: 700 }}>
+    حذف گزارش
+  </DialogTitle>
+  <DialogContent>
+    <Typography sx={{ mb: 2, textAlign: "center" }}>
+      آیا مطمئن هستید که می‌خواهید این گزارش را از سامانه حذف کنید؟
+    </Typography>
+    <Box display="flex" justifyContent="center" gap={2} mt={2}>
+      <Button onClick={() => setDeleteDialogOpen(false)} variant="outlined">
+        انصراف
+      </Button>
+      <Button onClick={handleDeleteReport} color="error" variant="contained">
+        حذف گزارش
+      </Button>
+    </Box>
   </DialogContent>
 </Dialog>
-
-
-
 
     <style>
     {`
@@ -1231,4 +1222,4 @@ const submitViolationReport = async () => {
   );
 };
 
-export default ReportFeed;
+export default ViolationReportFeed;
