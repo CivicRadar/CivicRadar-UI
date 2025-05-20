@@ -51,6 +51,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SortIcon from "@mui/icons-material/Sort";
 import logo from "../assets/lgo.png";
 import { useNavigate } from "react-router-dom";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 
 export default function Reports({ ReportClick }) {
@@ -684,26 +685,33 @@ export default function Reports({ ReportClick }) {
         (!toDateObj || reportDate <= toDateObj)
       );
     })
-    .sort((a, b) => {
-      for (let option of sortOptions) {
-        if (option === "priority") {
-          const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-          const diff =
-            (priorityOrder[a.Priority] || 4) - (priorityOrder[b.Priority] || 4);
-          if (diff !== 0) return diff;
-        } else if (option === "likes") {
-          const diff = (b.Likes || 0) - (a.Likes || 0);
-          if (diff !== 0) return diff;
-        } else if (option === "dislikes") {
-          const diff = (b.Dislikes || 0) - (a.Dislikes || 0);
-          if (diff !== 0) return diff;
-        } else if (option === "date") {
-          const diff = new Date(b.DateTime) - new Date(a.DateTime);
-          if (diff !== 0) return diff;
-        }
-      }
-      return 0;
-    });
+  .sort((a, b) => {
+  for (let option of sortOptions) {
+    if (option === "priority") {
+      const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+      const diff =
+        (priorityOrder[a.Priority] || 4) - (priorityOrder[b.Priority] || 4);
+      if (diff !== 0) return diff;
+    } else if (option === "likes") {
+      const diff = (b.Likes || 0) - (a.Likes || 0);
+      if (diff !== 0) return diff;
+    } else if (option === "dislikes") {
+      const diff = (b.Dislikes || 0) - (a.Dislikes || 0);
+      if (diff !== 0) return diff;
+    } else if (option === "date") {
+      const diff = new Date(b.DateTime) - new Date(a.DateTime);
+      if (diff !== 0) return diff;
+    } else if (option === "violations_desc") {
+  const diff = (b.Violations || 0) - (a.Violations || 0);
+  if (diff !== 0) return diff;
+} else if (option === "violations_asc") {
+  const diff = (a.Violations || 0) - (b.Violations || 0);
+  if (diff !== 0) return diff;
+}
+
+  }
+  return 0;
+});
 
   useEffect(() => {
     const fullBaseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${
@@ -855,6 +863,9 @@ export default function Reports({ ReportClick }) {
     { value: "likes", label: "بر اساس تأیید" },
     { value: "dislikes", label: "بر اساس عدم تأیید" },
     { value: "date", label: "بر اساس تاریخ" },
+    { value: "violations_desc", label: "تعداد تخلف (زیاد به کم)" },
+  { value: "violations_asc", label: "تعداد تخلف (کم به زیاد)" },
+
   ].map(({ value, label }) => (
     <MenuItem
       key={value}
@@ -1527,6 +1538,26 @@ export default function Reports({ ReportClick }) {
                         mt: { xs: 1, sm: 0 },
                       }}
                     />
+                    <Chip
+  icon={<WarningAmberIcon sx={{ color: "#d32f2f" }} />}
+  label={
+    report.Violations > 0
+      ? `${report.Violations} گزارش تخلف`
+      : "بدون تخلف"
+  }
+  sx={{
+    backgroundColor: report.Violations > 0 ? "#ffebee" : "#f1f8e9",
+    color: report.Violations > 0 ? "#c62828" : "#558b2f",
+    borderRadius: "16px",
+    fontWeight: 500,
+    px: 1.5,
+    alignSelf: { xs: "flex-start", sm: "center" },
+        mt: { xs: 0.5, sm: 0 },  
+
+  }}
+  size="small"
+/>
+
                   </Box>
                 </Box>
 
