@@ -45,6 +45,10 @@ import ReportsMap from "../Components/ReportsMap";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import MayorStatsPanel from "../Components/mayorstatpanel";
 import { getStats } from "../services/mayor-api";
+import { Badge } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+// import { useNavigate } from "react-router-dom"; 
+
 
 
 const MainContent = styled(Box)(({ theme }) => ({
@@ -77,10 +81,12 @@ export default function MayorDashboard() {
   const isMobile = useMediaQuery("(max-width:900px)");
   const [imagePreview, setImagePreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [editedProfile, setEditedProfile] = useState({
     FullName: "",
     Picture: null,
   });
+  const [notifDialogOpen, setNotifDialogOpen] = useState(false);
   const [shouldDeletePicture, setShouldDeletePicture] = useState(false);
   const fileInputRef = useRef();
   const handleShowTeamForm = () => {
@@ -138,6 +144,24 @@ export default function MayorDashboard() {
       fileInputRef.current.value = "";
     }
   };
+  useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/mayor-notifications/`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+      console.log("hi" + data);
+      setNotifications(data);
+    } catch (err) {
+      console.error("خطا در دریافت نوتیفیکیشن:", err);
+    }
+  };
+
+  fetchNotifications();
+}, []);
+
 
   useEffect(() => {
     // Check if state exists on initial load
@@ -421,6 +445,30 @@ export default function MayorDashboard() {
       setSelectedReport(repid)
       navigate(`/reports/${repid}`);
     }
+
+    const handleNotifDialogClose = () => {
+  const unseen = notifications.filter((n) => !n.Seen);
+  unseen.forEach((notif) => {
+    fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/mayor-notifications/`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ NotificationID: notif.id }),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notif.id ? { ...n, Seen: true } : n
+          )
+        );
+      })
+      .catch((err) => console.error("خطا در seen کردن نوتیف:", err));
+  });
+
+  setNotifDialogOpen(false);
+};
+
   
 
   return (
@@ -510,9 +558,12 @@ export default function MayorDashboard() {
                 </Typography>
               </Box>
 
-              <IconButton color="inherit">
-                <Notifications />
-              </IconButton>
+              <IconButton color="inherit" onClick={() => setNotifDialogOpen(true)}>
+  <Badge badgeContent={notifications.filter(n => !n.Seen).length} color="error">
+    <Notifications />
+  </Badge>
+</IconButton>
+
             </Toolbar>
           </AppBar>
 
@@ -612,6 +663,94 @@ export default function MayorDashboard() {
   onClose={() => setDeleteDialogOpen(false)}
   onConfirm={handleDeleteAccount}
 />
+
+<Dialog
+  open={notifDialogOpen}
+  onClose={handleNotifDialogClose}
+  maxWidth="sm"
+  fullWidth
+  dir="rtl"
+>
+  <DialogTitle
+    sx={{
+      fontWeight: "bold",
+      textAlign: "center",
+      position: "relative",
+      pr: 4,
+    }}
+  >
+    📢 پیام‌ها
+    <IconButton
+      onClick={handleNotifDialogClose}
+      sx={{
+        position: "absolute",
+        left: 8,
+        top: 8,
+        color: "grey.500",
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <DialogContent sx={{ px: 3, py: 1.5 }}>
+    {notifications.length === 0 ? (
+      <Box
+        sx={{
+          textAlign: "center",
+          mt: 3,
+          color: "text.secondary",
+          fontSize: "1rem",
+        }}
+      >
+        📭 پیامی وجود ندارد
+      </Box>
+    ) : (
+      notifications.map((notif) => (
+        <Box
+          key={notif.id}
+          sx={{
+            backgroundColor: notif.Seen ? "#f9f9f9" : "#e3f2fd",
+            p: 2,
+            borderRadius: 2,
+            mb: 1.5,
+            border: notif.Seen ? "1px solid #ddd" : "1px solid #64b5f6",
+            boxShadow: notif.Seen ? 0 : 2,
+            transition: "background 0.3s",
+          }}
+        >
+          <Typography fontWeight={notif.Seen ? "normal" : "bold"} sx={{ mb: 1 }}>
+            {notif.Message}
+          </Typography>
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              variant="contained"
+              color="success"
+              size="small"
+              onClick={() => navigate(`/reports/${notif.CityProblemID}`)}
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 2,
+                fontWeight: "bold",
+                fontSize: "0.95rem",
+                boxShadow: "none",
+              }}
+            >
+              مشاهده گزارش
+            </Button>
+          </Box>
+        </Box>
+      ))
+    )}
+  </DialogContent>
+</Dialog>
+
+
+
+
+
 
     </ThemeProvider>
   );

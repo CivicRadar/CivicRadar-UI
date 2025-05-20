@@ -244,9 +244,9 @@ const handleProfileClick = () => {
                 </IconButton>
               </Box>
 
-              <IconButton color="inherit">
+              {/* <IconButton color="inherit">
                 <Notifications />
-              </IconButton>
+              </IconButton> */}
             </Toolbar>
           </AppBar>
 
