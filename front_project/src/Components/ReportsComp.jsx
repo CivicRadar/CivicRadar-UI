@@ -56,6 +56,9 @@ const ReportForm = () => {
   const [uploadProgress, setUploadProgress] = useState(null); // null یا عدد بین 0 تا 100
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [rawImage, setRawImage] = useState(null);
+const imageInputRef = useRef(null);
+const videoInputRef = useRef(null);
+
 
 useEffect(() => {
   // When the component unmounts or activeStep changes, reset the map view
@@ -326,14 +329,25 @@ useEffect(() => {
     handleChange("image", croppedImageUrl);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
+const handleImageUpload = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const fileURL = URL.createObjectURL(file);
+
+    // برای اطمینان از re-render حتی اگر فایل تکراریه
+    setRawImage(null);
+    setTimeout(() => {
       setRawImage(fileURL);
       setCropDialogOpen(true);
+    }, 0);
+
+    // ریست input بعد از انتخاب
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
     }
-  };
+  }
+};
+
 
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
@@ -342,13 +356,31 @@ useEffect(() => {
     }
   };
 
-  const handleRemoveImage = () => {
-    handleChange('image', null);
-  };
+const handleRemoveImage = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-  const handleRemoveVideo = () => {
-    handleChange('video', null);
-  };
+  if (imageInputRef.current) {
+    imageInputRef.current.blur();
+  }
+
+  handleChange('image', null);
+};
+
+
+
+const handleRemoveVideo = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (videoInputRef.current) {
+    videoInputRef.current.value = "";
+    videoInputRef.current.blur(); // جلوگیری از auto-open
+  }
+
+  handleChange('video', null);
+};
+
 
   // Fetch provinces
   useEffect(() => {
@@ -1013,6 +1045,7 @@ useEffect(() => {
             onChange={handleImageUpload}
             style={{ display: 'none' }}
             id="image-upload"
+            ref={imageInputRef}
           />
           <label htmlFor="image-upload">
             <Button
@@ -1049,24 +1082,22 @@ useEffect(() => {
                       objectFit: 'cover',
                     }}
                   />
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveImage();
-                    }}
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      bgcolor: 'white',
-                      boxShadow: 1,
-                      '&:hover': {
-                        bgcolor: 'error.light',
-                      }
-                    }}
-                  >
-                    <DeleteIcon color="error" />
-                  </IconButton>
+                 <IconButton
+  onClick={handleRemoveImage}
+  sx={{
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    bgcolor: 'white',
+    boxShadow: 1,
+    '&:hover': {
+      bgcolor: 'error.light',
+    }
+  }}
+>
+  <DeleteIcon color="error" />
+</IconButton>
+
                 </>
               ) : (
                 <>
@@ -1102,6 +1133,7 @@ useEffect(() => {
             onChange={handleVideoUpload}
             style={{ display: 'none' }}
             id="video-upload"
+            ref={videoInputRef}
           />
           <label htmlFor="video-upload">
             <Button
@@ -1139,23 +1171,21 @@ useEffect(() => {
                     }}
                   />
                   <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveVideo();
-                    }}
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      bgcolor: 'white',
-                      boxShadow: 1,
-                      '&:hover': {
-                        bgcolor: 'error.light',
-                      }
-                    }}
-                  >
-                    <DeleteIcon color="error" />
-                  </IconButton>
+  onClick={handleRemoveVideo}
+  sx={{
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    bgcolor: 'white',
+    boxShadow: 1,
+    '&:hover': {
+      bgcolor: 'error.light',
+    }
+  }}
+>
+  <DeleteIcon color="error" />
+</IconButton>
+
                 </>
               ) : (
                 <>

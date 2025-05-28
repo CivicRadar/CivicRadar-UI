@@ -48,6 +48,9 @@ import { getStats } from "../services/mayor-api";
 import { Badge } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 // import { useNavigate } from "react-router-dom"; 
+import BlockRounded from "@mui/icons-material/BlockRounded";
+import VisibilityRounded from "@mui/icons-material/VisibilityRounded";
+
 
 
 
@@ -724,23 +727,37 @@ export default function MayorDashboard() {
           </Typography>
 
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="contained"
-              color="success"
-              size="small"
-              onClick={() => navigate(`/reports/${notif.CityProblemID}`)}
-              sx={{
-                borderRadius: "20px",
-                textTransform: "none",
-                px: 2,
-                fontWeight: "bold",
-                fontSize: "0.95rem",
-                boxShadow: "none",
-              }}
-            >
-              مشاهده گزارش
-            </Button>
-          </Box>
+ <Button
+  variant="contained"
+  color="success"
+  size="small"
+  disabled={!notif.CityProblemID}
+  onClick={() => navigate(`/reports/${notif.CityProblemID}`)}
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 1,
+    borderRadius: "20px",
+    textTransform: "none",
+    fontWeight: "bold",
+    fontSize: "0.9rem",
+    bgcolor: notif.CityProblemID ? "success.main" : "grey.300",
+    color: notif.CityProblemID ? "white" : "grey.600",
+    direction: "rtl", // راست‌چین کردن متن و ترتیب
+    "&:hover": {
+      bgcolor: notif.CityProblemID ? "success.dark" : "grey.400",
+    },
+  }}
+>
+  {notif.CityProblemID ? "مشاهده گزارش" : "گزارش حذف شده است"}
+  {notif.CityProblemID ? <VisibilityRounded /> : <BlockRounded />}
+</Button>
+
+
+</Box>
+
+
         </Box>
       ))
     )}
