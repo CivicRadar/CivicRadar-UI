@@ -3,10 +3,89 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Person, People, Campaign } from "@mui/icons-material";
 import { useState, useEffect } from "react";
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "./assets/lgo.png";
 import heroImage from "./assets/landing01.svg";
+import searchingImage from "./assets/searching.svg";
+import reportingImage from "./assets/reporting.svg";
+import solvingImage from "./assets/solving.svg";
 import IranMap from "./components/iranmap";
 import { keyframes } from '@emotion/react';
+import { GlobalStyles } from '@mui/system';
+import { Link } from '@mui/material';
+
+const theme = createTheme({
+  typography: {
+    fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+    fontSize: 18,
+    h1: { fontSize: "28px", fontWeight: 700 },
+    h2: { fontSize: "24px", fontWeight: 700 },
+    h3: { fontSize: "20px", fontWeight: 700 },
+    body1: { fontSize: "18px", fontWeight: 400 },
+    button: { fontSize: "20px", fontWeight: 700 },
+    subtitle1: { fontSize: "16px", fontWeight: 400, color: "#666" },
+  },
+});
+
+const globalStyles = (
+  <GlobalStyles
+    styles={{
+      ':root': {
+        '--color-primary': '#2584ff',
+        '--color-secondary': '#00d9ff',
+        '--color-accent': '#ff3400',
+        '--color-headings': '#1b0760',
+        '--color-body': '#918ca4',
+      },
+      '*': {
+        boxSizing: 'border-box',
+        margin: 0,
+        padding: 0,
+      },
+      body: {
+        overflowX: 'hidden',
+        fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+      }
+    }}
+  />
+);
+
+const WaveShape = () => (
+  <Box
+    sx={{
+      position: 'absolute',
+      bottom: -2,
+      left: 0,
+      width: '100%',
+      overflow: 'hidden',
+      lineHeight: 0,
+      zIndex: 1,
+    }}
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1200 120"
+      preserveAspectRatio="none"
+      style={{
+        position: 'relative',
+        display: 'block',
+        width: 'calc(100% + 1.3px)',
+        height: '150px',
+        transform: 'rotateY(180deg)',
+      }}
+    >
+      <path
+        d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+        style={{
+          fill: '#ffffff',
+        }}
+      />
+    </svg>
+  </Box>
+);
+
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -16,6 +95,13 @@ function LandingPage() {
     reportsToday: 0,
   });
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
+
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
 
   const toPersianNumber = (num) => {
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -83,167 +169,517 @@ function LandingPage() {
   `;
 
   return (
-    <Box sx={{ overflowX: "hidden" }}>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #021524, #023, #034, #056)",
-          backgroundSize: "400% 400%",
-          animation: "gradientAnimation 10s ease infinite",
-          color: "white",
-          position: "relative",
-        }}
-      >
-        {/* Navigation */}
-        <Box sx={{ position: "absolute", width: "100%", top: 0, p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <motion.img
-            src={logo}
-            alt="Logo"
-            style={{ height: "50px" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-          />
-          <Button
-            variant="contained"
-            sx={{
-              background: "rgba(255, 255, 255, 0.1)",
-              backdropFilter: "blur(10px)",
-              color: "white",
-              ':hover': {
-                background: "rgba(255, 255, 255, 0.2)",
-              },
+    <ThemeProvider theme={theme}>
+      <Box sx={{ overflowX: "hidden" }}>
+        {globalStyles}
+        {/* Hero Section */}
+        <Box
+          component="section"
+          sx={{
+            minHeight: "100vh",
+            width: "100vw",
+            margin: 0,
+            padding: 0,
+            background: "linear-gradient(135deg, rgb(2, 99, 75), #023, #034, #056)",
+            backgroundSize: "400% 400%",
+            animation: "gradientAnimation 10s ease infinite",
+            color: "white",
+            position: "relative",
+            overflow: "hidden",
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%)',
+              pointerEvents: 'none',
+            }
+          }}
+        >
+          {/* Navigation */}
+          <Box 
+            sx={{ 
+              position: "absolute", 
+              width: "100%", 
+              top: 20, 
+              p: 2, 
+              display: "flex", 
+              justifyContent: "space-between", 
+              alignItems: "center",
+              zIndex: 2,
             }}
-            onClick={() => navigate("/signuplogin")}
           >
-            ورود / ثبت نام
-          </Button>
-        </Box>
+            <motion.img
+              src={logo}
+              alt="Logo"
+              style={{ height: "50px" }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            />
+            <Button
+              variant="contained"
+              sx={{
+                background: "rgba(255, 255, 255, 0.1)",
+                backdropFilter: "blur(10px)",
+                mr: 4,
+                color: "white",
+                transition: "all 0.3s ease",
+                '&:hover': {
+                  background: "rgba(255, 255, 255, 0.2)",
+                  transform: "translateY(-2px)",
+                },
+              }}
+              onClick={() => navigate("/signuplogin")}
+            >
+              ورود / ثبت نام
+            </Button>
+          </Box>
 
-        {/* Hero Content */}
-        <Container>
-          <Grid container spacing={4} sx={{ minHeight: "100vh", alignItems: "center" }}>
-            <Grid item xs={12} md={6}>
-              <motion.div
-                initial={{ opacity: 0, x: -100 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1 }}
-              >
-                <Typography variant="h2" component="h1" sx={{ fontWeight: "bold", mb: 3, textAlign: "right" }}>
+          {/* Hero Content */}
+          <Container maxWidth="lg" sx={{ height: "100vh" }}>
+            <Grid 
+              container 
+              spacing={4} 
+              sx={{ 
+                height: "100%",
+                alignItems: "center",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                >
+                                  <Typography 
+                  variant="h1" 
+                  component="h1" 
+                  sx={{ 
+                    fontWeight: "bold", 
+                    mb: 3, 
+                    textAlign: "right",
+                    fontSize: { xs: "2.5rem", md: "3.5rem", lg: "4rem" },
+                    background: "linear-gradient(45deg, #fff, #e0e0e0)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    lineHeight: 1.2,
+                    maxWidth: "800px",
+                    marginRight: "auto",
+                  }}
+                >
                   سامانه هوشمند گزارش مشکلات شهری
                 </Typography>
-                <Typography variant="h5" sx={{ color: "#b0bec5", mb: 4, textAlign: "right" }}>
-                  با ما در ساختن شهری بهتر همراه شوید
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    sx={{
-                      background: "#00e5ff",
-                      color: "#023",
-                      ':hover': {
-                        background: "#00b8d4",
-                      },
+                  <Typography 
+                    variant="h2" 
+                    sx={{ 
+                      color: "rgba(255, 255, 255, 0.8)", 
+                      mb: 4, 
+                      textAlign: "right",
+                      fontSize: { xs: "1.5rem", md: "1.8rem" },
                     }}
-                    onClick={() => navigate("/register")}
                   >
-                    شروع کنید
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    sx={{
-                      color: "#00e5ff",
-                      borderColor: "#00e5ff",
-                      ':hover': {
-                        borderColor: "#00b8d4",
-                        background: "rgba(0, 229, 255, 0.1)",
-                      },
+                    با ما در ساختن شهری بهتر همراه شوید
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      sx={{
+                        background: "var(--color-secondary)",
+                        color: "#023",
+                        padding: "1rem 3rem",
+                        fontSize: "1.2rem",
+                        transition: "all 0.3s ease",
+                        '&:hover': {
+                          background: "#00b8d4",
+                          transform: "translateY(-2px)",
+                        },
+                      }}
+                      onClick={() => navigate("/register")}
+                    >
+                      شروع کنید
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      sx={{
+                        color: "var(--color-secondary)",
+                        borderColor: "var(--color-secondary)",
+                        padding: "1rem 3rem",
+                        fontSize: "1.2rem",
+                        transition: "all 0.3s ease",
+                        '&:hover': {
+                          borderColor: "#00b8d4",
+                          background: "rgba(0, 229, 255, 0.1)",
+                          transform: "translateY(-2px)",
+                        },
+                      }}
+                      onClick={() => navigate("/about")}
+                    >
+                      اطلاعات بیشتر
+                    </Button>
+                  </Box>
+                </motion.div>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%'
+                  }}
+                >
+                  <img 
+                    src={heroImage} 
+                    alt="Hero Illustration" 
+                    style={{
+                      maxWidth: '100%',
+                      height: 'auto',
+                      filter: 'drop-shadow(0px 20px 40px rgba(0, 0, 0, 0.25))',
                     }}
-                    onClick={() => navigate("/about")}
-                  >
-                    اطلاعات بیشتر
-                  </Button>
-                </Box>
-              </motion.div>
+                  />
+                </motion.div>
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%'
+          </Container>
+          <WaveShape />
+        </Box>
+
+        {/* Statistics Section */}
+        <Box
+          sx={{
+            py: { xs: 8, md: 12 },
+            mt: 0,
+            position: 'relative',
+            background: '#ffffff',
+            overflow: 'hidden',
+          }}
+        >
+          <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+            <Typography 
+              variant="h3" 
+              component="h2" 
+              sx={{ 
+                textAlign: "center", 
+                mb: 8, 
+                color: "#023",
+                fontSize: { xs: '2.5rem', md: '3rem' },
+                fontWeight: 'bold'
+              }}
+            >
+              آمار و دستاوردها
+            </Typography>
+
+            {/* First Stat - Citizens */}
+            <Grid 
+              container 
+              spacing={6} 
+              alignItems="center" 
+              sx={{ mb: 12 }}
+            >
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <Box sx={{ textAlign: 'right' }}>
+                                      <Typography
+                    variant="h1"
+                    sx={{
+                      color: '#0288d1',
+                      fontWeight: 'bold',
+                      fontSize: { xs: '2.5rem', md: '3.5rem' },
+                      mb: 2,
+                      textAlign: 'right',
+                    }}
+                  >
+                    ۶۹۴۰
+                  </Typography>
+                  <Typography
+                    variant="h2"
+                    sx={{
+                      color: '#333',
+                      mb: 2,
+                      fontSize: { xs: '1.8rem', md: '2.2rem' },
+                      textAlign: 'right',
+                    }}
+                  >
+                    شهروند وظیفه شناس
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#666',
+                      fontSize: { xs: '1rem', md: '1.1rem' },
+                      lineHeight: 1.8,
+                      textAlign: 'right',
+                    }}
+                  >
+                    شهروندان فعال ما از ۲۳۳ شهر مختلف در سراسر کشور، با ارسال ۹۲۰ گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.
+                  </Typography>
+                  </Box>
+                </motion.div>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <img 
+                    src={searchingImage} 
+                    alt="Citizens Statistics" 
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: '400px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </motion.div>
+              </Grid>
+            </Grid>
+
+            {/* Second Stat - Administrations */}
+            <Grid 
+              container 
+              spacing={6} 
+              alignItems="center" 
+              sx={{ mb: 12 }}
+              direction={{ xs: 'column-reverse', md: 'row' }}
+            >
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <img 
+                    src={reportingImage} 
+                    alt="Administration Statistics" 
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: '400px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </motion.div>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <Box sx={{ textAlign: 'right' }}>
+                                      <Typography
+                    variant="h1"
+                    sx={{
+                      color: '#0288d1',
+                      fontWeight: 'bold',
+                      fontSize: { xs: '2.5rem', md: '3.5rem' },
+                      mb: 2,
+                      textAlign: 'right',
+                    }}
+                  >
+                    ۴۳۰ 
+                  </Typography>
+                  <Typography
+                    variant="h2"
+                    sx={{
+                      color: '#333',
+                      mb: 2,
+                      fontSize: { xs: '1.8rem', md: '2.2rem' },
+                      textAlign: 'right',
+                    }}
+                  >
+                    مسئولین شهری
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#666',
+                      fontSize: { xs: '1rem', md: '1.1rem' },
+                      lineHeight: 1.8,
+                      textAlign: 'right',
+                    }}
+                  >
+                    همکاری ۳۰ استانداری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.
+                  </Typography>
+                  </Box>
+                </motion.div>
+              </Grid>
+            </Grid>
+
+            {/* Third Stat - Solved Problems */}
+            <Grid 
+              container 
+              spacing={6} 
+              alignItems="center"
+            >
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <Box sx={{ textAlign: 'right' }}>
+                                      <Typography
+                    variant="h1"
+                    sx={{
+                      color: '#0288d1',
+                      fontWeight: 'bold',
+                      fontSize: { xs: '2.5rem', md: '3.5rem' },
+                      mb: 2,
+                      textAlign: 'right',
+                    }}
+                  >
+                    ۶۴۲
+                  </Typography>
+                  <Typography
+                    variant="h2"
+                    sx={{
+                      color: '#333',
+                      mb: 2,
+                      fontSize: { xs: '1.8rem', md: '2.2rem' },
+                      textAlign: 'right',
+                    }}
+                  >
+                    مشکل شهری رسیدگی شده
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#666',
+                      fontSize: { xs: '1rem', md: '1.1rem' },
+                      lineHeight: 1.8,
+                      textAlign: 'right',
+                    }}
+                  >
+                    با همکاری ۴۳۰ مسئول شهری، تاکنون ۶۴۲ مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.
+                  </Typography>
+                  </Box>
+                </motion.div>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <img 
+                    src={solvingImage} 
+                    alt="Solved Problems Statistics" 
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: '400px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </motion.div>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* Iran Map Section */}
+        <Box sx={{ 
+          py: 12, 
+          background: "#fff",
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Typography 
+                variant="h3" 
+                component="h2" 
+                sx={{ 
+                  textAlign: "center", 
+                  mb: 6, 
+                  color: "#023",
+                  fontSize: { xs: '2.5rem', md: '3rem' },
+                  fontWeight: 'bold'
                 }}
               >
-                <img 
-                  src={heroImage} 
-                  alt="Hero Illustration" 
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    filter: 'drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15))'
-                  }}
-                />
-              </motion.div>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+                پراکندگی گزارشات در کشور
+              </Typography>
+              <Box sx={{ 
+                height: { xs: "400px", sm: "600px", md: "800px" },
+                width: "100%",
+                maxWidth: "1600px",
+                mx: "auto",
+                borderRadius: 4,
+                overflow: 'hidden'
+              }}>
+                <IranMap />
+              </Box>
+            </motion.div>
+          </Container>
+        </Box>
 
-      {/* Statistics Section */}
-      <Box
-        sx={{
-          py: 8,
+        {/* Features Section */}
+        <Box sx={{ 
+          py: 8, 
+          background: "#fff",
           position: 'relative',
-          background: '#f8f9fa',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              linear-gradient(to right, transparent 49.5%, #e9ecef 49.5%, #e9ecef 50.5%, transparent 50.5%),
-              linear-gradient(to bottom, transparent 49.5%, #e9ecef 49.5%, #e9ecef 50.5%, transparent 50.5%)
-            `,
-            backgroundSize: '40px 40px',
-            opacity: 0.5,
-          }
-        }}
-      >
-        <Container maxWidth="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <Grid container spacing={4} justifyContent="center">
+          overflow: 'hidden'
+        }}>
+          <Container sx={{ position: 'relative', zIndex: 1 }}>
+            <Typography 
+              variant="h3" 
+              component="h2" 
+              sx={{ 
+                textAlign: "center", 
+                mb: 6, 
+                color: "#023",
+                fontSize: { xs: '2.5rem', md: '3rem' },
+                fontWeight: 'bold'
+              }}
+            >
+              ویژگی‌های سامانه
+            </Typography>
+            <Grid container spacing={4}>
               {[
                 {
-                  title: "تعداد کل کاربران",
-                  value: dashboardData.users,
-                  color: "#0288d1"
+                  title: "گزارش مشکلات شهری",
+                  description: "به راحتی مشکلات شهری را گزارش دهید",
+                  color: "linear-gradient(135deg, #0288d1, #01579b)"
                 },
                 {
-                  title: "دانشگاه و مرکز آموزشی",
-                  value: dashboardData.admins,
-                  color: "#0288d1"
+                  title: "پیگیری آنلاین",
+                  description: "وضعیت گزارش‌های خود را پیگیری کنید",
+                  color: "linear-gradient(135deg, #0097a7, #006064)"
                 },
                 {
-                  title: "شرکت",
-                  value: dashboardData.reportsToday,
-                  color: "#0288d1"
+                  title: "همکاری با شهرداری",
+                  description: "ارتباط مستقیم با مسئولین شهری",
+                  color: "linear-gradient(135deg, #00897b, #004d40)"
                 }
-              ].map((item, index) => (
+              ].map((feature, index) => (
                 <Grid item xs={12} md={4} key={index}>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -253,11 +689,9 @@ function LandingPage() {
                   >
                     <Card
                       sx={{
-                        textAlign: "center",
-                        p: 4,
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        height: "100%",
+                        background: feature.color,
+                        color: 'white',
                         borderRadius: 4,
                         boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
                         transition: 'all 0.3s ease-in-out',
@@ -267,87 +701,181 @@ function LandingPage() {
                         },
                       }}
                     >
-                      <Typography
-                        variant="h2"
-                        sx={{
-                          mb: 2,
-                          color: item.color,
-                          fontWeight: 'bold',
-                          fontSize: { xs: '2.5rem', md: '3.5rem' },
-                        }}
-                      >
-                        {toPersianNumber(item.value)}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          mb: 2,
-                          color: '#1a237e',
-                          fontWeight: 'medium',
-                        }}
-                      >
-                        {item.title}
-                      </Typography>
+                      <CardContent>
+                        <Typography 
+                          variant="h5" 
+                          component="h3" 
+                          sx={{ 
+                            mb: 2, 
+                            color: 'rgba(255, 255, 255, 0.9)',
+                            textAlign: "right" 
+                          }}
+                        >
+                          {feature.title}
+                        </Typography>
+                        <Typography 
+                          sx={{ 
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            textAlign: "right"
+                          }}
+                        >
+                          {feature.description}
+                        </Typography>
+                      </CardContent>
                     </Card>
                   </motion.div>
                 </Grid>
               ))}
             </Grid>
-          </motion.div>
-        </Container>
-      </Box>
+          </Container>
+        </Box>
 
-      {/* Iran Map Section */}
-      <Box sx={{ py: 8, background: "#fff" }}>
-        <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <Typography variant="h3" component="h2" sx={{ textAlign: "center", mb: 6, color: "#023" }}>
-              پراکندگی گزارشات در کشور
-            </Typography>
-            <Box sx={{ height: "500px", width: "100%" }}>
-              <IranMap />
-            </Box>
-          </motion.div>
-        </Container>
-      </Box>
+        {/* Join Now Section */}
+        <Box
+          sx={{
+            py: 12,
+            background: 'linear-gradient(135deg, rgb(2, 99, 75), #023)',
+            position: 'relative',
+            overflow: 'hidden',
+            color: 'white',
+            textAlign: 'center'
+          }}
+        >
+          <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 'bold',
+                  mb: 3,
+                  fontSize: { xs: '2.5rem', md: '3.5rem' },
+                }}
+              >
+                همین حالا بپیوندید
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  mb: 6,
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: { xs: '1.2rem', md: '1.5rem' },
+                }}
+              >
+                به جمع هزاران شهروند مسئولیت‌پذیر بپیوندید و در ساختن شهری بهتر سهیم باشید
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => navigate("/register")}
+                sx={{
+                  bgcolor: 'white',
+                  color: '#023',
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.2rem',
+                  borderRadius: '50px',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.9)',
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
+                  }
+                }}
+              >
+                ثبت نام کنید
+              </Button>
+            </motion.div>
+          </Container>
+        </Box>
 
-      {/* Features Section */}
-      <Box sx={{ py: 8, background: "#fff" }}>
-        <Container>
-          <Typography variant="h3" component="h2" sx={{ textAlign: "center", mb: 6, color: "#023" }}>
-            ویژگی‌های سامانه
-          </Typography>
-          <Grid container spacing={4}>
-            {featuresList.map((feature, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
-                  viewport={{ once: true }}
-                >
-                  <Card sx={{ height: "100%", boxShadow: 3 }}>
-                    <CardContent>
-                      <Typography variant="h5" component="h3" sx={{ mb: 2, color: "#034", textAlign: "right" }}>
-                        {feature.title}
-                      </Typography>
-                      <Typography sx={{ color: "#666", textAlign: "right" }}>
-                        {feature.description}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+        {/* Footer */}
+        <Box
+          component="footer"
+          sx={{
+            bgcolor: '#023',
+            color: 'white',
+            py: 8,
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          <Container>
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ mb: 4 }}>
+                  <img src={logo} alt="Logo" style={{ height: '50px', marginBottom: '20px' }} />
+                  <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                    سامانه هوشمند گزارش مشکلات شهری
+                  </Typography>
+                </Box>
               </Grid>
-            ))}
-          </Grid>
-        </Container>
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
+                  لینک‌های مفید
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Link 
+                    component="button"
+                    onClick={() => navigate("/about")}
+                    sx={{ 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      textDecoration: 'none',
+                      '&:hover': { color: 'white' }
+                    }}
+                  >
+                    درباره ما
+                  </Link>
+                  <Link 
+                    component="button"
+                    onClick={() => navigate("/contact")}
+                    sx={{ 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      textDecoration: 'none',
+                      '&:hover': { color: 'white' }
+                    }}
+                  >
+                    تماس با ما
+                  </Link>
+                  <Link 
+                    component="button"
+                    onClick={() => navigate("/privacy")}
+                    sx={{ 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      textDecoration: 'none',
+                      '&:hover': { color: 'white' }
+                    }}
+                  >
+                    حریم خصوصی
+                  </Link>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
+                  تماس با ما
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                    ایمیل: info@civicradar.ir
+                  </Typography>
+                  <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                    تلفن: ۰۲۱-۱۲۳۴۵۶۷۸
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+            <Box sx={{ mt: 8, pt: 4, borderTop: '1px solid rgba(255, 255, 255, 0.1)', textAlign: 'center' }}>
+              <Typography sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                © {new Date().getFullYear()} CivicRadar. تمامی حقوق محفوظ است.
+              </Typography>
+            </Box>
+          </Container>
+        </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 }
 

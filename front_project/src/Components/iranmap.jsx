@@ -140,9 +140,6 @@ const handleSortSelect = (mode) => {
 
   return (
     <Box sx={{ fontFamily: 'Vazir', direction: 'rtl', p: isMobile ? 1 : 4 }}>
-      <Typography variant={isMobile ? 'h6' : 'h5'} align="center" mb={isMobile ? 2 : 3}>
-        نقشه گزارش‌ها بر اساس استان
-      </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: 'stretch', maxWidth: 1000, mx: 'auto' }}>
         {/* نقشه */}
