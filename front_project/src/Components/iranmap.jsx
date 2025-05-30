@@ -39,7 +39,7 @@ export default function IranMapSection() {
   const [sortMode, setSortMode] = useState('alphabetical'); // یا 'count'
 
   const [anchorEl, setAnchorEl] = useState(null);
-const open = Boolean(anchorEl);
+  const open = Boolean(anchorEl);
 
 const handleMenuClick = (event) => {
   setAnchorEl(event.currentTarget);
@@ -168,31 +168,40 @@ const handleSortSelect = (mode) => {
         </Box>
 
         {/* اطلاعات شهرها */}
-        <AnimatePresence mode="wait">
-          {selectedProvince && (
-            <motion.div
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -50, scale: 0.9 }}
-              transition={{ type: "spring", duration: 0.5 }}
-            >
-              <Box
-                sx={{
-                  flexBasis: { xs: '100%', md: '30%' },
-                  p: 2,
-                  borderRadius: 2,
-                  bgcolor: '#e6f4ea',
-                  border: '1px solid #3bcc6d',
-                  color: '#2e7d32',
-                  fontWeight: 'bold',
-                  boxShadow: 2,
-                  minHeight: mapHeight,
-                  maxHeight: mapHeight,
-                  height: mapHeight,
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
+        <motion.div
+          layout
+          style={{
+            flexBasis: '30%',
+            width: '100%'
+          }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+          <motion.div
+            layout
+            style={{
+              padding: 16,
+              borderRadius: 8,
+              backgroundColor: '#e6f4ea',
+              border: '1px solid #3bcc6d',
+              color: '#2e7d32',
+              fontWeight: 'bold',
+              boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+            animate={{
+              height: selectedProvince ? mapHeight : "auto",
+              transition: { duration: 0.5, ease: "easeInOut" }
+            }}
+          >
+            {selectedProvince ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: "spring", duration: 0.5 }}
+                style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
               >
                 <Typography variant={isMobile ? 'subtitle1' : 'h6'} fontWeight="bold" mb={2} textAlign="center">
                   {selectedProvince.label} – {selectedProvince.count} گزارش
@@ -297,10 +306,29 @@ const handleSortSelect = (mode) => {
                     );
                   })()}
                 </Box>
-              </Box>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            ) : (
+              <motion.div
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  padding: '16px'
+                }}
+              >
+                <Typography variant="h6" color="#2e7d32">
+                  برای دیدن گزارشات هر استان به تفکیک شهر ها روی استان مورد نظر کلیک کنید
+                </Typography>
+              </motion.div>
+            )}
+          </motion.div>
+        </motion.div>
       </Box>
     </Box>
   );

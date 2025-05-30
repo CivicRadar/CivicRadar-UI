@@ -1,17 +1,18 @@
 import { Typography, Box, Button, Container, Grid, Card, CardContent } from "@mui/material";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Person, People, Campaign } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { AppBar, Toolbar } from "@mui/material";
 import logo from "./assets/lgo.png";
 import heroImage from "./assets/landing01.svg";
 import searchingImage from "./assets/searching.svg";
 import reportingImage from "./assets/reporting.svg";
 import solvingImage from "./assets/solving.svg";
-import IranMap from "./components/iranmap";
+import IranMap from "./Components/iranmap";
 import { keyframes } from '@emotion/react';
 import { GlobalStyles } from '@mui/system';
 import { Link } from '@mui/material';
@@ -95,6 +96,9 @@ function LandingPage() {
     reportsToday: 0,
   });
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
+  const { scrollY } = useScroll();
+  const appBarOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const appBarBlur = useTransform(scrollY, [0, 300], [0, 8]);
 
   useEffect(() => {
     AOS.init({
@@ -172,6 +176,7 @@ function LandingPage() {
     <ThemeProvider theme={theme}>
       <Box sx={{ overflowX: "hidden" }}>
         {globalStyles}
+        
         {/* Hero Section */}
         <Box
           component="section"
@@ -198,48 +203,57 @@ function LandingPage() {
             }
           }}
         >
-          {/* Navigation */}
-          <Box 
-            sx={{ 
-              position: "absolute", 
-              width: "100%", 
-              top: 20, 
-              p: 2, 
-              display: "flex", 
-              justifyContent: "space-between", 
-              alignItems: "center",
-              zIndex: 2,
+          {/* App Bar */}
+          <motion.div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1000,
+              opacity: appBarOpacity,
             }}
           >
-            <motion.img
-              src={logo}
-              alt="Logo"
-              style={{ height: "50px" }}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            />
-            <Button
-              variant="contained"
+            <AppBar 
+              position="static" 
+              elevation={0}
               sx={{
-                background: "rgba(255, 255, 255, 0.1)",
-                backdropFilter: "blur(10px)",
-                mr: 4,
-                color: "white",
-                transition: "all 0.3s ease",
-                '&:hover': {
-                  background: "rgba(255, 255, 255, 0.2)",
-                  transform: "translateY(-2px)",
-                },
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(8px)',
+                mt: 2,
               }}
-              onClick={() => navigate("/signuplogin")}
             >
-              ورود / ثبت نام
-            </Button>
-          </Box>
+              <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 6 } }}>
+                <motion.img 
+                  src={logo} 
+                  alt="Logo" 
+                  style={{ height: "40px" }}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                />
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    backdropFilter: "blur(10px)",
+                    color: "white",
+                    transition: "all 0.3s ease",
+                    '&:hover': {
+                      background: "rgba(255, 255, 255, 0.2)",
+                      transform: "translateY(-2px)",
+                    },
+                  }}
+                  onClick={() => navigate("/signuplogin")}
+                >
+                  ورود / ثبت نام
+                </Button>
+              </Toolbar>
+            </AppBar>
+          </motion.div>
 
           {/* Hero Content */}
-          <Container maxWidth="lg" sx={{ height: "100vh" }}>
+          <Container maxWidth="lg" sx={{ height: "100vh", pt: 16 }}>
             <Grid 
               container 
               spacing={4} 
