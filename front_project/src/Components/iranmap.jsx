@@ -41,6 +41,10 @@ export default function IranMapSection() {
   const [anchorEl, setAnchorEl] = useState(null);
 const open = Boolean(anchorEl);
 
+const toPersianDigits = num =>
+  num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+
 const handleMenuClick = (event) => {
   setAnchorEl(event.currentTarget);
 };
@@ -64,6 +68,7 @@ const handleSortSelect = (mode) => {
   useEffect(() => {
     fetchProvincesData();
   }, []);
+  
 
   const provinceNameMapping = {
     "اردبیل": "ardabil", "اصفهان": "isfahan", "البرز": "alborz", "ایلام": "ilam",
@@ -191,7 +196,7 @@ const handleSortSelect = (mode) => {
             }}
           >
             <Typography variant={isMobile ? 'subtitle1' : 'h6'} fontWeight="bold" mb={2} textAlign="center">
-              {selectedProvince.label} – {selectedProvince.count} گزارش
+{selectedProvince.label} – {toPersianDigits(selectedProvince.count)} گزارش
             </Typography>
 
             <TextField
@@ -285,9 +290,11 @@ const handleSortSelect = (mode) => {
 
                 return sorted.length > 0 ? (
                   sorted.map(([city, count]) => (
-                    <li key={city} style={{ marginBottom: 6 }}>
-                      • {city} – {count} گزارش
-                    </li>
+           <li key={city} style={{ marginBottom: 8, fontSize: isMobile ? '14px' : '16px' }}>
+  • {city} – {toPersianDigits(count)} گزارش
+</li>
+
+
                   ))
                 ) : (
                   <Typography align="center" color="text.secondary" mt={2}>

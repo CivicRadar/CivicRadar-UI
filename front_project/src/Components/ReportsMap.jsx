@@ -265,173 +265,234 @@ export default function ReportsMap() {
 />
 
 
-          <FormControl size="small" sx={{
-    minWidth: 200,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>نوع گزارش</InputLabel>
-            <Select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} label="نوع گزارش">
-              <MenuItem value="">همه</MenuItem>
-              <MenuItem value="Street">خرابی خیابان</MenuItem>
-              <MenuItem value="Lighting">مشکل روشنایی</MenuItem>
-              <MenuItem value="Garbage">زباله رها شده</MenuItem>
-              <MenuItem value="Others">سایر</MenuItem>
-            </Select>
-          </FormControl>
+        <FormControl size="small" sx={{
+  minWidth: 200,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>نوع گزارش</InputLabel>
+  <Select
+    value={selectedType}
+    onChange={(e) => setSelectedType(e.target.value)}
+    label="نوع گزارش"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        }
+      }
+    }}
+  >
+    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
+    <MenuItem value="Street" sx={{ textAlign: 'right' }}>خرابی خیابان</MenuItem>
+    <MenuItem value="Lighting" sx={{ textAlign: 'right' }}>مشکل روشنایی</MenuItem>
+    <MenuItem value="Garbage" sx={{ textAlign: 'right' }}>زباله رها شده</MenuItem>
+    <MenuItem value="Others" sx={{ textAlign: 'right' }}>سایر</MenuItem>
+  </Select>
+</FormControl>
+
+
+       <FormControl size="small" sx={{
+  minWidth: 150,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>استان</InputLabel>
+  <Select
+    value={selectedProvince}
+    onChange={(e) => setSelectedProvince(e.target.value)}
+    label="استان"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+  >
+    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
+    {uniqueProvinces.map((province) => (
+      <MenuItem key={province} value={province} sx={{ textAlign: 'right' }}>
+        {province}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+
+         <FormControl size="small" sx={{
+  minWidth: 150,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>شهر</InputLabel>
+  <Select
+    value={selectedCity}
+    onChange={(e) => setSelectedCity(e.target.value)}
+    label="شهر"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+  >
+    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
+    {uniqueCities.map((city) => (
+      <MenuItem key={city} value={city} sx={{ textAlign: 'right' }}>
+        {city}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
 
           <FormControl size="small" sx={{
-    minWidth: 150,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>استان</InputLabel>
-            <Select value={selectedProvince} onChange={(e) => setSelectedProvince(e.target.value)} label="استان">
-              <MenuItem value="">همه</MenuItem>
-              {uniqueProvinces.map((province) => (
-                <MenuItem key={province} value={province}>
-                  {province}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+  minWidth: 150,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>اهمیت</InputLabel>
+  <Select
+    value={selectedPriority}
+    onChange={(e) => setSelectedPriority(e.target.value)}
+    label="اهمیت"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+  >
+    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
+    <MenuItem value="High" sx={{ textAlign: 'right' }}>زیاد</MenuItem>
+    <MenuItem value="Medium" sx={{ textAlign: 'right' }}>متوسط</MenuItem>
+    <MenuItem value="Low" sx={{ textAlign: 'right' }}>کم</MenuItem>
+  </Select>
+</FormControl>
 
-          <FormControl size="small" sx={{
-    minWidth: 150,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>شهر</InputLabel>
-            <Select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} label="شهر">
-              <MenuItem value="">همه</MenuItem>
-              {uniqueCities.map((city) => (
-                <MenuItem key={city} value={city}>
-                  {city}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{
-    minWidth: 150,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>اهمیت</InputLabel>
-            <Select value={selectedPriority} onChange={(e) => setSelectedPriority(e.target.value)} label="اهمیت">
-              <MenuItem value="">همه</MenuItem>
-              <MenuItem value="High">زیاد</MenuItem>
-              <MenuItem value="Medium">متوسط</MenuItem>
-              <MenuItem value="Low">کم</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{
-    minWidth: 200,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
+         <FormControl size="small" sx={{
+  minWidth: 200,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
   <InputLabel>وضعیت گزارش</InputLabel>
   <Select
     value={selectedStatus}
     onChange={(e) => setSelectedStatus(e.target.value)}
     label="وضعیت گزارش"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
   >
-    <MenuItem value="">همه</MenuItem>
-    <MenuItem value="PendingReview">در انتظار بررسی</MenuItem>
-    <MenuItem value="UnderConsideration">در حال رسیدگی</MenuItem>
-    <MenuItem value="IssueResolved">حل‌شده</MenuItem>
+    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
+    <MenuItem value="PendingReview" sx={{ textAlign: 'right' }}>در انتظار بررسی</MenuItem>
+    <MenuItem value="UnderConsideration" sx={{ textAlign: 'right' }}>در حال رسیدگی</MenuItem>
+    <MenuItem value="IssueResolved" sx={{ textAlign: 'right' }}>حل‌شده</MenuItem>
   </Select>
 </FormControl>
+
 
 
           <DatePicker
