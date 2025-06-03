@@ -39,6 +39,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import ReportIcon from "@mui/icons-material/Report";
 import Swal from "sweetalert2";
 
+const toPersianDigits = (num) => {
+  return String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+};
+
+
 
 const ReportFeed = () => {
   const [reports, setReports] = useState([]);
@@ -523,6 +528,15 @@ const submitViolationReport = async () => {
             <Select
               value={selectedType}
               label="نوع"
+                MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
               onChange={(e) => setSelectedType(e.target.value)}
             >
               <MenuItem value="">همه</MenuItem>
@@ -563,6 +577,15 @@ const submitViolationReport = async () => {
   <Select
     value={selectedProvince}
     label="استان"
+      MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', // یا هر فونت فارسی
+        },
+      },
+    }}
     onChange={(e) => {
       setSelectedProvince(e.target.value);
       setSelectedCity(""); 
@@ -605,6 +628,15 @@ const submitViolationReport = async () => {
   <Select
     value={selectedCity}
     label="شهر"
+      MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', // یا هر فونت فارسی
+        },
+      },
+    }}
     onChange={(e) => setSelectedCity(e.target.value)}
   >
     <MenuItem value="">همه</MenuItem>
@@ -644,6 +676,15 @@ const submitViolationReport = async () => {
             <Select
               value={selectedStatus}
               label="وضعیت"
+                MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', // یا هر فونت فارسی
+        },
+      },
+    }}
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
               <MenuItem value="">همه</MenuItem>
@@ -984,8 +1025,9 @@ const submitViolationReport = async () => {
   <ThumbDownAltIcon fontSize="small" />
 </IconButton>
 <Typography variant="body2" color="text.secondary">
-  {r.Dislikes || 0}
+  {toPersianDigits(r.Dislikes || 0)}
 </Typography>
+
 
 <IconButton
   size="small"
@@ -995,8 +1037,9 @@ const submitViolationReport = async () => {
   <ThumbUpAltIcon fontSize="small" />
 </IconButton>
 <Typography variant="body2" color="text.secondary">
-  {r.Likes || 0}
+  {toPersianDigits(r.Likes || 0)}
 </Typography>
+
 
 <Box
   display="inline-flex"

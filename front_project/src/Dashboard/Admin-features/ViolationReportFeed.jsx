@@ -66,6 +66,12 @@ const [unmarkDialogOpen, setUnmarkDialogOpen] = useState(false);
 const [reportToUnmark, setReportToUnmark] = useState(null);
 
 
+const toPersianDigits = (num) => {
+  if (num === null || num === undefined) return '';
+  return num.toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+};
+
+
 
 
 
@@ -979,7 +985,7 @@ const handleDislikeToggle = async (reportId) => {
   <ThumbDownAltIcon fontSize="small" />
 </IconButton>
 <Typography variant="body2" color="text.secondary">
-  {r.Dislikes || 0}
+  {toPersianDigits(r.Dislikes || 0)}
 </Typography>
 
 <IconButton
@@ -990,7 +996,7 @@ const handleDislikeToggle = async (reportId) => {
   <ThumbUpAltIcon fontSize="small" />
 </IconButton>
 <Typography variant="body2" color="text.secondary">
-  {r.Likes || 0}
+  {toPersianDigits(r.Likes || 0)}
 </Typography>
 
 
@@ -1026,18 +1032,19 @@ const handleDislikeToggle = async (reportId) => {
   bgcolor="#ffebee"
   boxShadow="0 2px 6px rgba(244, 67, 54, 0.2)"
 >
-  <Typography
-    variant="subtitle2"
-    fontWeight="bold"
-    color="error.main"
-    mb={1}
-    display="flex"
-    alignItems="center"
-    gap={1}
-  >
-    <ReportIcon fontSize="small" />
-    دلایل گزارش تخلف ({r.Reports.length} مورد)
-  </Typography>
+<Typography
+  variant="subtitle2"
+  fontWeight="bold"
+  color="error.main"
+  mb={1}
+  display="flex"
+  alignItems="center"
+  gap={1}
+>
+  <ReportIcon fontSize="small" />
+  {`دلایل گزارش تخلف (${toPersianDigits(r.Reports.length)} مورد)`}
+</Typography>
+
 
   <Box component="ul" sx={{ pr: 3, m: 0 }}>
     {r.Reports.map((rep, index) => (
