@@ -1,4 +1,4 @@
-import { Typography, Box, Button, Container, Grid, Card, CardContent } from "@mui/material";
+import { Typography, Box, Button, Container, Grid, Card, CardContent, useMediaQuery } from "@mui/material";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Person, People, Campaign } from "@mui/icons-material";
@@ -16,6 +16,7 @@ import IranMap from "./Components/iranmap";
 import { keyframes } from '@emotion/react';
 import { GlobalStyles } from '@mui/system';
 import { Link } from '@mui/material';
+import Typewriter from 'typewriter-effect';
 
 const theme = createTheme({
   typography: {
@@ -90,6 +91,7 @@ const WaveShape = () => (
 
 function LandingPage() {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery('(max-width:600px)');
   const [dashboardData, setDashboardData] = useState({
     users: 0,
     admins: 0,
@@ -97,8 +99,35 @@ function LandingPage() {
   });
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
   const { scrollY } = useScroll();
-  const appBarOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-  const appBarBlur = useTransform(scrollY, [0, 300], [0, 8]);
+  const buttonTextColor = useTransform(scrollY, [500, 1000], ['white', '#02634b']);
+  const buttonBorder = useTransform(scrollY, [500, 1000], ['none', '1px solid #02634b']);
+  const navOpacity = useTransform(scrollY, [0, 100], [1, 0]);
+  const navY = useTransform(scrollY, [0, 100], [0, -100]);
+
+  const scrollToTop = () => {
+    const currentPosition = window.pageYOffset;
+    const targetPosition = 0;
+    const distance = targetPosition - currentPosition;
+    const duration = 800; // Duration in milliseconds
+    let start = null;
+
+    function animation(currentTime) {
+      if (start === null) start = currentTime;
+      const timeElapsed = currentTime - start;
+      const progress = Math.min(timeElapsed / duration, 1);
+      
+      // Easing function for smooth landing
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      
+      window.scrollTo(0, currentPosition + distance * easeOutQuart);
+      
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    }
+
+    requestAnimationFrame(animation);
+  };
 
   useEffect(() => {
     AOS.init({
@@ -177,16 +206,70 @@ function LandingPage() {
       <Box sx={{ overflowX: "hidden" }}>
         {globalStyles}
         
+        {/* Top Navigation */}
+        <motion.div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            padding: isMobile ? '16px' : '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            opacity: isMobile ? navOpacity : 1,
+            transform: isMobile ? `translateY(${navY}px)` : 'none',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          <motion.img 
+            src={logo} 
+            alt="Logo" 
+            style={{ 
+              height: "40px",
+              filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))',
+              cursor: 'pointer'
+            }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            onClick={scrollToTop}
+            whileHover={{ scale: 1.05 }}
+          />
+          <motion.button
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(10px)",
+              border: buttonBorder,
+              borderRadius: "4px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              color: buttonTextColor,
+              fontSize: "1rem",
+              fontWeight: "bold",
+              transition: "all 0.3s ease",
+            }}
+            whileHover={{
+              background: "rgba(255, 255, 255, 0.2)",
+              transform: "translateY(-2px)",
+            }}
+            onClick={() => navigate("/signuplogin")}
+          >
+            ورود / ثبت نام
+          </motion.button>
+        </motion.div>
+
         {/* Hero Section */}
         <Box
           component="section"
           sx={{
-            minHeight: "100vh",
+            minHeight: { xs: "80vh", md: "90vh" },
             width: "100vw",
             margin: 0,
             padding: 0,
             background: "linear-gradient(135deg, rgb(2, 99, 75), #023, #034, #056)",
-            backgroundSize: "400% 400%",
+            backgroundSize: { xs: "200% 200%", md: "400% 400%" },
             animation: "gradientAnimation 10s ease infinite",
             color: "white",
             position: "relative",
@@ -198,62 +281,16 @@ function LandingPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%)',
+              background: {
+                xs: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%)',
+                md: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%)'
+              },
               pointerEvents: 'none',
             }
           }}
         >
-          {/* App Bar */}
-          <motion.div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1000,
-              opacity: appBarOpacity,
-            }}
-          >
-            <AppBar 
-              position="static" 
-              elevation={0}
-              sx={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(8px)',
-                mt: 2,
-              }}
-            >
-              <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 6 } }}>
-                <motion.img 
-                  src={logo} 
-                  alt="Logo" 
-                  style={{ height: "40px" }}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                />
-                <Button
-                  variant="contained"
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    backdropFilter: "blur(10px)",
-                    color: "white",
-                    transition: "all 0.3s ease",
-                    '&:hover': {
-                      background: "rgba(255, 255, 255, 0.2)",
-                      transform: "translateY(-2px)",
-                    },
-                  }}
-                  onClick={() => navigate("/signuplogin")}
-                >
-                  ورود / ثبت نام
-                </Button>
-              </Toolbar>
-            </AppBar>
-          </motion.div>
-
           {/* Hero Content */}
-          <Container maxWidth="lg" sx={{ height: "100vh", pt: 16 }}>
+          <Container maxWidth="lg" sx={{ height: "100%", pt: { xs: 12, md: 16 } }}>
             <Grid 
               container 
               spacing={4} 
@@ -270,44 +307,49 @@ function LandingPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
                 >
-                                  <Typography 
-                  variant="h1" 
-                  component="h1" 
-                  sx={{ 
-                    fontWeight: "bold", 
-                    mb: 3, 
-                    textAlign: "right",
-                    fontSize: { xs: "2.5rem", md: "3.5rem", lg: "4rem" },
-                    background: "linear-gradient(45deg, #fff, #e0e0e0)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    lineHeight: 1.2,
-                    maxWidth: "800px",
-                    marginRight: "auto",
-                  }}
-                >
-                  سامانه هوشمند گزارش مشکلات شهری
-                </Typography>
+                  <Typography 
+                    variant="h1" 
+                    component="h1" 
+                    sx={{ 
+                      fontWeight: "bold", 
+                      mb: 3, 
+                      textAlign: "right",
+                      fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem", lg: "4rem" },
+                      background: "linear-gradient(45deg, #fff, #e0e0e0)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      lineHeight: 1.2,
+                      maxWidth: "800px",
+                      marginRight: "auto",
+                    }}
+                  >
+                    سامانه هوشمند گزارش مشکلات شهری
+                  </Typography>
                   <Typography 
                     variant="h2" 
                     sx={{ 
                       color: "rgba(255, 255, 255, 0.8)", 
                       mb: 4, 
                       textAlign: "right",
-                      fontSize: { xs: "1.5rem", md: "1.8rem" },
+                      fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.8rem" },
                     }}
                   >
                     با ما در ساختن شهری بهتر همراه شوید
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    gap: 2, 
+                    justifyContent: "flex-end",
+                    flexDirection: { xs: "column", sm: "row" }
+                  }}>
                     <Button
                       variant="contained"
                       size="large"
                       sx={{
                         background: "var(--color-secondary)",
                         color: "#023",
-                        padding: "1rem 3rem",
-                        fontSize: "1.2rem",
+                        padding: { xs: "0.8rem 2rem", md: "1rem 3rem" },
+                        fontSize: { xs: "1rem", md: "1.2rem" },
                         transition: "all 0.3s ease",
                         '&:hover': {
                           background: "#00b8d4",
@@ -324,8 +366,8 @@ function LandingPage() {
                       sx={{
                         color: "var(--color-secondary)",
                         borderColor: "var(--color-secondary)",
-                        padding: "1rem 3rem",
-                        fontSize: "1.2rem",
+                        padding: { xs: "0.8rem 2rem", md: "1rem 3rem" },
+                        fontSize: { xs: "1rem", md: "1.2rem" },
                         transition: "all 0.3s ease",
                         '&:hover': {
                           borderColor: "#00b8d4",
@@ -358,6 +400,7 @@ function LandingPage() {
                     style={{
                       maxWidth: '100%',
                       height: 'auto',
+                      maxHeight: { xs: '300px', md: '500px' },
                       filter: 'drop-shadow(0px 20px 40px rgba(0, 0, 0, 0.25))',
                     }}
                   />
@@ -390,7 +433,19 @@ function LandingPage() {
                 fontWeight: 'bold'
               }}
             >
-              آمار و دستاوردها
+              <Typewriter
+                onInit={(typewriter) => {
+                  typewriter
+                    .typeString('آمار و دستاوردها')
+                    .start();
+                }}
+                options={{
+                  cursor: '|',
+                  delay: 50,
+                  deleteSpeed: null,
+                  autoStart: false,
+                }}
+              />
             </Typography>
 
             {/* First Stat - Citizens */}
@@ -408,40 +463,76 @@ function LandingPage() {
                   viewport={{ once: true }}
                 >
                   <Box sx={{ textAlign: 'right' }}>
-                                      <Typography
-                    variant="h1"
-                    sx={{
-                      color: '#0288d1',
-                      fontWeight: 'bold',
-                      fontSize: { xs: '2.5rem', md: '3.5rem' },
-                      mb: 2,
-                      textAlign: 'right',
-                    }}
-                  >
-                    ۶۹۴۰
-                  </Typography>
-                  <Typography
-                    variant="h2"
-                    sx={{
-                      color: '#333',
-                      mb: 2,
-                      fontSize: { xs: '1.8rem', md: '2.2rem' },
-                      textAlign: 'right',
-                    }}
-                  >
-                    شهروند وظیفه شناس
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#666',
-                      fontSize: { xs: '1rem', md: '1.1rem' },
-                      lineHeight: 1.8,
-                      textAlign: 'right',
-                    }}
-                  >
-                    شهروندان فعال ما از ۲۳۳ شهر مختلف در سراسر کشور، با ارسال ۹۲۰ گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.
-                  </Typography>
+                    <Typography
+                      variant="h1"
+                      sx={{
+                        color: '#0288d1',
+                        fontWeight: 'bold',
+                        fontSize: { xs: '2.5rem', md: '3.5rem' },
+                        mb: 2,
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('۶۹۴۰')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 30,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
+                    <Typography
+                      variant="h2"
+                      sx={{
+                        color: '#333',
+                        mb: 2,
+                        fontSize: { xs: '1.8rem', md: '2.2rem' },
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('شهروند وظیفه شناس')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 40,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        fontSize: { xs: '1rem', md: '1.1rem' },
+                        lineHeight: 1.8,
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('شهروندان فعال ما از ۲۳۳ شهر مختلف در سراسر کشور، با ارسال ۹۲۰ گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 20,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
                   </Box>
                 </motion.div>
               </Grid>
@@ -501,40 +592,76 @@ function LandingPage() {
                   viewport={{ once: true }}
                 >
                   <Box sx={{ textAlign: 'right' }}>
-                                      <Typography
-                    variant="h1"
-                    sx={{
-                      color: '#0288d1',
-                      fontWeight: 'bold',
-                      fontSize: { xs: '2.5rem', md: '3.5rem' },
-                      mb: 2,
-                      textAlign: 'right',
-                    }}
-                  >
-                    ۴۳۰ 
-                  </Typography>
-                  <Typography
-                    variant="h2"
-                    sx={{
-                      color: '#333',
-                      mb: 2,
-                      fontSize: { xs: '1.8rem', md: '2.2rem' },
-                      textAlign: 'right',
-                    }}
-                  >
-                    مسئولین شهری
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#666',
-                      fontSize: { xs: '1rem', md: '1.1rem' },
-                      lineHeight: 1.8,
-                      textAlign: 'right',
-                    }}
-                  >
-                    همکاری ۳۰ استانداری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.
-                  </Typography>
+                    <Typography
+                      variant="h1"
+                      sx={{
+                        color: '#0288d1',
+                        fontWeight: 'bold',
+                        fontSize: { xs: '2.5rem', md: '3.5rem' },
+                        mb: 2,
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('۴۳۰')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 30,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
+                    <Typography
+                      variant="h2"
+                      sx={{
+                        color: '#333',
+                        mb: 2,
+                        fontSize: { xs: '1.8rem', md: '2.2rem' },
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('مسئولین شهری')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 40,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        fontSize: { xs: '1rem', md: '1.1rem' },
+                        lineHeight: 1.8,
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('همکاری ۳۰ استانداری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 20,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
                   </Box>
                 </motion.div>
               </Grid>
@@ -554,40 +681,76 @@ function LandingPage() {
                   viewport={{ once: true }}
                 >
                   <Box sx={{ textAlign: 'right' }}>
-                                      <Typography
-                    variant="h1"
-                    sx={{
-                      color: '#0288d1',
-                      fontWeight: 'bold',
-                      fontSize: { xs: '2.5rem', md: '3.5rem' },
-                      mb: 2,
-                      textAlign: 'right',
-                    }}
-                  >
-                    ۶۴۲
-                  </Typography>
-                  <Typography
-                    variant="h2"
-                    sx={{
-                      color: '#333',
-                      mb: 2,
-                      fontSize: { xs: '1.8rem', md: '2.2rem' },
-                      textAlign: 'right',
-                    }}
-                  >
-                    مشکل شهری رسیدگی شده
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#666',
-                      fontSize: { xs: '1rem', md: '1.1rem' },
-                      lineHeight: 1.8,
-                      textAlign: 'right',
-                    }}
-                  >
-                    با همکاری ۴۳۰ مسئول شهری، تاکنون ۶۴۲ مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.
-                  </Typography>
+                    <Typography
+                      variant="h1"
+                      sx={{
+                        color: '#0288d1',
+                        fontWeight: 'bold',
+                        fontSize: { xs: '2.5rem', md: '3.5rem' },
+                        mb: 2,
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('۶۴۲')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 30,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
+                    <Typography
+                      variant="h2"
+                      sx={{
+                        color: '#333',
+                        mb: 2,
+                        fontSize: { xs: '1.8rem', md: '2.2rem' },
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('مشکل شهری رسیدگی شده')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 40,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        fontSize: { xs: '1rem', md: '1.1rem' },
+                        lineHeight: 1.8,
+                        textAlign: 'right',
+                      }}
+                    >
+                      <Typewriter
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('با همکاری ۴۳۰ مسئول شهری، تاکنون ۶۴۲ مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.')
+                            .start();
+                        }}
+                        options={{
+                          cursor: '|',
+                          delay: 20,
+                          deleteSpeed: null,
+                          autoStart: false,
+                        }}
+                      />
+                    </Typography>
                   </Box>
                 </motion.div>
               </Grid>
@@ -814,13 +977,14 @@ function LandingPage() {
             bgcolor: '#023',
             color: 'white',
             py: 8,
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            direction: 'rtl'
           }}
         >
           <Container>
             <Grid container spacing={4}>
               <Grid item xs={12} md={4}>
-                <Box sx={{ mb: 4 }}>
+                <Box sx={{ mb: 4, textAlign: 'right' }}>
                   <img src={logo} alt="Logo" style={{ height: '50px', marginBottom: '20px' }} />
                   <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                     سامانه هوشمند گزارش مشکلات شهری
@@ -828,56 +992,60 @@ function LandingPage() {
                 </Box>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
-                  لینک‌های مفید
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Link 
-                    component="button"
-                    onClick={() => navigate("/about")}
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      textDecoration: 'none',
-                      '&:hover': { color: 'white' }
-                    }}
-                  >
-                    درباره ما
-                  </Link>
-                  <Link 
-                    component="button"
-                    onClick={() => navigate("/contact")}
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      textDecoration: 'none',
-                      '&:hover': { color: 'white' }
-                    }}
-                  >
-                    تماس با ما
-                  </Link>
-                  <Link 
-                    component="button"
-                    onClick={() => navigate("/privacy")}
-                    sx={{ 
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      textDecoration: 'none',
-                      '&:hover': { color: 'white' }
-                    }}
-                  >
-                    حریم خصوصی
-                  </Link>
+                <Box sx={{ textAlign: 'right' }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
+                    لینک‌های مفید
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' ,direction: 'ltr'}}>
+                    <Link 
+                      component="button"
+                      onClick={() => navigate("/about")}
+                      sx={{ 
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        textDecoration: 'none',
+                        '&:hover': { color: 'white' }
+                      }}
+                    >
+                      درباره ما
+                    </Link>
+                    <Link 
+                      component="button"
+                      onClick={() => navigate("/contact")}
+                      sx={{ 
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        textDecoration: 'none',
+                        '&:hover': { color: 'white' }
+                      }}
+                    >
+                      تماس با ما
+                    </Link>
+                    <Link 
+                      component="button"
+                      onClick={() => navigate("/privacy")}
+                      sx={{ 
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        textDecoration: 'none',
+                        '&:hover': { color: 'white' }
+                      }}
+                    >
+                      حریم خصوصی
+                    </Link>
+                  </Box>
                 </Box>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
-                  تماس با ما
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                    ایمیل: info@civicradar.ir
+                <Box sx={{ textAlign: 'right' ,direction: 'ltr'}}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
+                    تماس با ما
                   </Typography>
-                  <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                    تلفن: ۰۲۱-۱۲۳۴۵۶۷۸
-                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-end' }}>
+                    <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                      ایمیل: info@civicradar.ir
+                    </Typography>
+                    <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                      تلفن: ۰۲۱-۱۲۳۴۵۶۷۸
+                    </Typography>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
