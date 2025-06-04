@@ -242,6 +242,10 @@ const SignUpForm = ({gotoregisted}) => {
                 left: 12, // فلش سمت چپ
                 right: 'auto',
               },
+              '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
             }}
           />
           <TextField
@@ -278,6 +282,10 @@ const SignUpForm = ({gotoregisted}) => {
                 left: 12, // فلش سمت چپ
                 right: 'auto',
               },
+              '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
             }}
           />
           <TextField
@@ -315,6 +323,10 @@ const SignUpForm = ({gotoregisted}) => {
                 left: 12, // فلش سمت چپ
                 right: 'auto',
               },
+              '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
             }}
           />
         </FormGroup>
@@ -375,6 +387,10 @@ const SignUpForm = ({gotoregisted}) => {
                     left: 12, // فلش سمت چپ
                     right: 'auto',
                   },
+                  '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
                 }}
               />
             )}
@@ -430,6 +446,10 @@ const SignUpForm = ({gotoregisted}) => {
           left: 12,
           right: 'auto',
         },
+        '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
       }}
     />
   )}

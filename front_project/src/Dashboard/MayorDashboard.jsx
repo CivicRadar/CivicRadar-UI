@@ -516,6 +516,8 @@ export default function MayorDashboard() {
               position: "relative",
               borderLeft: "1px solid #ddd",
               overflowY: "auto",
+              overflowX: "hidden", 
+
             },
           }}
           open
