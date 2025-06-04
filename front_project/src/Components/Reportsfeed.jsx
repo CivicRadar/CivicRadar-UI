@@ -298,6 +298,9 @@ const handleDislikeToggle = async (reportId) => {
     );
   })
   .sort((a, b) => {
+     if (sortOptions.length === 0) {
+      return new Date(a.DateTime) - new Date(b.DateTime);
+    }
     for (let option of sortOptions) {
       if (option === "priority") {
         const priorityOrder = { High: 1, Medium: 2, Low: 3 };

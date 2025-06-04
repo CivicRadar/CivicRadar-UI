@@ -524,6 +524,15 @@ const handleDislikeToggle = async (reportId) => {
             <Select
               value={selectedType}
               label="نوع"
+               MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
               onChange={(e) => setSelectedType(e.target.value)}
             >
               <MenuItem value="">همه</MenuItem>
@@ -564,6 +573,15 @@ const handleDislikeToggle = async (reportId) => {
   <Select
     value={selectedProvince}
     label="استان"
+     MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
     onChange={(e) => {
       setSelectedProvince(e.target.value);
       setSelectedCity(""); 
@@ -606,6 +624,15 @@ const handleDislikeToggle = async (reportId) => {
   <Select
     value={selectedCity}
     label="شهر"
+     MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
     onChange={(e) => setSelectedCity(e.target.value)}
   >
     <MenuItem value="">همه</MenuItem>
@@ -645,6 +672,15 @@ const handleDislikeToggle = async (reportId) => {
             <Select
               value={selectedStatus}
               label="وضعیت"
+               MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
               <MenuItem value="">همه</MenuItem>

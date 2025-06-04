@@ -728,7 +728,7 @@ const toggleSortOption = (option) => {
 }
 
   }
-  return 0;
+  return new Date(a.DateTime) - new Date(b.DateTime);
 });
 
   useEffect(() => {
@@ -1992,32 +1992,82 @@ const toggleSortOption = (option) => {
         </DialogActions>
       </Dialog> */}
 
-      <Dialog
-        open={Boolean(selectedImage)}
-        onClose={() => setSelectedImage(null)}
-        maxWidth="md"
-      >
-        <DialogContent sx={{ p: 0, position: "relative" }}>
-          <IconButton
-            onClick={() => setSelectedImage(null)}
-            sx={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              zIndex: 10,
-              background: "#fff",
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-          <Box
-            component="img"
-            src={selectedImage}
-            alt="نمایش بزرگ تصویر"
-            sx={{ width: "100%", maxHeight: "90vh", objectFit: "contain" }}
-          />
-        </DialogContent>
-      </Dialog>
+    <Dialog
+  open={Boolean(selectedImage)}
+  onClose={() => setSelectedImage(null)}
+  maxWidth="lg"
+  sx={{
+    "& .MuiDialog-paper": {
+      borderRadius: 3,
+      overflow: "hidden",
+      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.3)",
+      border: "1px solid rgba(0, 204, 136, 0.3)",
+      background: "transparent",
+    },
+    "& .MuiDialogContent-root": {
+      bgcolor: "rgba(255, 255, 255, 0.9)",
+      backdropFilter: "blur(8px)",
+      borderRadius: 3,
+    },
+  }}
+>
+  <DialogContent
+    sx={{
+      p: 0,
+      m: 0,
+      position: "relative",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: "hidden",
+      maxHeight: "90vh",
+      backgroundColor: "transparent",
+    }}
+  >
+    <IconButton
+      onClick={() => setSelectedImage(null)}
+      sx={{
+        position: "absolute",
+        top: 12,
+        right: 12,
+        bgcolor: "#00cc88",
+        color: "#ffffff",
+        border: "2px solid #ffffff",
+        borderRadius: "50%",
+        width: 40,
+        height: 40,
+        transition: "all 0.3s ease-in-out",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+        zIndex: 1,
+        "&:hover": {
+          bgcolor: "rgba(0, 204, 136, 0.8)",
+          color: "#ffffff",
+          borderColor: "#e0e0e0",
+          transform: "rotate(90deg)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+        },
+      }}
+    >
+      <CloseIcon fontSize="medium" />
+    </IconButton>
+
+    <Box
+      component="img"
+      src={selectedImage}
+      alt="تصویر گزارش"
+      sx={{
+        display: "block",
+        maxWidth: "100%",
+        maxHeight: "90vh",
+        width: "auto",
+        height: "auto",
+        objectFit: "contain",
+        borderRadius: 2,
+      }}
+    />
+  </DialogContent>
+</Dialog>
+
       <Dialog
         open={editNoteDialogOpen}
         onClose={() => setEditNoteDialogOpen(false)}
