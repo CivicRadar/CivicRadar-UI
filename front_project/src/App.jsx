@@ -12,7 +12,8 @@ import VerifyEmail from "./verifyemail";
 import ConfirmPassword from "./ConfirmPassword"; // Import the new component
 import ReportPageCon from "./Components/ReportPage";
 import ReportPageCon2 from "./Components/ReportPage2";
-
+import About from "./Pages/About";
+import Privacy from "./Pages/Privacy";
 
 import "./App.css"
 function App() {
@@ -24,6 +25,8 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/signuplogin" element={<AuthPage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/privacy" element={<Privacy />} />
               {/* New route for ConfirmPassword page */}
               <Route
                 path="auth/password-reset/:ui64/:token"

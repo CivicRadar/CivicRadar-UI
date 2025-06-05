@@ -22,7 +22,7 @@ import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import SortIcon from "@mui/icons-material/Sort"; 
 import CheckIcon from "@mui/icons-material/Check";
 import { ListItemIcon, ListItemText } from "@mui/material";
-
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function IranMapSection() {
   const wrapperRef = useRef(null);
@@ -39,7 +39,7 @@ export default function IranMapSection() {
   const [sortMode, setSortMode] = useState('alphabetical'); // یا 'count'
 
   const [anchorEl, setAnchorEl] = useState(null);
-const open = Boolean(anchorEl);
+  const open = Boolean(anchorEl);
 
 const toPersianDigits = num =>
   num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -145,9 +145,6 @@ const handleSortSelect = (mode) => {
 
   return (
     <Box sx={{ fontFamily: 'Vazir', direction: 'rtl', p: isMobile ? 1 : 4 }}>
-      <Typography variant={isMobile ? 'h6' : 'h5'} align="center" mb={isMobile ? 2 : 3}>
-        نقشه گزارش‌ها بر اساس استان
-      </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: 'stretch', maxWidth: 1000, mx: 'auto' }}>
         {/* نقشه */}
@@ -176,23 +173,31 @@ const handleSortSelect = (mode) => {
         </Box>
 
         {/* اطلاعات شهرها */}
-        {selectedProvince && (
-          <Box
-            sx={{
-              flexBasis: { xs: '100%', md: '30%' },
-              p: 2,
-              borderRadius: 2,
-              bgcolor: '#e6f4ea',
+        <motion.div
+          layout
+          style={{
+            flexBasis: '30%',
+            width: '100%'
+          }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+          <motion.div
+            layout
+            style={{
+              padding: 16,
+              borderRadius: 8,
+              backgroundColor: '#e6f4ea',
               border: '1px solid #3bcc6d',
               color: '#2e7d32',
               fontWeight: 'bold',
-              boxShadow: 2,
-              minHeight: mapHeight,
-              maxHeight: mapHeight,
-              height: mapHeight,
+              boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column'
+            }}
+            animate={{
+              height: selectedProvince ? mapHeight : "auto",
+              transition: { duration: 0.5, ease: "easeInOut" }
             }}
           >
             <Typography variant={isMobile ? 'subtitle1' : 'h6'} fontWeight="bold" mb={2} textAlign="center">
