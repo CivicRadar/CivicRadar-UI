@@ -92,14 +92,32 @@ export default function Reports({ ReportClick }) {
   const [activeVideos, setActiveVideos] = useState([]); // آرایه‌ای برای نگهداری شناسه ویدیوهای فعال
   const [sortAnchorEl, setSortAnchorEl] = useState(null);
   const [sortOptions, setSortOptions] = useState([]); // مثل: ['priority', 'likes']
+  const toPersianDigits = (num) => {
+  return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+};
 
-  const toggleSortOption = (option) => {
+
+const toggleSortOption = (option) => {
+  if (option === "violations_desc" || option === "violations_asc") {
+    setSortOptions((prev) =>
+      prev.includes(option)
+        ? prev.filter((opt) => opt !== option) 
+        : [
+            ...prev.filter(
+              (opt) => opt !== "violations_desc" && opt !== "violations_asc"
+            ),
+            option,
+          ]
+    );
+  } else {
     setSortOptions((prev) =>
       prev.includes(option)
         ? prev.filter((opt) => opt !== option)
         : [...prev, option]
     );
-  };
+  }
+};
+
 
   useEffect(() => {
     getProvince()
@@ -710,7 +728,7 @@ export default function Reports({ ReportClick }) {
 }
 
   }
-  return 0;
+  return new Date(a.DateTime) - new Date(b.DateTime);
 });
 
   useEffect(() => {
@@ -995,7 +1013,7 @@ export default function Reports({ ReportClick }) {
     '& .MuiSelect-icon': {
       left: 8,
       right: 'auto',
-    }
+    },
   }}
 >
   <InputLabel>نوع گزارش</InputLabel>
@@ -1003,161 +1021,215 @@ export default function Reports({ ReportClick }) {
     value={selectedType}
     onChange={(e) => setSelectedType(e.target.value)}
     label="نوع گزارش"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        }
+      }
+    }}
+    sx={{
+      textAlign: 'right',
+    }}
   >
-    <MenuItem value="" sx={{ textAlign: 'right' }}>همه</MenuItem>
-    <MenuItem value="خیابان" sx={{ textAlign: 'right' }}>خرابی خیابان</MenuItem>
-    <MenuItem value="روشنایی" sx={{ textAlign: 'right' }}>مشکل روشنایی</MenuItem>
-    <MenuItem value="زباله" sx={{ textAlign: 'right' }}>زباله رها شده</MenuItem>
-    <MenuItem value="سایر" sx={{ textAlign: 'right' }}>سایر</MenuItem>
+    <MenuItem value="">همه</MenuItem>
+    <MenuItem value="خیابان">خرابی خیابان</MenuItem>
+    <MenuItem value="روشنایی">مشکل روشنایی</MenuItem>
+    <MenuItem value="زباله">زباله رها شده</MenuItem>
+    <MenuItem value="سایر">سایر</MenuItem>
   </Select>
 </FormControl>
 
 
-          <FormControl size="small"  sx={{
-    minWidth: 150,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>استان</InputLabel>
-            <Select
-              value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.target.value)}
-              label="استان"
-            >
-              <MenuItem value="">همه</MenuItem>
-              {uniqueProvinces.map((province) => (
-                <MenuItem key={province} value={province}>
-                  {province}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl size="small"  sx={{
-    minWidth: 150,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>شهر</InputLabel>
-            <Select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              label="شهر"
-            >
-              <MenuItem value="">همه</MenuItem>
-              {uniqueCities.map((city) => (
-                <MenuItem key={city} value={city}>
-                  {city}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
 
-          <FormControl size="small"  sx={{
-    minWidth: 200,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
+         <FormControl size="small" sx={{
+  minWidth: 150,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>استان</InputLabel>
+  <Select
+    value={selectedProvince}
+    onChange={(e) => setSelectedProvince(e.target.value)}
+    label="استان"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+    sx={{
       textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>وضعیت گزارش</InputLabel>
-            <Select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              label="وضعیت گزارش"
-            >
-              <MenuItem value="">همه</MenuItem>
-              <MenuItem value="در انتظار بررسی">در انتظار بررسی</MenuItem>
-              <MenuItem value="در حال رسیدگی">در حال رسیدگی</MenuItem>
-              <MenuItem value="حل‌شده">حل‌شده</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small"  sx={{
-    minWidth: 150,
-    direction: 'rtl',
-    '& label': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 27,
-      left: 'auto',
-    },
-    '& .MuiSelect-select': {
-      textAlign: 'right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiSelect-icon': {
-      left: 8,
-      right: 'auto',
-    }
-  }}>
-            <InputLabel>درجه اهمیت</InputLabel>
-            <Select
-              value={selectedPriority}
-              onChange={(e) => setSelectedPriority(e.target.value)}
-              label="درجه اهمیت"
-            >
-              <MenuItem value="">همه</MenuItem>
-              <MenuItem value="High">زیاد</MenuItem>
-              <MenuItem value="Medium">متوسط</MenuItem>
-              <MenuItem value="Low">کم</MenuItem>
-            </Select>
-          </FormControl>
+    }}
+  >
+    <MenuItem value="">همه</MenuItem>
+    {uniqueProvinces.map((province) => (
+      <MenuItem key={province} value={province}>
+        {province}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+         <FormControl size="small" sx={{
+  minWidth: 150,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>شهر</InputLabel>
+  <Select
+    value={selectedCity}
+    onChange={(e) => setSelectedCity(e.target.value)}
+    label="شهر"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+    sx={{ textAlign: 'right' }}
+  >
+    <MenuItem value="">همه</MenuItem>
+    {uniqueCities.map((city) => (
+      <MenuItem key={city} value={city}>
+        {city}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+
+         <FormControl size="small" sx={{
+  minWidth: 200,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>وضعیت گزارش</InputLabel>
+  <Select
+    value={selectedStatus}
+    onChange={(e) => setSelectedStatus(e.target.value)}
+    label="وضعیت گزارش"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+    sx={{ textAlign: 'right' }}
+  >
+    <MenuItem value="">همه</MenuItem>
+    <MenuItem value="در انتظار بررسی">در انتظار بررسی</MenuItem>
+    <MenuItem value="در حال رسیدگی">در حال رسیدگی</MenuItem>
+    <MenuItem value="حل‌شده">حل‌شده</MenuItem>
+  </Select>
+</FormControl>
+
+         <FormControl size="small" sx={{
+  minWidth: 150,
+  direction: 'rtl',
+  '& label': {
+    right: 30,
+    left: 'auto',
+    transformOrigin: 'top right',
+  },
+  '& .MuiInputLabel-shrink': {
+    right: 27,
+    left: 'auto',
+  },
+  '& .MuiSelect-select': {
+    textAlign: 'right',
+  },
+  '& legend': {
+    textAlign: 'right',
+  },
+  '& .MuiSelect-icon': {
+    left: 8,
+    right: 'auto',
+  }
+}}>
+  <InputLabel>درجه اهمیت</InputLabel>
+  <Select
+    value={selectedPriority}
+    onChange={(e) => setSelectedPriority(e.target.value)}
+    label="درجه اهمیت"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+        },
+      },
+    }}
+    sx={{ textAlign: 'right' }}
+  >
+    <MenuItem value="">همه</MenuItem>
+    <MenuItem value="High">زیاد</MenuItem>
+    <MenuItem value="Medium">متوسط</MenuItem>
+    <MenuItem value="Low">کم</MenuItem>
+  </Select>
+</FormControl>
+
 
           <DatePicker
   value={dateFrom}
@@ -1800,7 +1872,7 @@ export default function Reports({ ReportClick }) {
                       color="text.secondary"
                       sx={{ overflowWrap: "anywhere", textAlign: "right" }}
                     >
-                      یادداشت {index + 1} توسط {note.NoteOwnerName}
+  یادداشت {toPersianDigits(index + 1)} توسط {note.NoteOwnerName}
                     </Typography>
                   </Box>
 
@@ -1881,7 +1953,7 @@ export default function Reports({ ReportClick }) {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={statusDialogOpen} onClose={handleCloseStatusDialog}>
+      {/* <Dialog open={statusDialogOpen} onClose={handleCloseStatusDialog}>
         <DialogContent>
           <FormControl fullWidth >
             <InputLabel>وضعیت گزارش</InputLabel>
@@ -1918,34 +1990,84 @@ export default function Reports({ ReportClick }) {
             ذخیره
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
-      <Dialog
-        open={Boolean(selectedImage)}
-        onClose={() => setSelectedImage(null)}
-        maxWidth="md"
-      >
-        <DialogContent sx={{ p: 0, position: "relative" }}>
-          <IconButton
-            onClick={() => setSelectedImage(null)}
-            sx={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              zIndex: 10,
-              background: "#fff",
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-          <Box
-            component="img"
-            src={selectedImage}
-            alt="نمایش بزرگ تصویر"
-            sx={{ width: "100%", maxHeight: "90vh", objectFit: "contain" }}
-          />
-        </DialogContent>
-      </Dialog>
+    <Dialog
+  open={Boolean(selectedImage)}
+  onClose={() => setSelectedImage(null)}
+  maxWidth="lg"
+  sx={{
+    "& .MuiDialog-paper": {
+      borderRadius: 3,
+      overflow: "hidden",
+      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.3)",
+      border: "1px solid rgba(0, 204, 136, 0.3)",
+      background: "transparent",
+    },
+    "& .MuiDialogContent-root": {
+      bgcolor: "rgba(255, 255, 255, 0.9)",
+      backdropFilter: "blur(8px)",
+      borderRadius: 3,
+    },
+  }}
+>
+  <DialogContent
+    sx={{
+      p: 0,
+      m: 0,
+      position: "relative",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: "hidden",
+      maxHeight: "90vh",
+      backgroundColor: "transparent",
+    }}
+  >
+    <IconButton
+      onClick={() => setSelectedImage(null)}
+      sx={{
+        position: "absolute",
+        top: 12,
+        right: 12,
+        bgcolor: "#00cc88",
+        color: "#ffffff",
+        border: "2px solid #ffffff",
+        borderRadius: "50%",
+        width: 40,
+        height: 40,
+        transition: "all 0.3s ease-in-out",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+        zIndex: 1,
+        "&:hover": {
+          bgcolor: "rgba(0, 204, 136, 0.8)",
+          color: "#ffffff",
+          borderColor: "#e0e0e0",
+          transform: "rotate(90deg)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+        },
+      }}
+    >
+      <CloseIcon fontSize="medium" />
+    </IconButton>
+
+    <Box
+      component="img"
+      src={selectedImage}
+      alt="تصویر گزارش"
+      sx={{
+        display: "block",
+        maxWidth: "100%",
+        maxHeight: "90vh",
+        width: "auto",
+        height: "auto",
+        objectFit: "contain",
+        borderRadius: 2,
+      }}
+    />
+  </DialogContent>
+</Dialog>
+
       <Dialog
         open={editNoteDialogOpen}
         onClose={() => setEditNoteDialogOpen(false)}
@@ -2092,6 +2214,15 @@ export default function Reports({ ReportClick }) {
               value={tempPriority}
               onChange={(e) => setTempPriority(e.target.value)}
               label="درجه اهمیت"
+               MenuProps={{
+          PaperProps: {
+            sx: {
+              direction: "rtl",
+              textAlign: "right",
+              fontFamily: "Vazirmatn, sans-serif",
+            },
+          },
+        }}
               sx={{
                 "& .MuiSelect-select": {
                   color: "#2e7d32",
@@ -2193,6 +2324,15 @@ export default function Reports({ ReportClick }) {
               value={tempStatus}
               onChange={(e) => setTempStatus(e.target.value)}
               label="وضعیت گزارش"
+                 MenuProps={{
+          PaperProps: {
+            sx: {
+              direction: "rtl",
+              textAlign: "right",
+              fontFamily: "Vazirmatn, sans-serif",
+            },
+          },
+        }}
               sx={{
                 "& .MuiSelect-select": {
                   color: "#2e7d32",
@@ -2331,17 +2471,15 @@ export default function Reports({ ReportClick }) {
                 </Typography>
 
                 <Typography
-                  variant="body2"
-                  display="flex"
-                  alignItems="center"
-                  gutterBottom
-                >
-                  <PhoneIcon
-                    fontSize="small"
-                    sx={{ ml: 1, color: "#2e7d32" }}
-                  />{" "}
-                  {team.OrganHead_Number}
-                </Typography>
+  variant="body2"
+  display="flex"
+  alignItems="center"
+  gutterBottom
+>
+  <PhoneIcon fontSize="small" sx={{ ml: 1, color: "#2e7d32" }} />
+  {toPersianDigits(team.OrganHead_Number)}
+</Typography>
+
 
                 <Typography variant="body2" display="flex" alignItems="center">
                   <LocationOnIcon
@@ -2511,44 +2649,57 @@ export default function Reports({ ReportClick }) {
             }}
           />
 
-          <FormControl fullWidth margin="normal" sx={{ 
-             
-             direction: 'rtl',
-             '& label': {
-               right: 30,
-               left: 'auto',
-               transformOrigin: 'top right',
-             },
-             '& .MuiInputLabel-shrink': {
-               right: 27,
-               left: 'auto',
-             },
-             '& .MuiSelect-select': {
-               textAlign: 'right',
-             },
-             '& legend': {
-               textAlign: 'right',
-             },
-             '& .MuiSelect-icon': {
-               left: 8,
-               right: 'auto',
-             }
-          
-         }}>
-            <InputLabel>نوع سازمان</InputLabel>
-            <Select
-              value={selectedTeam?.Type || ""}
-              onChange={(e) =>
-                setSelectedTeam({ ...selectedTeam, Type: e.target.value })
-              }
-              label="نوع سازمان"
-            >
-              <MenuItem value="Water">آب</MenuItem>
-              <MenuItem value="Waste">پسماند</MenuItem>
-              <MenuItem value="Gas">گاز</MenuItem>
-              <MenuItem value="Electricity">برق</MenuItem>
-            </Select>
-          </FormControl>
+        <FormControl
+  fullWidth
+  margin="normal"
+  sx={{
+    direction: "rtl",
+    '& label': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 27,
+      left: 'auto',
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+    },
+    '& .MuiSelect-icon': {
+      left: 8,
+      right: 'auto',
+    },
+    '& legend': {
+      textAlign: 'right',
+    }
+  }}
+>
+  <InputLabel>نوع سازمان</InputLabel>
+  <Select
+    value={selectedTeam?.Type || ""}
+    onChange={(e) =>
+      setSelectedTeam({ ...selectedTeam, Type: e.target.value })
+    }
+    label="نوع سازمان"
+    MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
+    sx={{ textAlign: 'right' }} // انتخاب شده هم راست‌چین
+  >
+    <MenuItem value="Water">آب</MenuItem>
+    <MenuItem value="Waste">پسماند</MenuItem>
+    <MenuItem value="Gas">گاز</MenuItem>
+    <MenuItem value="Electricity">برق</MenuItem>
+  </Select>
+</FormControl>
+
 
           <FormControl fullWidth margin="normal" sx={{ 
              
@@ -2583,6 +2734,15 @@ export default function Reports({ ReportClick }) {
                 )
               }
               label="استان"
+              MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
             >
               {provinces.map((province) => (
                 <MenuItem key={province.id} value={province.Name}>
@@ -2623,6 +2783,15 @@ export default function Reports({ ReportClick }) {
                 setEditedCity(cities.find((c) => c.Name === e.target.value))
               }
               label="شهر"
+              MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
             >
               {cities.map((city) => (
                 <MenuItem key={city.id} value={city.Name}>

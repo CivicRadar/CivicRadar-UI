@@ -62,6 +62,14 @@ const ViolationReportFeed = () => {
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 const [reportToDelete, setReportToDelete] = useState(null);
+const [unmarkDialogOpen, setUnmarkDialogOpen] = useState(false);
+const [reportToUnmark, setReportToUnmark] = useState(null);
+
+
+const toPersianDigits = (num) => {
+  if (num === null || num === undefined) return '';
+  return num.toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+};
 
 
 
@@ -71,6 +79,37 @@ const [reportToDelete, setReportToDelete] = useState(null);
 
 
 
+
+const handleUnmarkViolation = async (id) => {
+  try {
+    const res = await fetch(`${BASE}/supervise/handle-crc/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ CityProblemID: id }),
+    });
+
+    if (!res.ok) throw new Error("رفع وضعیت تخلف ناموفق بود");
+
+    setReports((prev) => prev.filter((r) => r.id !== id));
+
+    Swal.fire({
+      icon: "success",
+      title: "وضعیت تخلف حذف شد",
+      text: "گزارش از لیست متخلفین خارج شد",
+      confirmButtonText: "باشه",
+      customClass: {
+        confirmButton: "swal-confirm-btn",
+        title: "swal-title",
+        htmlContainer: "swal-text",
+      },
+    });
+  } catch (e) {
+    console.error("handleUnmarkViolation error:", e);
+  }
+};
 
 
   
@@ -485,6 +524,15 @@ const handleDislikeToggle = async (reportId) => {
             <Select
               value={selectedType}
               label="نوع"
+               MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
               onChange={(e) => setSelectedType(e.target.value)}
             >
               <MenuItem value="">همه</MenuItem>
@@ -525,6 +573,15 @@ const handleDislikeToggle = async (reportId) => {
   <Select
     value={selectedProvince}
     label="استان"
+     MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
     onChange={(e) => {
       setSelectedProvince(e.target.value);
       setSelectedCity(""); 
@@ -567,6 +624,15 @@ const handleDislikeToggle = async (reportId) => {
   <Select
     value={selectedCity}
     label="شهر"
+     MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
     onChange={(e) => setSelectedCity(e.target.value)}
   >
     <MenuItem value="">همه</MenuItem>
@@ -606,6 +672,15 @@ const handleDislikeToggle = async (reportId) => {
             <Select
               value={selectedStatus}
               label="وضعیت"
+               MenuProps={{
+      PaperProps: {
+        sx: {
+          direction: 'rtl',
+          textAlign: 'right',
+          fontFamily: 'Vazirmatn, sans-serif', 
+        },
+      },
+    }}
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
               <MenuItem value="">همه</MenuItem>
@@ -946,7 +1021,7 @@ const handleDislikeToggle = async (reportId) => {
   <ThumbDownAltIcon fontSize="small" />
 </IconButton>
 <Typography variant="body2" color="text.secondary">
-  {r.Dislikes || 0}
+  {toPersianDigits(r.Dislikes || 0)}
 </Typography>
 
 <IconButton
@@ -957,7 +1032,7 @@ const handleDislikeToggle = async (reportId) => {
   <ThumbUpAltIcon fontSize="small" />
 </IconButton>
 <Typography variant="body2" color="text.secondary">
-  {r.Likes || 0}
+  {toPersianDigits(r.Likes || 0)}
 </Typography>
 
 
@@ -993,18 +1068,19 @@ const handleDislikeToggle = async (reportId) => {
   bgcolor="#ffebee"
   boxShadow="0 2px 6px rgba(244, 67, 54, 0.2)"
 >
-  <Typography
-    variant="subtitle2"
-    fontWeight="bold"
-    color="error.main"
-    mb={1}
-    display="flex"
-    alignItems="center"
-    gap={1}
-  >
-    <ReportIcon fontSize="small" />
-    دلایل گزارش تخلف ({r.Reports.length} مورد)
-  </Typography>
+<Typography
+  variant="subtitle2"
+  fontWeight="bold"
+  color="error.main"
+  mb={1}
+  display="flex"
+  alignItems="center"
+  gap={1}
+>
+  <ReportIcon fontSize="small" />
+  {`دلایل گزارش تخلف (${toPersianDigits(r.Reports.length)} مورد)`}
+</Typography>
+
 
   <Box component="ul" sx={{ pr: 3, m: 0 }}>
     {r.Reports.map((rep, index) => (
@@ -1125,6 +1201,51 @@ const handleDislikeToggle = async (reportId) => {
 >
   حذف گزارش
 </Button>
+<Button
+  variant="contained"
+  onClick={() => {
+    setReportToUnmark(r.id);
+    setUnmarkDialogOpen(true);
+  }}
+  fullWidth
+  startIcon={<BuildIcon sx={{ fontSize: "1.2rem", ml: 1 }} />}
+
+  sx={{
+    mt: 1.5,
+    borderRadius: "12px",
+    fontWeight: 700,
+    fontSize: "1rem",
+    py: 1.2,
+    backdropFilter: "blur(10px)",
+    background: "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
+    border: "2px solid #90caf9",
+    color: "#0d47a1",
+    boxShadow: "0 4px 10px rgba(30, 136, 229, 0.1)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    "&:hover": {
+      background: "linear-gradient(135deg, #2196f3 0%, #0d47a1 100%)",
+      borderColor: "#ffffff",
+      color: "#fff",
+      boxShadow: "0 8px 20px rgba(33, 150, 243, 0.5)",
+      transform: "scale(1.02)",
+    },
+    "&:active": {
+      transform: "scale(0.98)",
+      boxShadow: "0 4px 10px rgba(33, 150, 243, 0.2)",
+    },
+    "&:focus": {
+      outline: "none",
+      boxShadow: "0 0 0 4px rgba(33, 150, 243, 0.2)",
+    },
+    textTransform: "none",
+  }}
+>
+  رفع وضعیت تخلف
+</Button>
+
+
+
+
 
 
 
@@ -1158,6 +1279,33 @@ const handleDislikeToggle = async (reportId) => {
     </Box>
   </DialogContent>
 </Dialog>
+<Dialog open={unmarkDialogOpen} onClose={() => setUnmarkDialogOpen(false)}>
+  <DialogTitle sx={{ textAlign: "center", fontWeight: 700 }}>
+    رفع وضعیت تخلف
+  </DialogTitle>
+  <DialogContent>
+    <Typography sx={{ mb: 2, textAlign: "center" }}>
+      آیا مطمئن هستید که می‌خواهید این گزارش را از لیست متخلفین خارج کنید؟
+    </Typography>
+    <Box display="flex" justifyContent="center" gap={2} mt={2}>
+      <Button onClick={() => setUnmarkDialogOpen(false)} variant="outlined">
+        انصراف
+      </Button>
+      <Button
+        onClick={() => {
+          handleUnmarkViolation(reportToUnmark);
+          setUnmarkDialogOpen(false);
+          setReportToUnmark(null);
+        }}
+        color="info"
+        variant="contained"
+      >
+        تأیید
+      </Button>
+    </Box>
+  </DialogContent>
+</Dialog>
+
 
     <style>
     {`

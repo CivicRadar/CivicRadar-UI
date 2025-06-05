@@ -4,6 +4,22 @@ import { getCity, getProvince, addMayor } from '../../services/admin-api';
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 import Swal from "sweetalert2";
+import { Popper } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const RTLPopper = styled(Popper)({
+  direction: 'rtl',
+  '& .MuiAutocomplete-paper': {
+    textAlign: 'right',
+  },
+  '& .MuiAutocomplete-option': {
+    justifyContent: 'flex-end',
+    textAlign: 'right',
+  },
+});
+
+
+
 
 
 const SignUpForm = ({gotoregisted}) => {
@@ -226,6 +242,10 @@ const SignUpForm = ({gotoregisted}) => {
                 left: 12, // فلش سمت چپ
                 right: 'auto',
               },
+              '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
             }}
           />
           <TextField
@@ -262,6 +282,10 @@ const SignUpForm = ({gotoregisted}) => {
                 left: 12, // فلش سمت چپ
                 right: 'auto',
               },
+              '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
             }}
           />
           <TextField
@@ -299,6 +323,10 @@ const SignUpForm = ({gotoregisted}) => {
                 left: 12, // فلش سمت چپ
                 right: 'auto',
               },
+              '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
             }}
           />
         </FormGroup>
@@ -320,6 +348,10 @@ const SignUpForm = ({gotoregisted}) => {
             getOptionLabel={(option) => option.Name}
             value={selectedProvince}
             onChange={handleProvinceChange}
+            slots={{ popper: RTLPopper }} 
+              noOptionsText="موردی یافت نشد"
+
+
             helperText={errorMessages.provinces}
             renderInput={(params) => (
               <TextField
@@ -355,6 +387,10 @@ const SignUpForm = ({gotoregisted}) => {
                     left: 12, // فلش سمت چپ
                     right: 'auto',
                   },
+                  '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
                 }}
               />
             )}
@@ -364,12 +400,18 @@ const SignUpForm = ({gotoregisted}) => {
   options={cities}
   getOptionLabel={(option) => option.Name}
   value={selectedCityInput}
-  onChange={(event, newValue) => {
-    setSelectedCityInput(null); // reset input field
+   onChange={(event, newValue) => {
+    setSelectedCityInput(newValue); // بذار مقدار بگیره!
     if (newValue && !selectedCities.find((city) => city.id === newValue.id)) {
       setSelectedCities((prev) => [...prev, newValue]);
     }
   }}
+  clearOnBlur // اختیاری: وقتی کاربر خارج شد از فیلد، پاک شه
+  clearOnEscape // اختیاری: با Esc پاک شه
+    slots={{ popper: RTLPopper }} 
+      noOptionsText="موردی یافت نشد"
+
+
   renderInput={(params) => (
     <TextField
       {...params}
@@ -404,6 +446,10 @@ const SignUpForm = ({gotoregisted}) => {
           left: 12,
           right: 'auto',
         },
+        '& .MuiFormHelperText-root': {
+  textAlign: 'right',
+},
+
       }}
     />
   )}

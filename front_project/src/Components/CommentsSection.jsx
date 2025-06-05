@@ -24,6 +24,12 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 import { useNavigate } from "react-router-dom";
 
 
+const toPersianDigits = (num) => {
+  return String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+};
+
+
+
 
 
 
@@ -460,8 +466,9 @@ sx={{ mb: 0.5, fontSize: "0.85rem", lineHeight: 1.4, color: "#666" }}
 </IconButton>
 
                 </Tooltip>
-                <Typography variant="caption">{comment.Likes || 0}</Typography>
-  
+<Typography variant="caption">
+  {toPersianDigits(comment.Likes || 0)}
+</Typography>  
                 <Tooltip title="رد کردن" arrow>
                 <IconButton
   onClick={() => handleReaction(comment.id, "dislike")}
@@ -475,7 +482,9 @@ sx={{ mb: 0.5, fontSize: "0.85rem", lineHeight: 1.4, color: "#666" }}
 </IconButton>
 
                 </Tooltip>
-                <Typography variant="caption">{comment.DisLikes || 0}</Typography>
+                <Typography variant="caption">
+  {toPersianDigits(comment.DisLikes || 0)}
+</Typography>
   
                 <Tooltip title="پاسخ دادن" arrow>
                   <IconButton onClick={() => {

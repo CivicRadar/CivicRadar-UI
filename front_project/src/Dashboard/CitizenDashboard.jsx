@@ -81,7 +81,7 @@ const DeleteAccountDialog = ({ open, onClose, onConfirm }) => {
       <DialogTitle sx={{ fontWeight: "bold" }}>تأیید حذف حساب کاربری</DialogTitle>
       <DialogContent>
         <Typography sx={{ mt: 1 }}>
-          آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست।
+          آیا مطمئن هستید که می‌خواهید حساب کاربری خود را حذف کنید؟ این عملیات قابل بازگشت نیست!
         </Typography>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>

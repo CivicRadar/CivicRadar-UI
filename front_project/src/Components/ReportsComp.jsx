@@ -40,6 +40,10 @@ const greenPalette = {
   darkest: '#00661c',
   contrastText: '#fff',
 };
+const toPersianDigits = (num) => {
+  return String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+};
+
 
 const ReportForm = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -56,6 +60,9 @@ const ReportForm = () => {
   const [uploadProgress, setUploadProgress] = useState(null); // null یا عدد بین 0 تا 100
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [rawImage, setRawImage] = useState(null);
+const imageInputRef = useRef(null);
+const videoInputRef = useRef(null);
+
 
 useEffect(() => {
   // When the component unmounts or activeStep changes, reset the map view
@@ -326,14 +333,25 @@ useEffect(() => {
     handleChange("image", croppedImageUrl);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
+const handleImageUpload = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const fileURL = URL.createObjectURL(file);
+
+    // برای اطمینان از re-render حتی اگر فایل تکراریه
+    setRawImage(null);
+    setTimeout(() => {
       setRawImage(fileURL);
       setCropDialogOpen(true);
+    }, 0);
+
+    // ریست input بعد از انتخاب
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
     }
-  };
+  }
+};
+
 
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
@@ -342,13 +360,31 @@ useEffect(() => {
     }
   };
 
-  const handleRemoveImage = () => {
-    handleChange('image', null);
-  };
+const handleRemoveImage = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-  const handleRemoveVideo = () => {
-    handleChange('video', null);
-  };
+  if (imageInputRef.current) {
+    imageInputRef.current.blur();
+  }
+
+  handleChange('image', null);
+};
+
+
+
+const handleRemoveVideo = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (videoInputRef.current) {
+    videoInputRef.current.value = "";
+    videoInputRef.current.blur(); // جلوگیری از auto-open
+  }
+
+  handleChange('video', null);
+};
+
 
   // Fetch provinces
   useEffect(() => {
@@ -557,7 +593,7 @@ useEffect(() => {
                 justifyContent: 'center',
                 mb: 1
               }}>
-                {step.number}
+                 {toPersianDigits(step.number)}
               </Box>
               <Typography variant="body2" sx={{ 
                 fontWeight: activeStep === index ? 'bold' : 'normal',
@@ -661,65 +697,33 @@ useEffect(() => {
         {activeStep === 1 && (
           <Grid container spacing={3} sx={{ flex: 1 }}>
             <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 3 }}>
-            <Autocomplete
-  options={provinces}
-  getOptionLabel={(option) => option.Name}
-  value={formData.province}
-  onChange={(e, newValue) => handleChange('province', newValue)}
-  renderInput={(params) => (
-    <TextField
-  {...params}
-  label="استان"
-  error={!!errors.province}
-  sx={{
-    direction: 'rtl',
-    '& input': {
-      textAlign: 'right',
-    },
-    '& label': {
-      right: 54,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 30, // تنظیم برای حالت شناور (shrink)
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiOutlinedInput-root': {
-      justifyContent: 'flex-end',
-    },
-    '& .MuiSvgIcon-root': {
-      left: 12, // فلش سمت چپ
-      right: 'auto',
-    },
-  }}
-  InputLabelProps={{ sx: { direction: 'rtl' } }}
-/>
-
-
-  )}
-/>
-
-</Box>
-
-
-<Box sx={{ mb: 3 }}>
+         <Box sx={{ mb: 3 }}>
   <Autocomplete
-    options={cities}
+    options={provinces}
     getOptionLabel={(option) => option.Name}
-    value={formData.city}
-    onChange={(e, newValue) => handleChange('city', newValue)}
-    disabled={!formData.province}
+    value={formData.province}
+    onChange={(e, newValue) => handleChange('province', newValue)}
+    PaperComponent={(props) => (
+      <Paper
+        {...props}
+        sx={{
+          direction: 'rtl',
+          textAlign: 'right',
+        }}
+      />
+    )}
+    slotProps={{
+      inputLabel: {
+        sx: { direction: 'rtl' },
+      },
+    }}
+      noOptionsText="هیچ گزینه‌ای یافت نشد" 
+
     renderInput={(params) => (
       <TextField
         {...params}
-        label="شهر"
-        error={!!errors.city}
+        label="استان"
+        error={!!errors.province}
         sx={{
           direction: 'rtl',
           '& input': {
@@ -742,34 +746,90 @@ useEffect(() => {
             justifyContent: 'flex-end',
           },
           '& .MuiSvgIcon-root': {
-            left: 16,
+            left: 12,
             right: 'auto',
           },
         }}
-        InputLabelProps={{ sx: { direction: 'rtl' } }}
       />
     )}
   />
 </Box>
 
 
+
+<Box sx={{ mb: 3 }}>
+  <Autocomplete
+  options={cities}
+  getOptionLabel={(option) => option?.Name || ""}
+  value={formData.city}
+  onChange={(e, newValue) => handleChange("city", newValue)}
+  disabled={!formData.province}
+  noOptionsText="هیچ شهری یافت نشد"
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="شهر"
+      error={!!errors.city}
+      sx={{
+        direction: "rtl",
+        '& input': {
+          textAlign: "right",
+        },
+        '& label': {
+          right: 54,
+          left: "auto",
+          transformOrigin: "top right",
+        },
+        '& .MuiInputLabel-shrink': {
+          right: 30,
+          left: "auto",
+          transformOrigin: "top right",
+        },
+        '& legend': {
+          textAlign: "right",
+        },
+        '& .MuiOutlinedInput-root': {
+          justifyContent: "flex-end",
+        },
+        '& .MuiSvgIcon-root': {
+          left: 16,
+          right: "auto",
+        },
+      }}
+      slotProps={{
+        inputLabel: { sx: { direction: "rtl" } },
+      }}
+    />
+  )}
+  PaperComponent={(props) => (
+    <Paper {...props} sx={{ direction: "rtl", textAlign: "right" }} />
+  )}
+/>
+
+</Box>
+
+
+
               <Box sx={{ mb: 2 }}>
                 <Button 
-                  variant="contained" 
-                  onClick={isMobile ? handleOpenMapDialog : getUserLocation}
-                  startIcon={<MyLocation />}
-                  sx={{
-                    color: 'white',
-                    bgcolor: greenPalette.dark,
-                    '&:hover': {
-                      color: greenPalette.dark,
-                      backgroundColor: '#e8f5e9' // light green background
-                    }
-                  }}
-                  fullWidth
-                >
-                  {isMobile ? 'انتخاب از روی نقشه' : 'موقعیت فعلی من'}
-                </Button>
+  variant="contained" 
+  onClick={isMobile ? handleOpenMapDialog : getUserLocation}
+  startIcon={<MyLocation />}
+  fullWidth
+  sx={{
+    direction: "rtl", // مهم برای راست‌چینی درست
+    gap: 1.2,         // فاصله بین آیکون و متن
+    color: 'white',
+    bgcolor: greenPalette.dark,
+    '&:hover': {
+      color: greenPalette.dark,
+      backgroundColor: '#e8f5e9'
+    }
+  }}
+>
+  {isMobile ? 'انتخاب از روی نقشه' : 'موقعیت فعلی من'}
+</Button>
+
               </Box>
 
               <TextField
@@ -1013,6 +1073,7 @@ useEffect(() => {
             onChange={handleImageUpload}
             style={{ display: 'none' }}
             id="image-upload"
+            ref={imageInputRef}
           />
           <label htmlFor="image-upload">
             <Button
@@ -1049,24 +1110,22 @@ useEffect(() => {
                       objectFit: 'cover',
                     }}
                   />
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveImage();
-                    }}
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      bgcolor: 'white',
-                      boxShadow: 1,
-                      '&:hover': {
-                        bgcolor: 'error.light',
-                      }
-                    }}
-                  >
-                    <DeleteIcon color="error" />
-                  </IconButton>
+                 <IconButton
+  onClick={handleRemoveImage}
+  sx={{
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    bgcolor: 'white',
+    boxShadow: 1,
+    '&:hover': {
+      bgcolor: 'error.light',
+    }
+  }}
+>
+  <DeleteIcon color="error" />
+</IconButton>
+
                 </>
               ) : (
                 <>
@@ -1102,6 +1161,7 @@ useEffect(() => {
             onChange={handleVideoUpload}
             style={{ display: 'none' }}
             id="video-upload"
+            ref={videoInputRef}
           />
           <label htmlFor="video-upload">
             <Button
@@ -1139,23 +1199,21 @@ useEffect(() => {
                     }}
                   />
                   <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveVideo();
-                    }}
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      bgcolor: 'white',
-                      boxShadow: 1,
-                      '&:hover': {
-                        bgcolor: 'error.light',
-                      }
-                    }}
-                  >
-                    <DeleteIcon color="error" />
-                  </IconButton>
+  onClick={handleRemoveVideo}
+  sx={{
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    bgcolor: 'white',
+    boxShadow: 1,
+    '&:hover': {
+      bgcolor: 'error.light',
+    }
+  }}
+>
+  <DeleteIcon color="error" />
+</IconButton>
+
                 </>
               ) : (
                 <>

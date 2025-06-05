@@ -20,7 +20,7 @@ const CropDialog = ({ imageSrc, open, onClose, onCropComplete }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Crop Image</DialogTitle>
+      <DialogTitle sx={{ textAlign: "center" }}>برش تصویر</DialogTitle>
       <DialogContent sx={{ position: "relative", height: 400, background: "#333" }}>
         <Cropper
           image={imageSrc}
@@ -41,8 +41,8 @@ const CropDialog = ({ imageSrc, open, onClose, onCropComplete }) => {
           onChange={(e, zoom) => setZoom(zoom)}
           sx={{ mx: 2, flexGrow: 1 }}
         />
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleCropDone}>Crop</Button>
+        <Button onClick={onClose}>انصراف</Button>
+        <Button variant="contained" onClick={handleCropDone}>برش</Button>
       </DialogActions>
     </Dialog>
   );

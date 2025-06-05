@@ -139,7 +139,7 @@ export default function TeamRegistrationForm() {
             value={formData.OrganHead_Email}
             onChange={handleChange}
             className={errors.OrganHead_Email ? "error" : ""}
-            type="email"
+            type="text"
           />
           {errors.OrganHead_Email && <small>{errors.OrganHead_Email}</small>}
         </div>

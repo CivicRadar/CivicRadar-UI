@@ -28,11 +28,19 @@ import { Avatar } from '@mui/material';
 
 const MAP_API_KEY = "web.2705e42e6fd74f8796b16a52b4a0b2aa";
 
+const toPersianDigits = (num) => {
+  if (num === null || num === undefined || isNaN(num)) return '';
+  return num.toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+};
+
+
 const Count = styled(Typography)(({ theme }) => ({
-  fontSize: "0.75rem",
+  fontSize: "1rem", //  بزرگ‌تر از قبل
   color: theme.palette.text.secondary,
   marginTop: theme.spacing(0.25),
+  fontWeight: 400,  //  بولدتر هم بخوای اضافه کن
 }));
+
 
 export default function EngagementSection({ reportData }) {
   const theme = useTheme();
@@ -240,7 +248,7 @@ export default function EngagementSection({ reportData }) {
                     <ThumbUpIcon />
                   </IconButton>
                 </Tooltip>
-                <Count>{likes}</Count>
+               <Count>{toPersianDigits(likes)}</Count>
               </Box>
               <Box sx={{ textAlign: "center" }}>
                 <Tooltip title="نپسندیدن">
@@ -251,7 +259,7 @@ export default function EngagementSection({ reportData }) {
                     <ThumbDownIcon />
                   </IconButton>
                 </Tooltip>
-                <Count>{dislikes}</Count>
+                <Count>{toPersianDigits(dislikes)}</Count>
               </Box>
               <Box sx={{ textAlign: "center" }}>
                 <Tooltip title="اشتراک‌گذاری">

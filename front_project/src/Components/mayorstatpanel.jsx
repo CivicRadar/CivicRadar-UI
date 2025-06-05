@@ -115,6 +115,13 @@ export default function MayorStatsPanel() {
     Street: "خیابان",
     Other: "سایر",
   };
+  const orgTypeMap = {
+  Water: "آب",
+  Waste: "پسماند",
+  Gas: "گاز",
+  Electricity: "برق",
+};
+
   const engagementMap = {
     Likes: "پسندیده",
     Dislikes: "نپسندیده",
@@ -336,7 +343,7 @@ export default function MayorStatsPanel() {
             backgroundColor: "#f9f9f9",
           }}
         >
-          <Typography>🔹 نوع سازمان: {org.Type}</Typography>
+          <Typography>🔹 نوع سازمان: {orgTypeMap[org.Type] || org.Type}</Typography>
           <Typography>👤 مدیر: {org.OrganHead_FullName}</Typography>
           <Typography>📧 ایمیل: {org.OrganHead_Email}</Typography>
           <Typography>📞 شماره تماس: {toFaNumber(org.OrganHead_Number)}</Typography>

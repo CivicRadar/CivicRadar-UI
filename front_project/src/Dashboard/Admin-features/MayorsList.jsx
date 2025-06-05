@@ -20,10 +20,35 @@ import { getProvince, getCity } from "../../services/admin-api";
 import IconButton from "@mui/material/IconButton";
 import { gridClasses } from '@mui/x-data-grid';
 import { grey } from '@mui/material/colors';
+// import { GRID_DEFAULT_LOCALE_TEXT } from '@mui/x-data-grid';   //استفاده کردم برای فارسی سازی دست زده نشود 
+
+// console.log(GRID_DEFAULT_LOCALE_TEXT);  
+
 // import moment from 'moment';
 import Swal from "sweetalert2";
 import moment from "moment-jalaali";
 moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
+import { Popper } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const RTLPopper = styled(Popper)(() => ({
+  direction: 'rtl',
+  '& .MuiAutocomplete-paper': {
+    textAlign: 'right',
+  },
+  '& .MuiAutocomplete-option': {
+    justifyContent: 'flex-end',
+    textAlign: 'right',
+  },
+}));
+
+
+const toPersianDigits = (num) => {
+  if (num === null || num === undefined || isNaN(num)) return '';
+  return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+};
+
+
 
 
 const faIR = {
@@ -51,7 +76,7 @@ const faIR = {
     count !== 1 ? `${count} فیلتر فعال` : `${count} فیلتر فعال`,
 
   // Quick filter toolbar field
-  toolbarQuickFilterPlaceholder: 'جستجو...',
+  toolbarQuickFilterPlaceholder: 'جستجو',
   toolbarQuickFilterLabel: 'جستجو',
   toolbarQuickFilterDeleteIconLabel: 'پاک کردن',
 
@@ -79,7 +104,9 @@ const faIR = {
   filterPanelInputPlaceholder: 'مقدار فیلتر',
 
   // Filter operators text
-  filterOperatorContains: 'شامل',
+  filterOperatorContains: 'شامل میشود',
+  filterOperatorDoesNotContain	: 'شامل نمی‌شود' ,
+  filterOperatorDoesNotEqual : 'نامساوی',
   filterOperatorEquals: 'مساوی',
   filterOperatorStartsWith: 'شروع با',
   filterOperatorEndsWith: 'پایان با',
@@ -105,6 +132,18 @@ const faIR = {
   columnMenuUnsort: 'حذف مرتب‌سازی',
   columnMenuSortAsc: 'مرتب‌سازی صعودی',
   columnMenuSortDesc: 'مرتب‌سازی نزولی',
+  columnMenuHideColumn: 'مخفی کردن ستون',   
+columnMenuManageColumns: 'مدیریت ستون‌ها',  
+columnsManagementSearchTitle:'جستجو...',
+columnsManagementShowHideAllText : 'نمایش/مخفی همه',
+columnsManagementReset	: 'بازنشانی',
+  headerFilterOperatorIsAnyOf : 'یکی از موارد' ,
+  filterOperatorIsAnyOf: 'یکی از موارد',
+  filterPanelOperator: 'عملگر',
+
+
+
+
 
   // Column header text
   columnHeaderFiltersTooltipActive: (count) =>
@@ -113,24 +152,28 @@ const faIR = {
   columnHeaderSortIconLabel: 'مرتب‌سازی',
 
   // Rows selected footer text
-  footerRowSelected: (count) =>
-    count !== 1
-      ? `${count.toLocaleString()} سطر انتخاب شده`
-      : `${count.toLocaleString()} سطر انتخاب شده`,
+footerRowSelected: (count) =>
+  count !== 1
+    ? `${toPersianDigits(count)} سطر انتخاب شده`
+    : `${toPersianDigits(count)} سطر انتخاب شده`,
+
 
   // Total row amount footer text
   footerTotalRows: 'تعداد کل سطرها:',
 
   // Total visible row amount footer text
-  footerTotalVisibleRows: (visibleCount, totalCount) =>
-    `${visibleCount.toLocaleString()} از ${totalCount.toLocaleString()}`,
+footerTotalVisibleRows: (visibleCount, totalCount) =>
+  `${toPersianDigits(visibleCount)} از ${toPersianDigits(totalCount)}`,
 
-  // Pagination text
-  MuiTablePagination: {
-    labelRowsPerPage: 'تعداد سطر در هر صفحه:',
-    labelDisplayedRows: ({ from, to, count }) =>
-      `${from}-${to} از ${count !== -1 ? count : `بیش از ${to}`}`,
-  }
+
+MuiTablePagination: {
+  labelRowsPerPage: 'تعداد سطر در هر صفحه:',
+  labelDisplayedRows: ({ from, to, count }) =>
+    `${toPersianDigits(from)}–${toPersianDigits(to)} از ${count !== -1 ? toPersianDigits(count) : `بیش از ${toPersianDigits(to)}`}`
+}
+,
+
+
 };
 const MayorsList = () => {
   const [mayors, setMayors] = useState([]);
@@ -152,8 +195,19 @@ const MayorsList = () => {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Controls the warning dialog
   const [mayorToDelete, setMayorToDelete] = useState(null); // Tracks the mayor selected for deletion
-  const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
+  const [cityInputValue, setCityInputValue] = useState("");
+  const [selectedCity, setSelectedCity] = useState(null);
+  const handleDialogClose = () => {
+  setOpen(false);
+  setSelectedCity(null);          // پاک کردن آخرین شهر انتخابی
+  setCityInputValue("");          // پاک کردن input value
+  setSelectedProvince(null);      // پاک کردن انتخاب استان
+  setcities([]);                  // پاک کردن لیست شهرها
+};
+
+
+
   const fetchMayors = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/mayor-registry/mayor-complex-list/`, {
@@ -179,6 +233,10 @@ const MayorsList = () => {
     setMayorToDelete(id); // Set the mayor to delete
     setDeleteDialogOpen(true); // Open confirmation dialog
   };
+
+  const toPersianDigits = (num) =>
+  num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
 
   const handleDelete = async (id) => {
     try {
@@ -339,6 +397,10 @@ const MayorsList = () => {
       
       setOpen(false); // Close the dialog
       fetchMayors(); // Refresh the list
+      setSelectedCity(null);
+setCityInputValue("");
+setSelectedProvince(null);
+setcities([]);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -446,12 +508,19 @@ const MayorsList = () => {
       
     },
     {
-      field: "MonthlyReportCheck",
-      headerName: "گزارش ماهانه",
-      width: 130,
-      headerAlign: 'center', // 🔥 این کلیدیه
-      editable: false,
-    },
+  field: "MonthlyReportCheck",
+  headerName: "گزارش ماهانه",
+  width: 130,
+  headerAlign: 'center',
+  editable: false,
+  renderCell: (params) => (
+    <span style={{ fontSize: '1.2rem'}}>
+      {toPersianDigits(params.value)}
+    </span>
+  )
+}
+
+,
     {
       field: "Actions",
       headerName: "عملیات",
@@ -546,60 +615,155 @@ const MayorsList = () => {
       }}>
 
       <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowId={(row) => row.id}
-        rowsPerPageOptions={[5, 10, 20]}
-        pageSize={pageSize}
-        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-        getRowSpacing={(params) => ({
-          top: params.isFirstVisible ? 0 : 5,
-          bottom: params.isLastVisible ? 0 : 5,
-        })}
-        autoHeight 
-        sx={{
-          direction: "rtl",
-          border: 'none',
-          [`& .${gridClasses.row}`]: {
-            bgcolor: (theme) =>
-              theme.palette.mode === 'light' ? grey[200] : grey[900],
-          },
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: "#f5f5f5",
-            borderBottom: '2px solid #005a24',
-            fontSize: { xs: '0.9rem', md: '1rem' },
-            fontWeight: 'bold',
-          },
-          '& .MuiDataGrid-columnHeader': {
-            justifyContent: 'center', // متن سرستون رو وسط چین کن
-          },
-          '& .MuiDataGrid-columnHeaderTitle': {
-            fontWeight: 'bold',
-            textAlign: 'center',
-            width: '100%',
-            display: 'block', // مهم! این باعث میشه متن واقعا وسط بیفته
-          },
-          '& .MuiDataGrid-cell': {
-            textAlign: 'right',
-            direction: 'rtl',
-            fontSize: { xs: '0.8rem', md: '0.9rem' },
-            padding: '10px',
-          },
-          '& .MuiDataGrid-footerContainer': {
-            borderTop: '1px solid rgba(224, 224, 224, 1)',
-            fontSize: { xs: '0.8rem', md: '0.9rem' },
-          },
-          '& .MuiTablePagination-root': {
-            fontSize: { xs: '0.8rem', md: '0.9rem' },
-          },
-        }}
-        onCellEditCommit={(params) => setRowId(params.id)}
-        localeText={faIR}
-      />
+  rows={rows}
+  columns={columns}
+  getRowId={(row) => row.id}
+  getRowSpacing={(params) => ({
+    top: params.isFirstVisible ? 0 : 5,
+    bottom: params.isLastVisible ? 0 : 5,
+  })}
+  sx={{
+  height: 450,
+  paddingLeft: '16px',
+  direction: 'rtl',
+  textAlign: 'right',
+  border: 'none',
+
+  [`& .${gridClasses.row}`]: {
+    bgcolor: (theme) =>
+      theme.palette.mode === 'light' ? grey[200] : grey[900],
+  },
+
+  '& .MuiDataGrid-columnHeaders': {
+    backgroundColor: "#f5f5f5",
+    borderBottom: '2px solid #005a24',
+    fontSize: { xs: '0.9rem', md: '1rem' },
+    fontWeight: 'bold',
+  },
+
+  '& .MuiDataGrid-columnHeader': {
+    justifyContent: 'center',
+  },
+
+  '& .MuiDataGrid-columnHeaderTitle': {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    width: '100%',
+    display: 'block',
+  },
+
+  '& .MuiDataGrid-cell': {
+    textAlign: 'right',
+    direction: 'rtl',
+    fontSize: { xs: '0.8rem', md: '0.9rem' },
+    padding: '10px',
+    paddingRight: '40px',
+  },
+
+  '& .MuiDataGrid-footerContainer': {
+    display: 'none',
+  },
+
+  // ✅ اضافه‌شده‌ها برای راست‌چینی منو و آیکون‌ها
+  '& .MuiDataGrid-menu': {
+    direction: 'rtl',
+    textAlign: 'right',
+  },
+  '& .MuiMenu-paper': {
+    direction: 'rtl',
+    textAlign: 'right',
+  },
+  '& .MuiPaper-root': {
+    direction: 'rtl',
+    textAlign: 'right',
+  },
+  '& .MuiMenuItem-root': {
+    justifyContent: 'flex-end',
+    '& svg': {
+      marginLeft: '8px',
+      marginRight: 0,
+    },
+  },
+
+  // 📱 مخفی کردن اسکرول برای موبایل
+  '& .MuiDataGrid-virtualScroller': {
+    '@media (max-width:600px)': {
+      '&::-webkit-scrollbar': {
+        display: 'none',
+      },
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    },
+  },
+  '@media (max-width:600px)': {
+    '& .MuiDataGrid-virtualScroller': {
+      pr: '8px',
+      '&::-webkit-scrollbar, &::-webkit-scrollbar-track, &::-webkit-scrollbar-thumb': {
+        width: '0 !important',
+        height: '0 !important',
+        display: 'none !important',
+        background: 'transparent !important',
+      },
+    },
+  },
+}}
+
+
+  onCellEditCommit={(params) => setRowId(params.id)}
+  localeText={faIR}
+ slotProps={{
+  columnMenu: {
+    sx: {
+      direction: 'rtl',
+      '& .MuiMenuItem-root': {
+        justifyContent: 'flex-end',
+        textAlign: 'right',
+        '& svg': {
+          marginLeft: 8,
+          marginRight: 0,
+        },
+      },
+    },
+  },
+  panel: {
+    sx: {
+      direction: 'rtl',
+      textAlign: 'right',
+      
+
+      '& .MuiFormControlLabel-root': {
+        justifyContent: 'flex-end',
+      },
+      '& .MuiFormControlLabel-label': {
+        paddingRight: '8px',
+      },
+      '& .MuiTypography-root': {
+        textAlign: 'right',
+      },
+
+      '& .MuiFormLabel-root': {
+        textAlign: 'right',
+        right: 0,
+        left: 'auto',
+        paddingBottom: '8px', 
+      },
+
+      '& .MuiInputBase-root': {
+        direction: 'rtl',
+      },
+      '& .MuiSelect-select': {
+        textAlign: 'right',
+      },
+    },
+  },
+}}
+
+/>
+
       </Box>
   </Box>
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth   maxWidth="sm" >
+      <Dialog open={open} onClose={handleDialogClose} fullWidth   maxWidth="sm" >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           ویرایش مسئول
         </DialogTitle>
@@ -779,6 +943,10 @@ const MayorsList = () => {
             getOptionLabel={(option) => option.Name}
             value={selectedProvince}
             onChange={handleProvinceChange}
+              slots={{ popper: RTLPopper }}
+              noOptionsText="گزینه‌ای یافت نشد"
+
+
             renderInput={(params) => (
               <TextField {...params} label="استان" fullWidth margin="dense" 
               sx={{
@@ -811,46 +979,67 @@ const MayorsList = () => {
           />
 
           {/* cities Dropdown */}
-          <Autocomplete
-            options={cities}
-            getOptionLabel={(option) => option.Name} // Use city.Name for dropdown
-            value={null} // Reset after each add
-            onChange={(event, newCity) => {
-              if (newCity) handleAddCity(newCity);
-            }}
-            renderInput={(params) => (
-              <TextField {...params} label="افزودن شهر جدید" fullWidth margin="dense"sx={{
-                direction: 'rtl',
-                '& input': {
-                  textAlign: 'right',
-                },
-                '& label': {
-                  right: 54,
-                  left: 'auto',
-                  transformOrigin: 'top right',
-                },
-                '& .MuiInputLabel-shrink': {
-                  right: 30,
-                  left: 'auto',
-                  transformOrigin: 'top right',
-                },
-                '& legend': {
-                  textAlign: 'right',
-                },
-                '& .MuiOutlinedInput-root': {
-                  justifyContent: 'flex-end',
-                },
-                '& .MuiSvgIcon-root': {
-                  left: 12,
-                  right: 'auto',
-                },
-              }}/>
-            )}
-          />
+   <Autocomplete
+  options={cities}
+  getOptionLabel={(option) => option?.Name || ""}
+
+  value={selectedCity} // ✅ مقدار واقعی
+  onChange={(event, newValue) => {
+    setSelectedCity(newValue); // ✅ ذخیره انتخاب‌شده
+    if (newValue && !selectedcities.find((city) => city.id === newValue.id)) {
+      handleAddCity(newValue); // ✅ اضافه به لیست
+    }
+  }}
+
+  clearOnBlur
+  clearOnEscape
+  disableClearable={false} // ✅ یعنی ضربدر نمایش داده شود
+
+  noOptionsText="گزینه‌ای یافت نشد"
+  slots={{ popper: RTLPopper }}
+
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="افزودن شهر جدید"
+      fullWidth
+      margin="dense"
+      sx={{
+        direction: 'rtl',
+        '& input': {
+          textAlign: 'right',
+        },
+        '& label': {
+          right: 54,
+          left: 'auto',
+          transformOrigin: 'top right',
+        },
+        '& .MuiInputLabel-shrink': {
+          right: 30,
+          left: 'auto',
+          transformOrigin: 'top right',
+        },
+        '& legend': {
+          textAlign: 'right',
+        },
+        '& .MuiOutlinedInput-root': {
+          justifyContent: 'flex-end',
+        },
+        '& .MuiSvgIcon-root': {
+          left: 12,
+          right: 'auto',
+        },
+      }}
+    />
+  )}
+/>
+
+
+
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setOpen(false)}
+            onClick={handleDialogClose}
             sx={{ color: "#005a24", fontWeight: "bold" }}
           >
             لغو

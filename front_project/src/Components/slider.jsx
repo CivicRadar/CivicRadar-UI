@@ -9,6 +9,8 @@ import {
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useSwipeable } from "react-swipeable";
+import { useEffect } from "react";
+
 
 function MediaSlider({ reportData }) {
   const mediaItems = [];
@@ -63,6 +65,9 @@ function MediaSlider({ reportData }) {
     currentIndex * itemsPerSlide,
     currentIndex * itemsPerSlide + itemsPerSlide
   );
+  useEffect(() => {
+  setCurrentIndex(0);
+}, [itemsPerSlide]);
 
   return (
     <Box>
