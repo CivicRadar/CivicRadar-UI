@@ -352,7 +352,7 @@ function LandingPage() {
                           transform: "translateY(-2px)",
                         },
                       }}
-                      onClick={() => navigate("/register")}
+                      onClick={() => navigate("/signuplogin")}
                     >
                       شروع کنید
                     </Button>
@@ -959,7 +959,7 @@ function LandingPage() {
               <Button
                 variant="contained"
                 size="large"
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/signuplogin")}
                 sx={{
                   bgcolor: 'white',
                   color: '#023',
@@ -1040,7 +1040,7 @@ function LandingPage() {
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-end' }}>
                     <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      ایمیل: info@civicradar.ir
+                      ایمیل: info@shahrsanj.ir
                     </Typography>
                     <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)'}}>
                       تلفن: ۷۳۲۲۵۳۰۳-۰۲۱
