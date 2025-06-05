@@ -10,6 +10,12 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Card,
+  FormControlLabel,
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   Email,
@@ -32,8 +38,9 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useNavigate, useParams } from "react-router-dom"; // Added useParams for URL params
+import { useNavigate, useParams, Link } from "react-router-dom"; // Added useParams for URL params and Link for the terms and conditions
 import Swal from "sweetalert2";
+import PolicyDialog from "./Components/PolicyDialog";
 
 
 const AuthPage = () => {
@@ -53,9 +60,11 @@ const AuthPage = () => {
     Email: "",
     Password: "",
   });
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [openPolicyDialog, setOpenPolicyDialog] = useState(false);
 
   // const [errorMessages, setErrorMessages] = useState({
   //   user: "",
@@ -91,6 +100,11 @@ const AuthPage = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     setErrorMessage("");
+
+    if (isSignup && !termsAccepted) {
+      setErrorMessage("لطفاً شرایط و قوانین را مطالعه و تایید کنید ❌");
+      return;
+    }
 
     if (isSignup && formData.FullName.trim() === "") {
       setErrorMessage("نام کامل نمی‌تواند خالی باشد ❌");
@@ -281,6 +295,14 @@ const AuthPage = () => {
   //     sliderRef.current.slickNext();
   //   }
   // };
+
+  const handleOpenPolicyDialog = () => {
+    setOpenPolicyDialog(true);
+  };
+
+  const handleClosePolicyDialog = () => {
+    setOpenPolicyDialog(false);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -550,66 +572,53 @@ const AuthPage = () => {
                 ) : (
                   <>
                     {isSignup && (
-                      <TextField
-                      placeholder="نام کامل"
-                      name="FullName"
-                      type="text"
-                      value={formData.FullName}
-                      onChange={handleChange}
-                      fullWidth
-                      required
-                      margin="normal"
-                      dir="rtl"
-                      inputProps={{
-                        style: {
-                          textAlign: "right",
-                          fontFamily: "inherit",
-                        },
-                      }}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Person />
-                          </InputAdornment>
-                        ),
-                        sx: {
-                          flexDirection: "row-reverse",
-                        },
-                      }}
-                      sx={{
-                        direction: "rtl",
-                        "& .MuiOutlinedInput-root": {
-                          flexDirection: "row-reverse", // آیکون بیاد سمت راست
-                          "& input": {
-                            textAlign: "right", // متن داخل input راست‌چین
-                          },
-                          "& fieldset": {
-                            borderColor: "#ccc !important",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "#aaa !important",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "#ccc !important", // حذف رنگ آبی
-                            boxShadow: "none !important",
-                          },
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#ccc !important",
-                        },
-                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#ccc !important",
-                          boxShadow: "none !important",
-                        },
-                        "& input:-webkit-autofill": {
-                          WebkitBoxShadow: "0 0 0px 1000px white inset !important",
-                          backgroundColor: "white !important",
-                        },
-                      }}
-                      
-                      
-                    />
-                    
+                      <>
+                        <TextField
+                          fullWidth
+                          label="نام کامل"
+                          name="FullName"
+                          value={formData.FullName}
+                          onChange={handleChange}
+                          margin="normal"
+                          required
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Person />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={termsAccepted}
+                              onChange={(e) => setTermsAccepted(e.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label={
+                            <Typography variant="body2">
+                              <span
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleOpenPolicyDialog();
+                                }}
+                                style={{ 
+                                  color: '#1976d2', 
+                                  textDecoration: 'none',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                شرایط و قوانین
+                              </span>
+                              {" را مطالعه کردم"}
+                            </Typography>
+                          }
+                          sx={{ mt: 1, mb: 2 }}
+                        />
+                      </>
                     )}
 
 <TextField
@@ -970,6 +979,11 @@ const AuthPage = () => {
           </Box>
         </Card>
       </Box>
+
+      <PolicyDialog 
+        open={openPolicyDialog}
+        onClose={handleClosePolicyDialog}
+      />
     </ThemeProvider>
   );
 };
