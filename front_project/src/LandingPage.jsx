@@ -13,10 +13,12 @@ import searchingImage from "./assets/searching.svg";
 import reportingImage from "./assets/reporting.svg";
 import solvingImage from "./assets/solving.svg";
 import IranMap from "./Components/iranmap";
+import ReportFeed from "./Components/Reportsfeed";
 import { keyframes } from '@emotion/react';
 import { GlobalStyles } from '@mui/system';
 import { Link } from '@mui/material';
 import Typewriter from 'typewriter-effect';
+import { getLandingStats } from "./services/mayor-api";
 
 const theme = createTheme({
   typography: {
@@ -92,10 +94,11 @@ const WaveShape = () => (
 function LandingPage() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width:600px)');
-  const [dashboardData, setDashboardData] = useState({
-    users: 0,
-    admins: 0,
-    reportsToday: 0,
+  const [stats, setStats] = useState({
+    MayorCount: 0,
+    UserCount: 0,
+    TotalReportCount: 0,
+    TotalResolvedReportCount: 0
   });
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
   const { scrollY } = useScroll();
@@ -142,24 +145,17 @@ function LandingPage() {
   };
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
+    const fetchStats = async () => {
       try {
-        const res = await fetch(`${BASE}/stats/counter/`, {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("خطا در دریافت آمار");
-        const data = await res.json();
-        setDashboardData({
-          users: data.UserCount,
-          admins: data.MayorCount,
-          reportsToday: data.DailyReportCount,
-        });
+        const data = await getLandingStats();
+        console.log("Fetched stats:", data); // Debug log
+        setStats(data);
       } catch (err) {
-        console.error("Dashboard stats error:", err);
+        console.error("Error fetching landing stats:", err);
       }
     };
 
-    fetchDashboardStats();
+    fetchStats();
   }, []);
 
   const featuresList = [
@@ -474,16 +470,17 @@ function LandingPage() {
                       }}
                     >
                       <Typewriter
+                        key={`user-count-${stats.UserCount}`}
                         onInit={(typewriter) => {
                           typewriter
-                            .typeString('۶۹۴۰')
+                            .typeString(toPersianNumber(stats.UserCount))
                             .start();
                         }}
                         options={{
                           cursor: '|',
                           delay: 30,
                           deleteSpeed: null,
-                          autoStart: false,
+                          autoStart: true,
                         }}
                       />
                     </Typography>
@@ -520,16 +517,17 @@ function LandingPage() {
                       }}
                     >
                       <Typewriter
+                        key={`user-desc-${stats.TotalReportCount}`}
                         onInit={(typewriter) => {
                           typewriter
-                            .typeString('شهروندان فعال ما از ۲۳۳ شهر مختلف در سراسر کشور، با ارسال ۹۲۰ گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.')
+                            .typeString(`شهروندان فعال ما از سراسر کشور، با ارسال ${toPersianNumber(stats.TotalReportCount)} گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.`)
                             .start();
                         }}
                         options={{
                           cursor: '|',
                           delay: 20,
                           deleteSpeed: null,
-                          autoStart: false,
+                          autoStart: true,
                         }}
                       />
                     </Typography>
@@ -603,16 +601,17 @@ function LandingPage() {
                       }}
                     >
                       <Typewriter
+                        key={`mayor-count-${stats.MayorCount}`}
                         onInit={(typewriter) => {
                           typewriter
-                            .typeString('۴۳۰')
+                            .typeString(toPersianNumber(stats.MayorCount))
                             .start();
                         }}
                         options={{
                           cursor: '|',
                           delay: 30,
                           deleteSpeed: null,
-                          autoStart: false,
+                          autoStart: true,
                         }}
                       />
                     </Typography>
@@ -649,16 +648,17 @@ function LandingPage() {
                       }}
                     >
                       <Typewriter
+                        key={`mayor-desc-${stats.MayorCount}`}
                         onInit={(typewriter) => {
                           typewriter
-                            .typeString('همکاری ۳۰ استانداری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.')
+                            .typeString(`همکاری ${toPersianNumber(stats.MayorCount)} مسئول شهری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.`)
                             .start();
                         }}
                         options={{
                           cursor: '|',
                           delay: 20,
                           deleteSpeed: null,
-                          autoStart: false,
+                          autoStart: true,
                         }}
                       />
                     </Typography>
@@ -692,16 +692,17 @@ function LandingPage() {
                       }}
                     >
                       <Typewriter
+                        key={`resolved-count-${stats.TotalResolvedReportCount}`}
                         onInit={(typewriter) => {
                           typewriter
-                            .typeString('۶۴۲')
+                            .typeString(toPersianNumber(stats.TotalResolvedReportCount))
                             .start();
                         }}
                         options={{
                           cursor: '|',
                           delay: 30,
                           deleteSpeed: null,
-                          autoStart: false,
+                          autoStart: true,
                         }}
                       />
                     </Typography>
@@ -738,16 +739,17 @@ function LandingPage() {
                       }}
                     >
                       <Typewriter
+                        key={`resolved-desc-${stats.TotalResolvedReportCount}-${stats.MayorCount}`}
                         onInit={(typewriter) => {
                           typewriter
-                            .typeString('با همکاری ۴۳۰ مسئول شهری، تاکنون ۶۴۲ مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.')
+                            .typeString(`با همکاری ${toPersianNumber(stats.MayorCount)} مسئول شهری، تاکنون ${toPersianNumber(stats.TotalResolvedReportCount)} مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.`)
                             .start();
                         }}
                         options={{
                           cursor: '|',
                           delay: 20,
                           deleteSpeed: null,
-                          autoStart: false,
+                          autoStart: true,
                         }}
                       />
                     </Typography>
@@ -779,7 +781,7 @@ function LandingPage() {
 
         {/* Iran Map Section */}
         <Box sx={{ 
-          py: 12, 
+          pt: 12,
           background: "#fff",
           position: 'relative',
           overflow: 'hidden'
@@ -818,6 +820,38 @@ function LandingPage() {
           </Container>
         </Box>
 
+        {/* Reports Feed Section */}
+        <Box sx={{ 
+          pb: 12, 
+          background: "#fff",
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Typography 
+                variant="h3" 
+                component="h2" 
+                sx={{ 
+                  textAlign: "center", 
+                  mb: 6, 
+                  color: "#023",
+                  fontSize: { xs: '2.5rem', md: '3rem' },
+                  fontWeight: 'bold'
+                }}
+              >
+                آخرین گزارشات
+              </Typography>
+              <ReportFeed />
+            </motion.div>
+          </Container>
+        </Box>
+
         {/* Features Section */}
         <Box sx={{ 
           py: 8, 
@@ -826,19 +860,6 @@ function LandingPage() {
           overflow: 'hidden'
         }}>
           <Container sx={{ position: 'relative', zIndex: 1 }}>
-            <Typography 
-              variant="h3" 
-              component="h2" 
-              sx={{ 
-                textAlign: "center", 
-                mb: 6, 
-                color: "#023",
-                fontSize: { xs: '2.5rem', md: '3rem' },
-                fontWeight: 'bold'
-              }}
-            >
-              ویژگی‌های سامانه
-            </Typography>
             <Grid container spacing={4}>
               {[
                 {
@@ -910,7 +931,7 @@ function LandingPage() {
         {/* Join Now Section */}
         <Box
           sx={{
-            py: 12,
+            py: 5,
             background: 'linear-gradient(135deg, rgb(2, 99, 75), #023)',
             position: 'relative',
             overflow: 'hidden',
@@ -925,16 +946,6 @@ function LandingPage() {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 'bold',
-                  mb: 3,
-                  fontSize: { xs: '2.5rem', md: '3.5rem' },
-                }}
-              >
-                همین حالا بپیوندید
-              </Typography>
               <Typography
                 variant="h5"
                 sx={{
@@ -1010,17 +1021,6 @@ function LandingPage() {
                     </Link>
                     <Link 
                       component="button"
-                      onClick={() => navigate("/contact")}
-                      sx={{ 
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        textDecoration: 'none',
-                        '&:hover': { color: 'white' }
-                      }}
-                    >
-                      تماس با ما
-                    </Link>
-                    <Link 
-                      component="button"
                       onClick={() => navigate("/privacy")}
                       sx={{ 
                         color: 'rgba(255, 255, 255, 0.7)',
@@ -1042,8 +1042,8 @@ function LandingPage() {
                     <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       ایمیل: info@civicradar.ir
                     </Typography>
-                    <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      تلفن: ۰۲۱-۱۲۳۴۵۶۷۸
+                    <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)'}}>
+                      تلفن: ۷۳۲۲۵۳۰۳-۰۲۱
                     </Typography>
                   </Box>
                 </Box>
@@ -1051,7 +1051,7 @@ function LandingPage() {
             </Grid>
             <Box sx={{ mt: 8, pt: 4, borderTop: '1px solid rgba(255, 255, 255, 0.1)', textAlign: 'center' }}>
               <Typography sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                © {new Date().getFullYear()} CivicRadar. تمامی حقوق محفوظ است.
+                © {new Date().getFullYear()} شهرسنج. تمامی حقوق محفوظ است.
               </Typography>
             </Box>
           </Container>
