@@ -663,13 +663,18 @@ sx={{ fontSize: "0.7rem", color: getUserRoleColor(reply.SenderType) }}
                         </Typography>
                       }
                     />
-                    <Tooltip 
-                      title="با انتخاب این گزینه نام شما در نظر ثبت شده ناشناس باقی می‌ماند"
-                      arrow
-                      placement="top"
-                    >
-                      <InfoIcon sx={{ color: "#4CAF50", fontSize: "1.1rem" }} />
-                    </Tooltip>
+                    <Tooltip
+  title={
+    <span style={{ direction: "rtl", textAlign: "right", display: "block" }}>
+      با انتخاب این گزینه نام شما در نظر ثبت شده ناشناس باقی می‌ماند
+    .</span>
+  }
+  arrow
+  placement="top"
+>
+  <InfoIcon sx={{ color: "#4CAF50", fontSize: "1.1rem", mr: 2 }} />
+</Tooltip>
+
                   </Box>
                 </Box>
               )}
@@ -755,13 +760,28 @@ sx={{ fontSize: "0.7rem", color: getUserRoleColor(reply.SenderType) }}
                 </Typography>
               }
             />
-            <Tooltip 
-              title="با انتخاب این گزینه نام شما در نظر ثبت شده ناشناس باقی می‌ماند"
-              arrow
-              placement="top"
-            >
-              <InfoIcon sx={{ color: "#4CAF50", fontSize: "1.1rem" }} />
-            </Tooltip>
+            <Tooltip
+  title="با انتخاب این گزینه نام شما در نظر ثبت شده ناشناس باقی می‌ماند ."
+  arrow
+  placement="top"
+  PopperProps={{
+    modifiers: [
+      {
+        name: 'offset',
+        options: {
+          offset: [0, 8],
+        },
+      },
+    ],
+    sx: {
+      direction: "rtl", // ⬅️ این مهمه
+      textAlign: "right",
+    },
+  }}
+>
+  <InfoIcon sx={{ color: "#4CAF50", fontSize: "1.1rem", mr: 2 }} />
+</Tooltip>
+
           </Box>
         </Box>
           ) : (
