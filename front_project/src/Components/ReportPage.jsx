@@ -50,7 +50,6 @@ const MainContent = styled(Box)(({ theme }) => ({
 const ContentContainer = styled(Box)(({ theme }) => ({
   flex: 1,
   overflowY: "auto",
-  padding: theme.spacing(3),
   backgroundColor: "#F9FAFB",
 }));
 
