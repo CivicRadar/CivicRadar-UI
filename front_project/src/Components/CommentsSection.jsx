@@ -7,6 +7,8 @@ import {
   Avatar,
   Tooltip,
   Popover,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
@@ -14,6 +16,7 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
+import InfoIcon from "@mui/icons-material/Info";
 import Picker from "emoji-picker-react";
 import { useCitizen } from "../context/CitizenContext";
 import { useMayor } from "../context/MayorContext";
@@ -111,6 +114,7 @@ export default function CommentsSection({ cityProblemId }) {
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const commentsContainerRef = useRef();
   const { citizen } = useCitizen();
 const { mayor } = useMayor();
@@ -194,6 +198,7 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
       Content: newComment,
       IsAReply: parentId !== null,
       ReplyID: parentId || 0,
+      IsAnonymous: isAnonymous,
     };
     try {
       // POST new comment
@@ -245,6 +250,7 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
       setNewComment("");
       setReplyTo(null);
       setEmojiAnchorEl(null);
+      setIsAnonymous(false);
     } catch (e) {
       console.error(e);
     }
@@ -575,57 +581,100 @@ sx={{ fontSize: "0.7rem", color: getUserRoleColor(reply.SenderType) }}
                   sx={{
                     mt: 1,
                     display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
+                    flexDirection: "column",
                     gap: 1,
-                    alignItems: { sm: "center" },
                   }}
                 >
-                  <TextField
-                    fullWidth
-                    multiline
-                    minRows={1}
-                    maxRows={5}
-                    variant="outlined"
-                    placeholder="پاسخ خود را بنویسید..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, comment.id)}
+                  <Box
                     sx={{
-                      fontSize: "0.85rem",
-                      boxShadow: "0 0 10px rgba(76,175,80,0.5)",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "rgba(76,175,80,0.3)",
-                      },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#4CAF50",
-                      },
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      gap: 1,
+                      alignItems: { sm: "center" },
                     }}
-                  />
+                  >
+                    <TextField
+                      fullWidth
+                      multiline
+                      minRows={1}
+                      maxRows={5}
+                      variant="outlined"
+                      placeholder="پاسخ خود را بنویسید..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, comment.id)}
+                      sx={{
+                        fontSize: "0.85rem",
+                        boxShadow: "0 0 10px rgba(76,175,80,0.5)",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "rgba(76,175,80,0.3)",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4CAF50",
+                        },
+                      }}
+                    />
   
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Tooltip title="ایموجی">
-                      <IconButton onClick={toggleEmojiPicker}>
-                        <EmojiEmotionsIcon />
-                      </IconButton>
-                    </Tooltip>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Tooltip title="ایموجی">
+                        <IconButton onClick={toggleEmojiPicker}>
+                          <EmojiEmotionsIcon />
+                        </IconButton>
+                      </Tooltip>
   
-                    <Tooltip title="ارسال">
-                      <IconButton onClick={() => handleAddComment(comment.id)}>
-                        <SendIcon />
-                      </IconButton>
-                    </Tooltip>
+                      <Tooltip title="ارسال">
+                        <IconButton onClick={() => handleAddComment(comment.id)}>
+                          <SendIcon />
+                        </IconButton>
+                      </Tooltip>
   
-                    <Tooltip title="لغو پاسخ">
-                      <IconButton
-                        onClick={() => {
-                          setReplyTo(null);
-                          setNewComment("");
-                          setEmojiAnchorEl(null);
-                        }}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Tooltip>
+                      <Tooltip title="لغو پاسخ">
+                        <IconButton
+                          onClick={() => {
+                            setReplyTo(null);
+                            setNewComment("");
+                            setEmojiAnchorEl(null);
+                            setIsAnonymous(false);
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isAnonymous}
+                          onChange={(e) => setIsAnonymous(e.target.checked)}
+                          sx={{
+                            color: "#4CAF50",
+                            "&.Mui-checked": {
+                              color: "#2e7d32",
+                            },
+                          }}
+                        />
+                      }
+                      label={
+                        <Typography variant="body2" sx={{ color: "#666", fontSize: "0.9rem" }}>
+                          ثبت ناشناس 
+                        </Typography>
+                      }
+                    />
+                    <Tooltip
+  title={
+    <span style={{ direction: "rtl", textAlign: "right", display: "block" }}>
+      با انتخاب این گزینه نام شما در نظر ثبت شده ناشناس باقی می‌ماند
+    .</span>
+  }
+  arrow
+  placement="top"
+>
+  <InfoIcon sx={{ color: "#4CAF50", fontSize: "1.1rem", mr: 2 }} />
+</Tooltip>
+
                   </Box>
                 </Box>
               )}
@@ -638,50 +687,101 @@ sx={{ fontSize: "0.7rem", color: getUserRoleColor(reply.SenderType) }}
       {/* New Comment Input */}
       {!replyTo && (
           isLoggedIn ? (
-
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: "column",
             gap: 1,
             mt: 1,
           }}
         >
-          <TextField
-            fullWidth
-            multiline
-            minRows={1}
-            maxRows={5}
-            variant="outlined"
-            placeholder="نظر خود را بنویسید..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            onKeyDown={handleKeyDown}
+          <Box
             sx={{
-              fontSize: "0.85rem",
-              boxShadow: "0 0 10px rgba(76,175,80,0.5)",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "rgba(76,175,80,0.3)",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#4CAF50",
-              },
+              display: "flex",
+              alignItems: "center",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 1,
             }}
-          />
+          >
+            <TextField
+              fullWidth
+              multiline
+              minRows={1}
+              maxRows={5}
+              variant="outlined"
+              placeholder="نظر خود را بنویسید..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={handleKeyDown}
+              sx={{
+                fontSize: "0.85rem",
+                boxShadow: "0 0 10px rgba(76,175,80,0.5)",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(76,175,80,0.3)",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4CAF50",
+                },
+              }}
+            />
   
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Tooltip title="ایموجی">
-              <IconButton onClick={toggleEmojiPicker}>
-                <EmojiEmotionsIcon />
-              </IconButton>
-            </Tooltip>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Tooltip title="ایموجی">
+                <IconButton onClick={toggleEmojiPicker}>
+                  <EmojiEmotionsIcon />
+                </IconButton>
+              </Tooltip>
   
-            <Tooltip title="ارسال">
-              <IconButton onClick={() => handleAddComment()}>
-                <SendIcon />
-              </IconButton>
-            </Tooltip>
+              <Tooltip title="ارسال">
+                <IconButton onClick={() => handleAddComment()}>
+                  <SendIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  sx={{
+                    color: "#4CAF50",
+                    "&.Mui-checked": {
+                      color: "#2e7d32",
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ color: "#666", fontSize: "0.9rem" }}>
+                  ثبت ناشناس
+                </Typography>
+              }
+            />
+            <Tooltip
+  title="با انتخاب این گزینه نام شما در نظر ثبت شده ناشناس باقی می‌ماند ."
+  arrow
+  placement="top"
+  PopperProps={{
+    modifiers: [
+      {
+        name: 'offset',
+        options: {
+          offset: [0, 8],
+        },
+      },
+    ],
+    sx: {
+      direction: "rtl", // ⬅️ این مهمه
+      textAlign: "right",
+    },
+  }}
+>
+  <InfoIcon sx={{ color: "#4CAF50", fontSize: "1.1rem", mr: 2 }} />
+</Tooltip>
+
           </Box>
         </Box>
           ) : (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Container,
@@ -15,6 +15,8 @@ import SecurityIcon from '@mui/icons-material/Security';
 import LockIcon from '@mui/icons-material/Lock';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import ShieldIcon from '@mui/icons-material/Shield';
+import AppBar from "../Components/AppBar";
+import Footer from "../Components/Footer";
 
 const theme = createTheme({
   typography: {
@@ -42,6 +44,10 @@ const Privacy = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const privacySections = [
     {
       icon: <SecurityIcon sx={{ fontSize: 40, color: '#00cc88' }} />,
@@ -68,174 +74,195 @@ const Privacy = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ 
-        minHeight: '100vh', 
-        bgcolor: '#f5f5f5', 
-        pt: 8, 
-        pb: 12,
-        fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-      }}>
-        <Container maxWidth="lg">
-          {/* Hero Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <Box sx={{ textAlign: 'center', mb: 8 }}>
-              <Typography
-                variant="h2"
-                sx={{
-                  color: '#023',
-                  fontWeight: 'bold',
-                  mb: 3,
-                  fontSize: { xs: '2rem', md: '3rem' },
-                  fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-                }}
-              >
-                حریم خصوصی
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{
-                  color: '#666',
-                  maxWidth: '800px',
-                  mx: 'auto',
-                  lineHeight: 1.8,
-                  fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-                }}
-              >
-                ما متعهد به حفاظت از حریم خصوصی شما هستیم
-              </Typography>
-            </Box>
-          </motion.div>
-
-          {/* Privacy Policy Content */}
-          <Box sx={{ mb: 8 }}>
-            <Typography
-              variant="body1"
-              sx={{
-                color: '#666',
-                lineHeight: 2,
-                textAlign: 'right',
-                fontSize: '1.1rem',
-                mb: 4,
-                fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-              }}
+      <Box sx={{ overflowX: "hidden", direction: 'rtl' }}>
+        <AppBar />
+        <Box sx={{ 
+          minHeight: '100vh', 
+          bgcolor: '#f5f5f5', 
+          pt: 8, 
+          pb: 12,
+          fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+        }}>
+          <Container maxWidth="lg">
+            {/* Hero Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              در سامانه هوشمند گزارش مشکلات شهری، حفظ حریم خصوصی کاربران یکی از اولویت‌های اصلی ماست. 
-              این سیاست حریم خصوصی توضیح می‌دهد که چگونه اطلاعات شما را جمع‌آوری، استفاده و محافظت می‌کنیم.
-            </Typography>
-
-            {privacySections.map((section, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Paper
-                  elevation={3}
+              <Box sx={{ textAlign: 'center', mb: 8 }}>
+                <Typography
+                  variant="h2"
                   sx={{
-                    p: 4,
-                    mb: 4,
-                    borderRadius: 4,
-                    bgcolor: 'white',
-                    transition: 'transform 0.3s ease-in-out',
-                    '&:hover': {
-                      transform: 'translateY(-5px)'
-                    }
+                    color: '#023',
+                    fontWeight: 'bold',
+                    mb: 3,
+                    fontSize: { xs: '2rem', md: '3rem' },
+                    fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-                    {section.icon}
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        color: '#023',
-                        fontWeight: 'bold',
-                        fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-                      }}
-                    >
-                      {section.title}
-                    </Typography>
-                  </Box>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#666',
-                      lineHeight: 2,
-                      textAlign: 'right',
-                      fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-                    }}
-                  >
-                    {section.content}
-                  </Typography>
-                </Paper>
-              </motion.div>
-            ))}
-          </Box>
+                  حریم خصوصی
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: '#666',
+                    maxWidth: '800px',
+                    mx: 'auto',
+                    lineHeight: 1.8,
+                    fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+                  }}
+                >
+                  ما متعهد به حفاظت از حریم خصوصی شما هستیم
+                </Typography>
+              </Box>
+            </motion.div>
 
-          {/* Contact Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <Paper
-              elevation={3}
-              sx={{
-                p: 4,
-                borderRadius: 4,
-                bgcolor: 'white',
-                textAlign: 'right'
-              }}
-            >
-              <Typography
-                variant="h5"
-                sx={{
-                  color: '#023',
-                  fontWeight: 'bold',
-                  mb: 3,
-                  fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-                }}
-              >
-                سوالات و نظرات
-              </Typography>
+            {/* Privacy Policy Content */}
+            <Box sx={{ mb: 8 }}>
               <Typography
                 variant="body1"
                 sx={{
                   color: '#666',
                   lineHeight: 2,
-                  mb: 2,
+                  textAlign: 'right',
+                  fontSize: '1.1rem',
+                  mb: 4,
                   fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                 }}
               >
-                اگر سوال یا نظری در مورد سیاست حریم خصوصی ما دارید، می‌توانید با ما تماس بگیرید:
+                در سامانه هوشمند گزارش مشکلات شهری، حفظ حریم خصوصی کاربران یکی از اولویت‌های اصلی ماست. 
+                این سیاست حریم خصوصی توضیح می‌دهد که چگونه اطلاعات شما را جمع‌آوری، استفاده و محافظت می‌کنیم.
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    color: '#666',
+
+              {privacySections.map((section, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      p: 4,
+                      mb: 4,
+                      borderRadius: 4,
+                      bgcolor: 'white',
+                      transition: 'transform 0.3s ease-in-out',
+                      '&:hover': {
+                        transform: 'translateY(-5px)'
+                      }
+                    }}
+                  >
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2, 
+                      mb: 2,
+                      justifyContent: 'flex-start'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {section.icon}
+                      </Box>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          color: '#023',
+                          fontWeight: 'bold',
+                          fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+                        }}
+                      >
+                        {section.title}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        lineHeight: 2,
+                        textAlign: 'right',
+                        fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+                      }}
+                    >
+                      {section.content}
+                    </Typography>
+                  </Paper>
+                </motion.div>
+              ))}
+            </Box>
+
+            {/* Contact Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 4,
+                  borderRadius: 4,
+                  bgcolor: 'white',
+                  textAlign: 'right'
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: '#023',
+                    fontWeight: 'bold',
+                    mb: 3,
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
-                  ایمیل: privacy@civicradar.ir
+                  سوالات و نظرات
                 </Typography>
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
+                <Typography
+                  variant="body1"
+                  sx={{
                     color: '#666',
+                    lineHeight: 2,
+                    mb: 2,
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
-                  تلفن: ۰۲۱-۱۲۳۴۵۶۷۸
+                  اگر سوال یا نظری در مورد سیاست حریم خصوصی ما دارید، می‌توانید با ما تماس بگیرید:
                 </Typography>
-              </Box>
-            </Paper>
-          </motion.div>
-        </Container>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: '#666',
+                      fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+                    }}
+                  >
+                    ایمیل: info@shahrsanj.ir
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: '#666',
+                      fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+                    }}
+                  >
+                    تلفن: ۷۳۲۲۵۳۰۳-۰۲۱
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      color: '#666',
+                      fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
+                    }}
+                  >
+                    آدرس: تهران، رسالت، خیابان هنگام، خیابان دانشگاه، دانشگاه علم و صنعت ایران
+                  </Typography>
+                </Box>
+              </Paper>
+            </motion.div>
+          </Container>
+        </Box>
+        <Footer />
       </Box>
     </ThemeProvider>
   );

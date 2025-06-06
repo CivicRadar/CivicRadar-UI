@@ -15,6 +15,9 @@ import {
   IconButton,
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import Masonry from "react-masonry-css";
 import SortIcon from "@mui/icons-material/Sort";
@@ -38,12 +41,11 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CloseIcon from '@mui/icons-material/Close';
 import ReportIcon from "@mui/icons-material/Report";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const toPersianDigits = (num) => {
   return String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 };
-
-
 
 const ReportFeed = () => {
   const [reports, setReports] = useState([]);
@@ -64,42 +66,138 @@ const ReportFeed = () => {
   const [userLikeStatusMap, setUserLikeStatusMap] = useState({}); 
   const BASE = `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}`;
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
-const [reportReason, setReportReason] = useState("");
-const [violationStatus, setViolationStatus] = useState(""); // "" | "reported" | "not_reported"
+  const [reportReason, setReportReason] = useState("");
+  const [violationStatus, setViolationStatus] = useState(""); // "" | "reported" | "not_reported"
+  const [selectedReportId, setSelectedReportId] = useState(null);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
-const [selectedReportId, setSelectedReportId] = useState(null);
-const openViolationDialog = async (reportId) => {
-  setSelectedReportId(reportId);
-  setReportReason("");
-  setViolationStatus(""); 
+  const handleLikeToggle = async (reportId) => {
+    const current = userLikeStatusMap[reportId];
+    const sendingValue = true;
 
-  try {
-    const res = await fetch(`${BASE}/supervise/citizen-report-citizen/?CityProblemID=${reportId}`, {
-      method: "GET",
-      credentials: "include",
-    });
-    const data = await res.json();
-    if (data.Answer === "you have reported this problem") {
-      setViolationStatus("reported");
-    } else {
-      setViolationStatus("not_reported");
+    try {
+      const res = await fetch(`${BASE}/communicate/like/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          CityProblemID: reportId,
+          Like: sendingValue,
+        }),
+      });
+
+      if (!res.ok) {
+        setLoginDialogOpen(true);
+        return;
+      }
+
+      const updatedStatus = current === true ? null : true;
+
+      setUserLikeStatusMap((m) => ({ ...m, [reportId]: updatedStatus }));
+
+      setReports((rs) =>
+        rs.map((r) => {
+          if (r.id !== reportId) return r;
+          let Likes = r.Likes || 0;
+          let Dislikes = r.Dislikes || 0;
+
+          if (current === true) {
+            Likes -= 1;
+          } else if (current === false) {
+            Dislikes -= 1;
+            Likes += 1;
+          } else {
+            Likes += 1;
+          }
+
+          return { ...r, Likes, Dislikes };
+        })
+      );
+    } catch (e) {
+      console.error("handleLikeToggle error", e);
+      setLoginDialogOpen(true);
     }
-    setReportDialogOpen(true);
-  } catch (err) {
-    console.error("خطا در بررسی گزارش قبلی:", err);
-    alert("خطا در بررسی ثبت قبلی گزارش.");
-  }
-};
+  };
 
+  const handleDislikeToggle = async (reportId) => {
+    const current = userLikeStatusMap[reportId];
+    const sendingValue = false;
 
+    try {
+      const res = await fetch(`${BASE}/communicate/like/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          CityProblemID: reportId,
+          Like: sendingValue,
+        }),
+      });
 
+      if (!res.ok) {
+        setLoginDialogOpen(true);
+        return;
+      }
 
+      const updatedStatus = current === false ? null : false;
 
+      setUserLikeStatusMap((m) => ({ ...m, [reportId]: updatedStatus }));
 
+      setReports((rs) =>
+        rs.map((r) => {
+          if (r.id !== reportId) return r;
+          let Likes = r.Likes || 0;
+          let Dislikes = r.Dislikes || 0;
 
+          if (current === false) {
+            Dislikes -= 1;
+          } else if (current === true) {
+            Likes -= 1;
+            Dislikes += 1;
+          } else {
+            Dislikes += 1;
+          }
 
-  
+          return { ...r, Likes, Dislikes };
+        })
+      );
+    } catch (e) {
+      console.error("handleDislikeToggle error", e);
+      setLoginDialogOpen(true);
+    }
+  };
 
+  const openViolationDialog = async (reportId) => {
+    try {
+      const res = await fetch(`${BASE}/supervise/citizen-report-citizen/?CityProblemID=${reportId}`, {
+        method: "GET",
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        setLoginDialogOpen(true);
+        return;
+      }
+
+      const data = await res.json();
+      setSelectedReportId(reportId);
+      setReportReason("");
+      setViolationStatus(data.Answer === "you have reported this problem" ? "reported" : "not_reported");
+      setReportDialogOpen(true);
+    } catch (err) {
+      console.error("خطا در بررسی گزارش قبلی:", err);
+      setLoginDialogOpen(true);
+    }
+  };
+
+  const handleLogin = () => {
+    navigate("/signuplogin");
+  };
+
+  const handleLoginClose = () => {
+    setLoginDialogOpen(false);
+  };
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/all-citizen-report/`)
@@ -181,176 +279,7 @@ setUserLikeStatusMap(statusMap);
         return status;
     }
   };
-// … بقیه‌ی ایمپورت‌ها و stateها
 
-const handleLikeToggle = async (reportId) => {
-  const current = userLikeStatusMap[reportId];
-  const sendingValue = true;
-
-  try {
-    await fetch(`${BASE}/communicate/like/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        CityProblemID: reportId,
-        Like: sendingValue,
-      }),
-    });
-
-    const updatedStatus = current === true ? null : true;
-
-    setUserLikeStatusMap((m) => ({ ...m, [reportId]: updatedStatus }));
-
-    setReports((rs) =>
-      rs.map((r) => {
-        if (r.id !== reportId) return r;
-        let Likes = r.Likes || 0;
-        let Dislikes = r.Dislikes || 0;
-
-        if (current === true) {
-          Likes -= 1; // برداشتن لایک
-        } else if (current === false) {
-          Dislikes -= 1;
-          Likes += 1; // از دیسلایک به لایک
-        } else {
-          Likes += 1; // لایک جدید
-        }
-
-        return { ...r, Likes, Dislikes };
-      })
-    );
-  } catch (e) {
-    console.error("handleLikeToggle error", e);
-  }
-};
-
-
-const handleDislikeToggle = async (reportId) => {
-  const current = userLikeStatusMap[reportId];
-  const sendingValue = false;
-
-  try {
-    await fetch(`${BASE}/communicate/like/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        CityProblemID: reportId,
-        Like: sendingValue,
-      }),
-    });
-
-    const updatedStatus = current === false ? null : false;
-
-    setUserLikeStatusMap((m) => ({ ...m, [reportId]: updatedStatus }));
-
-    setReports((rs) =>
-      rs.map((r) => {
-        if (r.id !== reportId) return r;
-        let Likes = r.Likes || 0;
-        let Dislikes = r.Dislikes || 0;
-
-        if (current === false) {
-          Dislikes -= 1; // برداشتن دیسلایک
-        } else if (current === true) {
-          Likes -= 1;
-          Dislikes += 1; // از لایک به دیسلایک
-        } else {
-          Dislikes += 1; // دیسلایک جدید
-        }
-
-        return { ...r, Likes, Dislikes };
-      })
-    );
-  } catch (e) {
-    console.error("handleDislikeToggle error", e);
-  }
-};
-
-
-
-
-
-
-  
-  
-
-  const toggleSortOption = (option) =>
-    setSortOptions((prev) =>
-      prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]
-    );
-
-  const finalReports = [...reports]
-  .filter((r) => {
-    const reportDate = new DateObject({ date: new Date(r.DateTime), calendar: persian, locale: persian_fa });
-    const fromDateObj = dateFrom ? new DateObject(dateFrom).set({ hour: 0, minute: 0, second: 0 }) : null;
-    const toDateObj = dateTo ? new DateObject(dateTo).set({ hour: 23, minute: 59, second: 59 }) : null;
-
-    return (
-      (selectedType === "" || translateType(r.Type) === selectedType) &&
-      (selectedProvince === "" || r.ProvinceName === selectedProvince) &&
-      (selectedCity === "" || r.CityName === selectedCity) &&
-      (selectedStatus === "" || translateStatus(r.Status) === selectedStatus) &&
-      (searchQuery === "" || r.Information.includes(searchQuery) || r.ReporterName.includes(searchQuery)) &&
-      (!fromDateObj || reportDate >= fromDateObj) &&
-      (!toDateObj || reportDate <= toDateObj)
-    );
-  })
-  .sort((a, b) => {
-     if (sortOptions.length === 0) {
-      return new Date(a.DateTime) - new Date(b.DateTime);
-    }
-    for (let option of sortOptions) {
-      if (option === "priority") {
-        const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-        const diff = (priorityOrder[a.Priority] || 4) - (priorityOrder[b.Priority] || 4);
-        if (diff !== 0) return diff;
-      } else if (option === "likes") {
-        const diff = (b.Likes || 0) - (a.Likes || 0);
-        if (diff !== 0) return diff;
-      } else if (option === "dislikes") {
-        const diff = (b.Dislikes || 0) - (a.Dislikes || 0);
-        if (diff !== 0) return diff;
-      } else if (option === "date") {
-        const diff = new Date(b.DateTime) - new Date(a.DateTime);
-        if (diff !== 0) return diff;
-      }
-    }
-    return 0; 
-  });
-
-
-  const breakpointColumns = { default: 2, 960: 2, 600: 1 };
-
-
-  const getStatusProps = (status) => {
-    switch (status) {
-      case "PendingReview":
-      case "در انتظار بررسی":
-        return {
-          label: "در انتظار بررسی",
-          icon: <HourglassBottomIcon sx={{ fontSize: 18 }} />,
-          color: "#ffb300",
-        };
-      case "UnderConsideration":
-      case "در حال رسیدگی":
-        return {
-          label: "در حال رسیدگی",
-          icon: <BuildIcon sx={{ fontSize: 18 }} />,
-          color: "#039be5",
-        };
-      case "IssueResolved":
-      case "حل‌شده":
-        return {
-          label: "حل‌شده",
-          icon: <CheckCircleIcon sx={{ fontSize: 18 }} />,
-          color: "#43a047",
-        };
-      default:
-        return { label: status, icon: null, color: "#ccc" };
-    }
-  };
 const submitViolationReport = async () => {
   if (!reportReason.trim()) {
     Swal.fire({
@@ -416,9 +345,79 @@ const submitViolationReport = async () => {
   }
 };
 
+  const toggleSortOption = (option) =>
+    setSortOptions((prev) =>
+      prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]
+    );
 
+  const finalReports = [...reports]
+  .filter((r) => {
+    const reportDate = new DateObject({ date: new Date(r.DateTime), calendar: persian, locale: persian_fa });
+    const fromDateObj = dateFrom ? new DateObject(dateFrom).set({ hour: 0, minute: 0, second: 0 }) : null;
+    const toDateObj = dateTo ? new DateObject(dateTo).set({ hour: 23, minute: 59, second: 59 }) : null;
 
-  
+    return (
+      (selectedType === "" || translateType(r.Type) === selectedType) &&
+      (selectedProvince === "" || r.ProvinceName === selectedProvince) &&
+      (selectedCity === "" || r.CityName === selectedCity) &&
+      (selectedStatus === "" || translateStatus(r.Status) === selectedStatus) &&
+      (searchQuery === "" || r.Information.includes(searchQuery) || r.ReporterName.includes(searchQuery)) &&
+      (!fromDateObj || reportDate >= fromDateObj) &&
+      (!toDateObj || reportDate <= toDateObj)
+    );
+  })
+  .sort((a, b) => {
+     if (sortOptions.length === 0) {
+      return new Date(a.DateTime) - new Date(b.DateTime);
+    }
+    for (let option of sortOptions) {
+      if (option === "priority") {
+        const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+        const diff = (priorityOrder[a.Priority] || 4) - (priorityOrder[b.Priority] || 4);
+        if (diff !== 0) return diff;
+      } else if (option === "likes") {
+        const diff = (b.Likes || 0) - (a.Likes || 0);
+        if (diff !== 0) return diff;
+      } else if (option === "dislikes") {
+        const diff = (b.Dislikes || 0) - (a.Dislikes || 0);
+        if (diff !== 0) return diff;
+      } else if (option === "date") {
+        const diff = new Date(b.DateTime) - new Date(a.DateTime);
+        if (diff !== 0) return diff;
+      }
+    }
+    return 0; 
+  });
+
+  const breakpointColumns = { default: 2, 960: 2, 600: 1 };
+
+  const getStatusProps = (status) => {
+    switch (status) {
+      case "PendingReview":
+      case "در انتظار بررسی":
+        return {
+          label: "در انتظار بررسی",
+          icon: <HourglassBottomIcon sx={{ fontSize: 18 }} />,
+          color: "#ffb300",
+        };
+      case "UnderConsideration":
+      case "در حال رسیدگی":
+        return {
+          label: "در حال رسیدگی",
+          icon: <BuildIcon sx={{ fontSize: 18 }} />,
+          color: "#039be5",
+        };
+      case "IssueResolved":
+      case "حل‌شده":
+        return {
+          label: "حل‌شده",
+          icon: <CheckCircleIcon sx={{ fontSize: 18 }} />,
+          color: "#43a047",
+        };
+      default:
+        return { label: status, icon: null, color: "#ccc" };
+    }
+  };
 
   return (
     <Box textAlign="center">
@@ -466,7 +465,6 @@ const submitViolationReport = async () => {
     مرتب‌سازی
   </Button>
 </Box>
-
 
       <Collapse in={showFilters}>
       <Box
@@ -809,7 +807,6 @@ const submitViolationReport = async () => {
   </MenuItem>
 </Menu>
 
-
       <Dialog
       open={dialogOpen}
       onClose={() => setDialogOpen(false)}
@@ -1022,7 +1019,7 @@ const submitViolationReport = async () => {
   <Box display="flex" alignItems="center" gap={0.5}>
   <IconButton
   size="small"
-  onClick={() => handleDislikeToggle(r.id, userLikeStatusMap[r.id])}
+  onClick={() => handleDislikeToggle(r.id)}
   color={userLikeStatusMap[r.id] === false ? "error" : "default"}
 >
   <ThumbDownAltIcon fontSize="small" />
@@ -1034,7 +1031,7 @@ const submitViolationReport = async () => {
 
 <IconButton
   size="small"
-  onClick={() => handleLikeToggle(r.id, userLikeStatusMap[r.id])}
+  onClick={() => handleLikeToggle(r.id)}
   color={userLikeStatusMap[r.id] === true ? "success" : "default"}
 >
   <ThumbUpAltIcon fontSize="small" />
@@ -1211,8 +1208,37 @@ const submitViolationReport = async () => {
   </DialogContent>
 </Dialog>
 
-
-
+      <Dialog open={loginDialogOpen} onClose={handleLoginClose} dir="rtl">
+        <DialogTitle sx={{ textAlign: "right" }}>باید وارد حساب خود شوید.</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ textAlign: "right" }}>
+            به صفحه ورود برویم؟
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "flex-start", px: 3 }}>
+          <Button
+            onClick={handleLogin}
+            sx={{ 
+              color: "#007E33",
+              fontWeight: "bold" 
+            }}
+          >
+            بله
+          </Button>
+          <Button
+            onClick={handleLoginClose}
+            color="error"
+            sx={{
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "rgba(2, 41, 18, 0.1)",
+              },
+            }}
+          >
+            خیر
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     <style>
     {`
@@ -1271,7 +1297,6 @@ const submitViolationReport = async () => {
 
     `}
   </style>
-
 
     </Box>
   );

@@ -352,7 +352,7 @@ function LandingPage() {
                           transform: "translateY(-2px)",
                         },
                       }}
-                      onClick={() => navigate("/register")}
+                      onClick={() => navigate("/signuplogin")}
                     >
                       شروع کنید
                     </Button>
@@ -418,31 +418,34 @@ function LandingPage() {
           }}
         >
           <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-            <Typography 
-              variant="h3" 
-              component="h2" 
-              sx={{ 
-                textAlign: "center", 
-                mb: 8, 
-                color: "#023",
-                fontSize: { xs: '2.5rem', md: '3rem' },
-                fontWeight: 'bold'
-              }}
-            >
-              <Typewriter
-                onInit={(typewriter) => {
-                  typewriter
-                    .typeString('آمار و دستاوردها')
-                    .start();
-                }}
-                options={{
-                  cursor: '|',
-                  delay: 50,
-                  deleteSpeed: null,
-                  autoStart: false,
-                }}
-              />
-            </Typography>
+           <Typography 
+  variant="h3" 
+  component="h2" 
+  sx={{ 
+    textAlign: "center", 
+    mb: 8, 
+    color: "#023",
+    fontSize: { xs: '2.5rem', md: '3rem' },
+    fontWeight: 'bold',
+    direction: 'rtl',        
+    unicodeBidi: 'isolate',  
+  }}
+>
+  <Typewriter
+    onInit={(typewriter) => {
+      typewriter
+        .typeString('آمار و دستاوردها')
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 50,
+      deleteSpeed: null,
+      autoStart: false,
+    }}
+  />
+</Typography>
+
 
             {/* First Stat - Citizens */}
             <Grid 
@@ -460,77 +463,89 @@ function LandingPage() {
                 >
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography
-                      variant="h1"
-                      sx={{
-                        color: '#0288d1',
-                        fontWeight: 'bold',
-                        fontSize: { xs: '2.5rem', md: '3.5rem' },
-                        mb: 2,
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        key={`user-count-${stats.UserCount}`}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString(toPersianNumber(stats.UserCount))
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 30,
-                          deleteSpeed: null,
-                          autoStart: true,
-                        }}
-                      />
-                    </Typography>
+  variant="h1"
+  dir="rtl" // زبان راست‌به‌چپ
+  sx={{
+    color: '#0288d1',
+    fontWeight: 'bold',
+    fontSize: { xs: '2.5rem', md: '3.5rem' },
+    mb: 2,
+    textAlign: 'right',
+    direction: 'rtl',       // اجباری برای درست بودن مکان کرسر
+    unicodeBidi: 'isolate', // کرسر مستقل از بافت اطراف
+  }}
+>
+  <Typewriter
+    key={`user-count-${stats.UserCount}`}
+    onInit={(typewriter) => {
+      typewriter
+        .typeString(toPersianNumber(stats.UserCount))
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 30,
+      deleteSpeed: null,
+      autoStart: true,
+    }}
+  />
+</Typography>
+
+                   <Typography
+  variant="h2"
+  sx={{
+    color: '#333',
+    mb: 2,
+    fontSize: { xs: '1.8rem', md: '2.2rem' },
+    textAlign: 'right',
+    direction: 'rtl',        
+    unicodeBidi: 'isolate',  
+  }}
+>
+  <Typewriter
+    onInit={(typewriter) => {
+      typewriter
+        .typeString('شهروند وظیفه شناس')
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 40,
+      deleteSpeed: null,
+      autoStart: false,
+    }}
+  />
+</Typography>
+
                     <Typography
-                      variant="h2"
-                      sx={{
-                        color: '#333',
-                        mb: 2,
-                        fontSize: { xs: '1.8rem', md: '2.2rem' },
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString('شهروند وظیفه شناس')
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 40,
-                          deleteSpeed: null,
-                          autoStart: false,
-                        }}
-                      />
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: '#666',
-                        fontSize: { xs: '1rem', md: '1.1rem' },
-                        lineHeight: 1.8,
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        key={`user-desc-${stats.TotalReportCount}`}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString(`شهروندان فعال ما از سراسر کشور، با ارسال ${toPersianNumber(stats.TotalReportCount)} گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.`)
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 20,
-                          deleteSpeed: null,
-                          autoStart: true,
-                        }}
-                      />
-                    </Typography>
+  variant="body1"
+  dir="rtl"                       
+  sx={{
+    color: '#666',
+    fontSize: { xs: '1rem', md: '1.1rem' },
+    lineHeight: 1.8,
+    textAlign: 'right',
+    unicodeBidi: 'plaintext',      
+  }}
+>
+  <Typewriter
+    key={`user-desc-${stats.TotalReportCount}`}
+    onInit={(typewriter) => {
+      typewriter.typeString(
+        `شهروندان فعال ما از سراسر کشور، با ارسال ${toPersianNumber(
+          stats.TotalReportCount
+        )} گزارش، نقش مهمی در بهبود وضعیت شهری ایفا کرده‌اند. این مشارکت گسترده نشان‌دهنده اعتماد و همکاری مؤثر مردم در مدیریت شهری است.`
+      ).start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 20,
+      deleteSpeed: null,
+      autoStart: true,
+    }}
+  />
+</Typography>
+
                   </Box>
                 </motion.div>
               </Grid>
@@ -590,78 +605,91 @@ function LandingPage() {
                   viewport={{ once: true }}
                 >
                   <Box sx={{ textAlign: 'right' }}>
+                   <Typography
+  variant="h1"
+  sx={{
+    color: '#0288d1',
+    fontWeight: 'bold',
+    fontSize: { xs: '2.5rem', md: '3.5rem' },
+    mb: 2,
+    textAlign: 'right',
+    direction: 'rtl',       
+    unicodeBidi: 'isolate',  
+  }}
+>
+  <Typewriter
+    key={`mayor-count-${stats.MayorCount}`}
+    onInit={(typewriter) => {
+      typewriter
+        .typeString(toPersianNumber(stats.MayorCount))
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 30,
+      deleteSpeed: null,
+      autoStart: true,
+    }}
+  />
+</Typography>
+
                     <Typography
-                      variant="h1"
-                      sx={{
-                        color: '#0288d1',
-                        fontWeight: 'bold',
-                        fontSize: { xs: '2.5rem', md: '3.5rem' },
-                        mb: 2,
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        key={`mayor-count-${stats.MayorCount}`}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString(toPersianNumber(stats.MayorCount))
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 30,
-                          deleteSpeed: null,
-                          autoStart: true,
-                        }}
-                      />
-                    </Typography>
+  variant="h2"
+  sx={{
+    color: '#333',
+    mb: 2,
+    fontSize: { xs: '1.8rem', md: '2.2rem' },
+    textAlign: 'right',
+    direction: 'rtl',       
+    unicodeBidi: 'isolate',  
+  }}
+>
+  <Typewriter
+    onInit={(typewriter) => {
+      typewriter
+        .typeString('مسئولین شهری')
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 40,
+      deleteSpeed: null,
+      autoStart: false,
+    }}
+  />
+</Typography>
+
                     <Typography
-                      variant="h2"
-                      sx={{
-                        color: '#333',
-                        mb: 2,
-                        fontSize: { xs: '1.8rem', md: '2.2rem' },
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString('مسئولین شهری')
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 40,
-                          deleteSpeed: null,
-                          autoStart: false,
-                        }}
-                      />
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: '#666',
-                        fontSize: { xs: '1rem', md: '1.1rem' },
-                        lineHeight: 1.8,
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        key={`mayor-desc-${stats.MayorCount}`}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString(`همکاری ${toPersianNumber(stats.MayorCount)} مسئول شهری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.`)
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 20,
-                          deleteSpeed: null,
-                          autoStart: true,
-                        }}
-                      />
-                    </Typography>
+  variant="body1"
+  dir="rtl"                       // جهت کل بلاک
+  sx={{
+    color: '#666',
+    fontSize: { xs: '1rem', md: '1.1rem' },
+    lineHeight: 1.8,
+    textAlign: 'right',
+    unicodeBidi: 'plaintext',     // خنثی‌ها (مثل .) را هم RTL تفسیر کن
+  }}
+>
+  <Typewriter
+    key={`mayor-desc-${stats.MayorCount}`}
+    onInit={(typewriter) => {
+      typewriter
+        .typeString(
+          `همکاری ${toPersianNumber(
+            stats.MayorCount
+          )} مسئول شهری در سامانه، نشان‌دهنده اعتماد نهادهای رسمی به این پلتفرم است. این مشارکت باعث تسهیل ارتباط مستقیم بین مردم و مسئولین شده و روند رسیدگی به مشکلات شهری را سرعت بخشیده است.`
+        )
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 20,
+      deleteSpeed: null,
+      autoStart: true,
+    }}
+  />
+</Typography>
+
                   </Box>
                 </motion.div>
               </Grid>
@@ -682,77 +710,96 @@ function LandingPage() {
                 >
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography
-                      variant="h1"
-                      sx={{
-                        color: '#0288d1',
-                        fontWeight: 'bold',
-                        fontSize: { xs: '2.5rem', md: '3.5rem' },
-                        mb: 2,
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        key={`resolved-count-${stats.TotalResolvedReportCount}`}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString(toPersianNumber(stats.TotalResolvedReportCount))
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 30,
-                          deleteSpeed: null,
-                          autoStart: true,
-                        }}
-                      />
-                    </Typography>
-                    <Typography
-                      variant="h2"
-                      sx={{
-                        color: '#333',
-                        mb: 2,
-                        fontSize: { xs: '1.8rem', md: '2.2rem' },
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString('مشکل شهری رسیدگی شده')
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 40,
-                          deleteSpeed: null,
-                          autoStart: false,
-                        }}
-                      />
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: '#666',
-                        fontSize: { xs: '1rem', md: '1.1rem' },
-                        lineHeight: 1.8,
-                        textAlign: 'right',
-                      }}
-                    >
-                      <Typewriter
-                        key={`resolved-desc-${stats.TotalResolvedReportCount}-${stats.MayorCount}`}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString(`با همکاری ${toPersianNumber(stats.MayorCount)} مسئول شهری، تاکنون ${toPersianNumber(stats.TotalResolvedReportCount)} مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.`)
-                            .start();
-                        }}
-                        options={{
-                          cursor: '|',
-                          delay: 20,
-                          deleteSpeed: null,
-                          autoStart: true,
-                        }}
-                      />
-                    </Typography>
+  variant="h1"
+  sx={{
+    color: '#0288d1',
+    fontWeight: 'bold',
+    fontSize: { xs: '2.5rem', md: '3.5rem' },
+    mb: 2,
+    textAlign: 'right',
+    direction: 'rtl',        
+    unicodeBidi: 'isolate',  
+  }}
+>
+  <Typewriter
+    key={`resolved-count-${stats.TotalResolvedReportCount}`}
+    onInit={(typewriter) => {
+      typewriter
+        .typeString(toPersianNumber(stats.TotalResolvedReportCount))
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 30,
+      deleteSpeed: null,
+      autoStart: true,
+    }}
+  />
+</Typography>
+
+                   <Typography
+  variant="h2"
+  sx={{
+    color: '#333',
+    mb: 2,
+    fontSize: { xs: '1.8rem', md: '2.2rem' },
+    textAlign: 'right',
+    direction: 'rtl',        
+    unicodeBidi: 'isolate',  
+  }}
+>
+  <Typewriter
+    onInit={(typewriter) => {
+      typewriter
+        .typeString('مشکل شهری رسیدگی شده')
+        .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 40,
+      deleteSpeed: null,
+      autoStart: false,
+    }}
+  />
+</Typography>
+
+                   <Typography
+  variant="body1"
+  dir="rtl"                       // ⬅️ جهت کل بلاک
+  sx={{
+    color: '#666',
+    fontSize: { xs: '1rem', md: '1.1rem' },
+    lineHeight: 1.8,
+    textAlign: 'right',
+    unicodeBidi: 'plaintext',     // ⬅️ خنثی‌ها (مثل .) را RTL تفسیر کن
+  }}
+>
+  <Typewriter
+    key={`resolved-desc-${stats.TotalResolvedReportCount}-${stats.MayorCount}`}
+    onInit={(typewriter) => {
+      typewriter.typeString(
+        `با همکاری ${toPersianNumber(
+          stats.MayorCount
+        )} مسئول شهری، تاکنون ${toPersianNumber(
+          stats.TotalResolvedReportCount
+        )} مشکل شهری با موفقیت حل شده است. این آمار نشان‌دهنده کارآمدی سیستم و تعهد مسئولین به رسیدگی به مشکلات گزارش شده توسط شهروندان است.`
+      )
+      .callFunction(() => {
+        // کرسر را مخفی کن
+        const cursors = document.querySelectorAll('.Typewriter__cursor');
+        cursors.forEach((el) => el.style.display = 'none');
+      })
+      .start();
+    }}
+    options={{
+      cursor: '|',
+      delay: 20,
+      deleteSpeed: null,
+      autoStart: true,
+    }}
+  />
+</Typography>
+
                   </Box>
                 </motion.div>
               </Grid>
@@ -807,7 +854,7 @@ function LandingPage() {
                 پراکندگی گزارشات در کشور
               </Typography>
               <Box sx={{ 
-                height: { xs: "400px", sm: "600px", md: "800px" },
+                // height: { xs: "400px", sm: "600px", md: "800px" },
                 width: "100%",
                 maxWidth: "1600px",
                 mx: "auto",
@@ -823,33 +870,51 @@ function LandingPage() {
         {/* Reports Feed Section */}
         <Box sx={{ 
           pb: 12, 
+          direction: 'rtl',
           background: "#fff",
           position: 'relative',
           overflow: 'hidden'
         }}>
-          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <Typography 
-                variant="h3" 
-                component="h2" 
-                sx={{ 
-                  textAlign: "center", 
-                  mb: 6, 
-                  color: "#023",
-                  fontSize: { xs: '2.5rem', md: '3rem' },
-                  fontWeight: 'bold'
-                }}
-              >
-                آخرین گزارشات
-              </Typography>
-              <ReportFeed />
-            </motion.div>
-          </Container>
+       <Container
+  maxWidth="xl"
+  sx={{
+    position: 'relative',
+    zIndex: 1,
+    pt: { xs: 8, md: 12 },
+    pr: { xs: 0.3, sm: 2, md: 3 },  
+    pl: { xs: 2, sm: 3, md: 4 }   
+  }}
+>
+
+
+  <motion.div
+    initial={{ opacity: 0, y: 50 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8 }}
+    viewport={{ once: true }}
+  >
+    <Typography 
+      variant="h3" 
+      component="h2" 
+      sx={{ 
+        textAlign: "center", 
+        mb: 6, 
+        color: "#023",
+        fontSize: { xs: '2.5rem', md: '3rem' },
+        fontWeight: 'bold'
+      }}
+    >
+      آخرین گزارشات
+    </Typography>
+
+   <Box sx={{ px: { xs: 3, sm: 3, md: 3 } }}>
+  <ReportFeed />
+</Box>
+
+
+  </motion.div>
+</Container>
+
         </Box>
 
         {/* Features Section */}
@@ -959,7 +1024,7 @@ function LandingPage() {
               <Button
                 variant="contained"
                 size="large"
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/signuplogin")}
                 sx={{
                   bgcolor: 'white',
                   color: '#023',
@@ -1040,10 +1105,10 @@ function LandingPage() {
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-end' }}>
                     <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      ایمیل: info@civicradar.ir
+                      info@shahrsanj.ir : ایمیل
                     </Typography>
                     <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)'}}>
-                      تلفن: ۷۳۲۲۵۳۰۳-۰۲۱
+                      تلفن : ۷۳۲۲۵۳۰۳-۰۲۱
                     </Typography>
                   </Box>
                 </Box>

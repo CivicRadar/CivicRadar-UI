@@ -22,7 +22,7 @@ import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import SortIcon from "@mui/icons-material/Sort"; 
 import CheckIcon from "@mui/icons-material/Check";
 import { ListItemIcon, ListItemText } from "@mui/material";
-import { motion } from "framer-motion";
+
 
 export default function IranMapSection() {
   const wrapperRef = useRef(null);
@@ -36,26 +36,27 @@ export default function IranMapSection() {
   const [citySearch, setCitySearch] = useState('');
   const [loadingMap, setLoadingMap] = useState(true);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [sortMode, setSortMode] = useState('alphabetical');
+  const [sortMode, setSortMode] = useState('alphabetical'); // یا 'count'
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+const open = Boolean(anchorEl);
 
-  const toPersianDigits = num =>
-    num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigits = num =>
+  num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+const handleMenuClick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
 
-  const handleSortSelect = (mode) => {
-    setSortMode(mode);
-    handleMenuClose();
-  };
+const handleMenuClose = () => {
+  setAnchorEl(null);
+};
+
+const handleSortSelect = (mode) => {
+  setSortMode(mode);
+  handleMenuClose();
+};
 
   useLayoutEffect(() => {
     if (!loadingMap && wrapperRef.current) {
@@ -68,6 +69,7 @@ export default function IranMapSection() {
     fetchProvincesData();
   }, []);
   
+
   const provinceNameMapping = {
     "اردبیل": "ardabil", "اصفهان": "isfahan", "البرز": "alborz", "ایلام": "ilam",
     "آذربایجان شرقی": "eastAzerbaijan", "آذربایجان غربی": "westAzerbaijan", "بوشهر": "bushehr", "تهران": "tehran",
@@ -143,14 +145,11 @@ export default function IranMapSection() {
 
   return (
     <Box sx={{ fontFamily: 'Vazir', direction: 'rtl', p: isMobile ? 1 : 4 }}>
-      <Box sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        gap: 2,
-        alignItems: 'stretch',
-        maxWidth: 1000,
-        mx: 'auto'
-      }}>
+      <Typography variant={isMobile ? 'h6' : 'h5'} align="center" mb={isMobile ? 2 : 3}>
+        نقشه گزارش‌ها بر اساس استان
+      </Typography>
+
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: 'stretch', maxWidth: 1000, mx: 'auto' }}>
         {/* نقشه */}
         <Box
           ref={wrapperRef}
@@ -177,34 +176,29 @@ export default function IranMapSection() {
         </Box>
 
         {/* اطلاعات شهرها */}
-        <motion.div
-          layout
-          style={{
-            flexBasis: '30%',
-            width: '100%'
+        <Box
+          sx={{
+            flexBasis: { xs: '100%', md: '30%' },
+            p: 2,
+            borderRadius: 2,
+            bgcolor: '#e6f4ea',
+            border: '1px solid #3bcc6d',
+            color: '#2e7d32',
+            fontWeight: 'bold',
+            boxShadow: 2,
+            minHeight: mapHeight,
+            maxHeight: mapHeight,
+            height: mapHeight,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'all 0.3s ease-in-out',
+            opacity: selectedProvince ? 1 : 0.8,
+            transform: selectedProvince ? 'scale(1)' : 'scale(0.98)'
           }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
         >
-          {selectedProvince && (
-            <motion.div
-              layout
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                backgroundColor: '#e6f4ea',
-                border: '1px solid #3bcc6d',
-                color: '#2e7d32',
-                fontWeight: 'bold',
-                boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-              animate={{
-                height: selectedProvince ? mapHeight : "auto",
-                transition: { duration: 0.5, ease: "easeInOut" }
-              }}
-            >
+          {selectedProvince ? (
+            <>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} fontWeight="bold" mb={2} textAlign="center">
                 {selectedProvince.label} – {toPersianDigits(selectedProvince.count)} گزارش
               </Typography>
@@ -250,6 +244,7 @@ export default function IranMapSection() {
                     }}
                   />
                 </MenuItem>
+
                 <MenuItem onClick={() => handleSortSelect("count")} sx={{ direction: "rtl" }}>
                   {sortMode === "count" && (
                     <ListItemIcon sx={{ minWidth: 0, ml: 1 }}>
@@ -287,11 +282,13 @@ export default function IranMapSection() {
                 ) : (() => {
                   const filtered = Object.entries(selectedProvince.cities)
                     .filter(([city, count]) => count > 0 && city.includes(citySearch));
+
                   const sorted = [...filtered].sort((a, b) =>
                     sortMode === 'alphabetical'
                       ? a[0].localeCompare(b[0], 'fa')
                       : b[1] - a[1]
                   );
+
                   return sorted.length > 0 ? (
                     sorted.map(([city, count]) => (
                       <li key={city} style={{ marginBottom: 8, fontSize: isMobile ? '14px' : '16px' }}>
@@ -305,9 +302,24 @@ export default function IranMapSection() {
                   );
                 })()}
               </Box>
-            </motion.div>
+            </>
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                textAlign: 'center',
+                p: 2
+              }}
+            >
+              <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                برای دیدن گزارشات به تفکیک شهر ها استان مورد نظر را انتخاب کنید
+              </Typography>
+            </Box>
           )}
-        </motion.div>
+        </Box>
       </Box>
     </Box>
   );
