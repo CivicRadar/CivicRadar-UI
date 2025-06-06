@@ -1,57 +1,58 @@
-import React, { useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
   Button,
   Divider,
   Avatar,
-  TextField,
   Paper,
+  IconButton,
 } from "@mui/material";
 import {
   Email as EmailIcon,
   Badge as BadgeIcon,
   AccountCircle,
   Campaign,
-  Favorite as FavoriteIcon,
-  Reply as ReplyIcon,
-  Share as ShareIcon,
+  ThumbDown as ThumbDownIcon,
+  ThumbUp as ThumbUpIcon,
 } from "@mui/icons-material";
-import {
-    Card,
-    Grid,
-    AppBar,
-    Toolbar,
-    IconButton,
-    Drawer,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    useMediaQuery,
-    CssBaseline,
-    styled,
 
-  } from "@mui/material";
-import potholeImage from "../assets/pathole.jpg";
-import riverImage from "../assets/river.jpg";
+// ترجمه نوع گزارش
+const typeToPersian = (type) => {
+  switch ((type || "").toLowerCase()) {
+    case "street":
+      return "خیابان";
+    case "lighting":
+      return "نور";
+    case "garbage":
+      return "زباله";
+    case "other":
+      return "سایر";
+    default:
+      return type || "نامشخص";
+  }
+};
 
-const demoReports = [
-  {
-    id: 1,
-    title: "چاله خیابان اصلی",
-    description: "یک چاله بزرگ در خیابان اصلی شهر ایجاد شده که خطرناک است.",
-    image: potholeImage,
-    category: "مشکلات شهری",
-  },
-  {
-    id: 2,
-    title: "آلودگی رودخانه",
-    description: "رودخانه شهر به شدت آلوده شده و نیاز به پاکسازی دارد.",
-    image: riverImage,
-    category: "محیط زیست",
-  },
-];
+// کوتاه کننده توضیحات
+const truncateWords = (text, n = 5) => {
+  if (!text) return "";
+  const words = text.split(/\s+/);
+  if (words.length <= n) return text;
+  return words.slice(0, n).join(" ") + " ...";
+};
+
+const statusToPersian = (status) => {
+  switch (status) {
+    case "PendingReview":
+      return "در انتظار بررسی";
+    case "UnderConsideration":
+      return "در حال بررسی";
+    case "IssueResolved":
+      return "حل شده";
+    default:
+      return status || "نامشخص";
+  }
+};
 
 export default function ProfileSection({
   profile,
@@ -67,6 +68,32 @@ export default function ProfileSection({
   fileInputRef,
   handleMarkPictureForDeletion,
 }) {
+  const [userReports, setUserReports] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  useEffect(() => {
+    async function fetchReports() {
+      setLoadingReports(true);
+      setFetchError(null);
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`,
+          { credentials: "include" }
+        );
+        if (!res.ok) throw new Error("خطا در دریافت گزارشات!");
+        const data = await res.json();
+        setUserReports(data);
+      } catch (err) {
+        setUserReports([]);
+        setFetchError("گزارشات بارگذاری نشدند!");
+      } finally {
+        setLoadingReports(false);
+      }
+    }
+    fetchReports();
+  }, []);
+
   return (
     <Box
       sx={{
@@ -122,12 +149,12 @@ export default function ProfileSection({
                   height: 100,
                   mx: "auto",
                   mb: 1,
-                  boxShadow: "0 0 0 3px #4caf50, 0 0 10px rgba(76, 175, 80, 0.5)",
+                  boxShadow:
+                    "0 0 0 3px #4caf50, 0 0 10px rgba(76, 175, 80, 0.5)",
                   cursor: isEditing ? "pointer" : "default",
                 }}
               />
             </label>
-
             {isEditing && (imagePreview || profile?.Picture) && (
               <Button
                 variant="text"
@@ -138,15 +165,12 @@ export default function ProfileSection({
                   fontSize: "0.8rem",
                   mt: 0.5,
                   color: "#f44336",
-                  "&:hover": {
-                    bgcolor: "rgba(244, 67, 54, 0.08)",
-                  },
+                  "&:hover": { bgcolor: "rgba(244, 67, 54, 0.08)" },
                 }}
               >
                 حذف عکس پروفایل
               </Button>
             )}
-
             {isEditing ? (
               <>
                 <Typography
@@ -156,22 +180,22 @@ export default function ProfileSection({
                 >
                   برای تغییر عکس پروفایل روی تصویر بالا کلیک کنید.
                 </Typography>
-
-                <div className={`form-group ${editedProfile.FullName ? "filled" : ""}`}>
-  <input
-    type="text"
-    value={editedProfile.FullName}
-    onChange={(e) =>
-      setEditedProfile((prev) => ({
-        ...prev,
-        FullName: e.target.value,
-      }))
-    }
-    required
-  />
-  <label>نام کامل</label>
-</div>
-
+                <div
+                  className={`form-group ${editedProfile.FullName ? "filled" : ""}`}
+                >
+                  <input
+                    type="text"
+                    value={editedProfile.FullName}
+                    onChange={(e) =>
+                      setEditedProfile((prev) => ({
+                        ...prev,
+                        FullName: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                  <label>نام کامل</label>
+                </div>
               </>
             ) : (
               <>
@@ -184,21 +208,17 @@ export default function ProfileSection({
               </>
             )}
           </Box>
-
           <Divider sx={{ my: 2 }} />
-
           <Box sx={{ textAlign: "right", mb: 2 }}>
             <Typography sx={{ display: "flex", alignItems: "center", mb: 1 }}>
               <EmailIcon sx={{ ml: 1, color: "#4caf50" }} />
               {profile?.Email || "ایمیل موجود نیست"}
             </Typography>
-
             <Typography sx={{ display: "flex", alignItems: "center", mb: 1 }}>
               <BadgeIcon sx={{ ml: 1, color: "#4caf50" }} />
               {profile?.user_type || "نوع کاربر مشخص نیست"}
             </Typography>
           </Box>
-
           {isEditing ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Button
@@ -255,7 +275,6 @@ export default function ProfileSection({
               >
                 ویرایش اطلاعات پروفایل
               </Button>
-
               <Button
                 variant="outlined"
                 fullWidth
@@ -294,54 +313,109 @@ export default function ProfileSection({
             گزارشات من
           </Typography>
         </Box>
-
-        {demoReports.length > 0 ? (
-          demoReports.map((report) => (
+        {loadingReports ? (
+          <Typography sx={{ p: 2 }}>در حال دریافت گزارشات...</Typography>
+        ) : fetchError ? (
+          <Typography color="error" sx={{ p: 2 }}>
+            {fetchError}
+          </Typography>
+        ) : userReports.length > 0 ? (
+          userReports.map((report) => (
             <Paper
               key={report.id}
               elevation={3}
               sx={{
                 p: 1.5,
-                mb: 2,
-                borderRadius: 2,
+                mb: 3,
+                borderRadius: 4,
                 bgcolor: "#fff",
-                width: { xs: "100%", md: "80%" },
-                maxWidth: "600px",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                width: { xs: "100%", md: "95%" },
+                maxWidth: "800px",
+                minWidth: "320px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "stretch",
+                // هاله سبز براق
+                boxShadow: "0 0 15px 5px rgba(76, 175, 80, 0.5)",
               }}
             >
               <Box sx={{ mb: 1 }}>
                 <img
-                  src={report.image}
-                  alt={report.title}
+                  src={
+                    report.Picture && !report.Picture.startsWith("http")
+                      ? `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${report.Picture}`
+                      : report.Picture || "/path-to-default.jpg"
+                  }
+                  alt={report.Information}
                   style={{
                     width: "100%",
-                    height: "60px",
+                    height: "130px",
                     objectFit: "cover",
-                    borderRadius: "8px",
+                    borderRadius: "10px",
                   }}
                 />
               </Box>
               <Typography variant="h6" fontWeight="bold" mb={0.5}>
-                {report.title}
+                {truncateWords(report.Information, 5)}
               </Typography>
               <Typography variant="body2" color="text.primary" mb={0.5}>
-                {report.description}
+                {report.FullAdress}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                دسته‌بندی: {report.category}
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 600 }}
+              >
+                نوع گزارش: {typeToPersian(report.Type)}
               </Typography>
-              <Box sx={{ display: "flex", mt: 1, gap: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
+                وضعیت: {statusToPersian(report.Status)}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  mt: 2,
+                  gap: 2,
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                }}
+              >
                 <IconButton>
-                  <FavoriteIcon color="error" />
+                  <ThumbUpIcon sx={{ color: "#43a047", fontSize: 28 }} />
+                  <span style={{ fontSize: 13, marginRight: 4 }}>
+                    {report.Likes ?? 0}
+                  </span>
                 </IconButton>
                 <IconButton>
-                  <ReplyIcon />
-                </IconButton>
-                <IconButton>
-                  <ShareIcon />
+                  <ThumbDownIcon sx={{ color: "#f44336", fontSize: 28 }} />
+                  <span style={{ fontSize: 13, marginRight: 4 }}>
+                    {report.Dislikes ?? 0}
+                  </span>
                 </IconButton>
               </Box>
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 2,
+                  bgcolor: "#388e3c",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  fontSize: 17,
+                  borderRadius: 2,
+                  "&:hover": { bgcolor: "#2e7d32" },
+                  py: 1.1,
+                  letterSpacing: 0.5,
+                  boxShadow: "0 2px 12px 0 #43a04740",
+                }}
+                onClick={() => window.location.href =`/reports/${report.id}`}
+              >
+                رفتن به صفحه گزارش
+              </Button>
             </Paper>
           ))
         ) : (
@@ -371,56 +445,51 @@ export default function ProfileSection({
         )}
       </Box>
       <style>
-{`
-  @font-face {
-    font-family: 'Vazir';
-    src: url('/fonts/Vazir.woff2') format('woff2'),
-         url('/fonts/Vazir.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  .form-group {
-    position: relative;
-    margin: 20px 0;
-    direction: rtl;
-    text-align: right;
-    font-family: 'Vazir', sans-serif;
-  }
-
-  .form-group input {
-    width: 100%;
-    padding: 16px 12px 8px 12px;
-    font-size: 18px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    outline: none;
-    text-align: right;
-    font-family: 'Vazir', sans-serif;
-  }
-
-  .form-group label {
-    position: absolute;
-    right: 12px;
-    top: 14px;
-    background: #fff;
-    padding: 0 6px;
-    font-size: 16px;
-    color: #888;
-    pointer-events: none;
-    transition: 0.2s ease all;
-    font-family: 'Vazir', sans-serif;
-  }
-
-  .form-group input:focus + label,
-  .form-group input:not(:placeholder-shown) + label {
-    top: -8px;
-    font-size: 13px;
-    color: #007E33;
-  }
-`}
-</style>
-
+        {`
+        @font-face {
+          font-family: 'Vazir';
+          src: url('/fonts/Vazir.woff2') format('woff2'),
+              url('/fonts/Vazir.woff') format('woff');
+          font-weight: normal;
+          font-style: normal;
+        }
+        .form-group {
+          position: relative;
+          margin: 20px 0;
+          direction: rtl;
+          text-align: right;
+          font-family: 'Vazir', sans-serif;
+        }
+        .form-group input {
+          width: 100%;
+          padding: 16px 12px 8px 12px;
+          font-size: 18px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          outline: none;
+          text-align: right;
+          font-family: 'Vazir', sans-serif;
+        }
+        .form-group label {
+          position: absolute;
+          right: 12px;
+          top: 14px;
+          background: #fff;
+          padding: 0 6px;
+          font-size: 16px;
+          color: #888;
+          pointer-events: none;
+          transition: 0.2s ease all;
+          font-family: 'Vazir', sans-serif;
+        }
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label {
+          top: -8px;
+          font-size: 13px;
+          color: #007E33;
+        }
+        `}
+      </style>
     </Box>
   );
 }
