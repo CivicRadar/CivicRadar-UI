@@ -854,7 +854,7 @@ function LandingPage() {
                 پراکندگی گزارشات در کشور
               </Typography>
               <Box sx={{ 
-                height: { xs: "400px", sm: "600px", md: "800px" },
+                // height: { xs: "400px", sm: "600px", md: "800px" },
                 width: "100%",
                 maxWidth: "1600px",
                 mx: "auto",
