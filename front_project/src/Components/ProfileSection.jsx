@@ -101,19 +101,17 @@ export default function ProfileSection({
         justifyContent: "center",
         alignItems: "flex-start",
         flexDirection: { xs: "column", md: "row" },
-        p: 4,
         gap: 4,
+
       }}
     >
       {/* Profile Section */}
       <Box
         sx={{
-          width: { xs: "100%", md: "460px" },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          alignSelf: "flex-start",
-          mr: { md: 15 },
+
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -297,16 +295,22 @@ export default function ProfileSection({
         </Paper>
       </Box>
 
-      {/* Reports Section */}
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          minHeight: "50vh",
-        }}
-      >
+ {/* Reports Section */}
+<Box
+  sx={{
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: { xs: "center", md: "center" },
+    width: "100%",
+    direction: "rtl",
+    maxHeight: "80vh", // یا هر مقدار مناسب دیگه
+    overflowY: "auto",
+  }}
+>
+
+
+
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Campaign sx={{ mr: 1, fontSize: 32, color: "#4caf50" }} />
           <Typography variant="h5" fontWeight="bold">
@@ -322,23 +326,25 @@ export default function ProfileSection({
         ) : userReports.length > 0 ? (
           userReports.map((report) => (
             <Paper
-              key={report.id}
-              elevation={3}
-              sx={{
-                p: 1.5,
-                mb: 3,
-                borderRadius: 4,
-                bgcolor: "#fff",
-                width: { xs: "100%", md: "95%" },
-                maxWidth: "800px",
-                minWidth: "320px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "stretch",
-                // هاله سبز براق
-                boxShadow: "0 0 15px 5px rgba(76, 175, 80, 0.5)",
-              }}
-            >
+  key={report.id}
+  elevation={3}
+  sx={{
+    direction: "rtl",
+    textAlign: "right",
+    width: "100%",
+    maxWidth: { xs: "98%", sm: 780, md: 800 }, // ← تغییر مهم
+    // mx: "auto",
+    p: 1.5,
+        mx: { xs: 1.5, sm: "auto" },  // ✅ فاصله افقی در موبایل، وسط‌چین در دسکتاپ
+
+    mb: 3,
+    borderRadius: 4,
+    bgcolor: "#fff",
+    boxShadow: "0 0 15px 5px rgba(76, 175, 80, 0.5)",
+  }}
+>
+
+
               <Box sx={{ mb: 1 }}>
                 <img
                   src={
@@ -362,19 +368,21 @@ export default function ProfileSection({
                 {report.FullAdress}
               </Typography>
               <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ fontWeight: 600 }}
-              >
-                نوع گزارش: {typeToPersian(report.Type)}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 0.5 }}
-              >
-                وضعیت: {statusToPersian(report.Status)}
-              </Typography>
+  variant="caption"
+  color="text.secondary"
+  sx={{ fontWeight: 600, display: 'block', mb: .5 }}   
+>
+  نوع گزارش: {typeToPersian(report.Type)}
+</Typography>
+
+<Typography
+  variant="caption"
+  color="text.secondary"
+  sx={{ display: 'block' }}                          
+>
+  وضعیت: {statusToPersian(report.Status)}
+</Typography>
+
               <Box
                 sx={{
                   display: "flex",

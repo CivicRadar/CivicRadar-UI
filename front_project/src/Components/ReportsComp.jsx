@@ -9,6 +9,7 @@ import CropDialog from './CropDialog';
 import { MyLocation, Delete as DeleteIcon, AddPhotoAlternate, VideoLibrary, Close, Place } from '@mui/icons-material';
 import NeshanMap from 'react-neshan-map-leaflet';
 import { getProvince, getCity } from '../services/admin-api';
+import { Backdrop } from '@mui/material';
 
 const MAP_API_KEY = "web.2705e42e6fd74f8796b16a52b4a0b2aa";
 const SERVICE_API_KEY = "service.368ec1865d634daaaeac06a233800da6";
@@ -44,6 +45,8 @@ const ReportForm = () => {
   const [rawImage, setRawImage] = useState(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
+  const [isValidating, setIsValidating] = useState(false);
+
 
   const [formData, setFormData] = useState({
     reportSubject: '',
@@ -320,16 +323,24 @@ const ReportForm = () => {
 
     let aiValidationResult = null;
     try {
+      setIsValidating(true); // قبل از شروع
       aiValidationResult = await validateReportWithAI(
         formData.description,
         formData.image
       );
+      setIsValidating(false); // بعد از موفقیت
     } catch (err) {
+      setIsValidating(false); // اگر خطا داشت
+
       Swal.fire({
         icon: "error",
         title: "خطا",
-        text: "خطا در ارتباط با سامانه هوشمند! لطفا مجدد تلاش کنید.",
-        confirmButtonText: "باشه"
+        text: ".خطا در ارتباط با سامانه هوشمند! لطفا مجدد تلاش کنید",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
       });
       return;
     }
@@ -355,13 +366,19 @@ Swal.fire({
     ${reasons.map(r => `<li>• ${r}</li>`).join('')}
     </ul>`,
   confirmButtonText: "ویرایش گزارش",
+  customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        },
   confirmButtonColor: "#388e3c",
   background: "#fff",
   iconColor: "#d32f2f",
 });
 
+ setIsValidating(false);
       return;
     }
+   
 
     // ثبت گزارش
     try {
@@ -395,8 +412,12 @@ Swal.fire({
         if (xhr.status >= 200 && xhr.status < 300) {
           Swal.fire({
             icon: "success",
-            title: "ثبت موفق!",
+            title: "!ثبت موفق",
             text: "گزارش شما با موفقیت ثبت شد و توسط سامانه هوشمند تایید گردید ",
+            customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        },
             confirmButtonText: "تایید",
              confirmButtonColor: "#388e3c",
             background: "#fff",
@@ -428,6 +449,7 @@ Swal.fire({
           title: "خطا",
           text: "ارسال گزارش با خطا مواجه شد ❌",
           confirmButtonText: "باشه"
+
         });
       };
       xhr.open(
@@ -452,8 +474,21 @@ Swal.fire({
   return (
     <Box sx={{ maxWidth: 1000, margin: 'auto', p: 3, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: 'white' }}>
       {/* Stepper */}
-      <Box sx={{ width: '100%', mb: 4, position: 'relative' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+  <Box sx={{ 
+        width: '100%',
+        mb: 4,
+        position: 'relative',
+        '& .step-connector': {
+          position: 'absolute',
+          top: '20px',
+          height: '2px',
+          backgroundColor: '#e0e0e0',
+          '&.active': {
+            backgroundColor: '#9fe0b1'
+          }
+        }
+      }}>        
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
           {steps.map((step, index) => (
             <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
               <Box sx={{
@@ -469,6 +504,10 @@ Swal.fire({
             </Box>
           ))}
         </Box>
+          <Box className={`step-connector ${activeStep >= 1 ? 'active' : ''}`} 
+          sx={{ left: '16.66%', right: '16.66%' }} />
+        <Box className={`step-connector ${activeStep >= 2 ? 'active' : ''}`} 
+          sx={{ left: '49.99%', right: '49.99%' }} />
       </Box>
 
       {/* مراحل */}
@@ -481,22 +520,45 @@ Swal.fire({
                   موضوع گزارش:
                 </Typography>
                 <TextField
-                  select fullWidth value={formData.reportSubject}
-                  onChange={e => handleChange('reportSubject', e.target.value)}
-                  error={!!errors.reportSubject}
-                  label="موضوع گزارش"
-                  sx={{
-                    direction: 'rtl',
-                    '& input': { textAlign: 'right' },
-                    '& label': { right: 54, left: 'auto', transformOrigin: 'top right' },
-                  }}
-                  InputLabelProps={{ sx: { direction: 'rtl' } }}
-                >
-                  <MenuItem value="Lighting" sx={{ direction: 'rtl', textAlign: 'right' }}>نور</MenuItem>
-                  <MenuItem value="Street" sx={{ direction: 'rtl', textAlign: 'right' }}>خیابان</MenuItem>
-                  <MenuItem value="Garbage" sx={{ direction: 'rtl', textAlign: 'right' }}>زباله</MenuItem>
-                  <MenuItem value="Other" sx={{ direction: 'rtl', textAlign: 'right' }}>سایر</MenuItem>
-                </TextField>
+  select
+  fullWidth
+  value={formData.reportSubject}
+  onChange={(e) => handleChange('reportSubject', e.target.value)}
+  error={!!errors.reportSubject}
+  label="موضوع گزارش"
+  sx={{
+    direction: 'rtl',
+    '& input': {
+      textAlign: 'right',
+    },
+    '& label': {
+      right: 54,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-root': {
+      justifyContent: 'flex-end',
+    },
+    '& .MuiSvgIcon-root': {
+      left: 16,
+      right: 'auto',
+    },
+  }}
+  InputLabelProps={{ sx: { direction: 'rtl' } }}
+>
+  <MenuItem value="Lighting" sx={{ direction: 'rtl', textAlign: 'right' }}>نور</MenuItem>
+  <MenuItem value="Street" sx={{ direction: 'rtl', textAlign: 'right' }}>خیابان</MenuItem>
+  <MenuItem value="Garbage" sx={{ direction: 'rtl', textAlign: 'right' }}>زباله</MenuItem>
+  <MenuItem value="Other" sx={{ direction: 'rtl', textAlign: 'right' }}>سایر</MenuItem>
+</TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
@@ -540,11 +602,32 @@ Swal.fire({
                   noOptionsText="هیچ گزینه‌ای یافت نشد"
                   renderInput={params => (
                     <TextField {...params} label="استان" error={!!errors.province}
-                      sx={{
-                        direction: 'rtl',
-                        '& input': { textAlign: 'right' },
-                        '& label': { right: 54, left: 'auto', transformOrigin: 'top right' },
-                      }}
+                       sx={{
+          direction: 'rtl',
+          '& input': {
+            textAlign: 'right',
+          },
+          '& label': {
+            right: 54,
+            left: 'auto',
+            transformOrigin: 'top right',
+          },
+          '& .MuiInputLabel-shrink': {
+            right: 30,
+            left: 'auto',
+            transformOrigin: 'top right',
+          },
+          '& legend': {
+            textAlign: 'right',
+          },
+          '& .MuiOutlinedInput-root': {
+            justifyContent: 'flex-end',
+          },
+          '& .MuiSvgIcon-root': {
+            left: 12,
+            right: 'auto',
+          },
+        }}
                       InputLabelProps={{ sx: { direction: 'rtl' } }}
                     />
                   )}
@@ -558,20 +641,46 @@ Swal.fire({
                   onChange={(e, newValue) => handleChange("city", newValue)}
                   disabled={!formData.province}
                   noOptionsText="هیچ شهری یافت نشد"
-                  renderInput={params => (
-                    <TextField {...params} label="شهر" error={!!errors.city}
-                      sx={{
-                        direction: "rtl",
-                        '& input': { textAlign: "right" },
-                        '& label': { right: 54, left: "auto", transformOrigin: "top right" },
-                      }}
-                      InputLabelProps={{ sx: { direction: "rtl" } }}
-                    />
-                  )}
-                  PaperComponent={props => (
-                    <Paper {...props} sx={{ direction: "rtl", textAlign: "right" }} />
-                  )}
-                />
+                 renderInput={(params) => (
+    <TextField
+      {...params}
+      label="شهر"
+      error={!!errors.city}
+      sx={{
+        direction: "rtl",
+        '& input': {
+          textAlign: "right",
+        },
+        '& label': {
+          right: 54,
+          left: "auto",
+          transformOrigin: "top right",
+        },
+        '& .MuiInputLabel-shrink': {
+          right: 30,
+          left: "auto",
+          transformOrigin: "top right",
+        },
+        '& legend': {
+          textAlign: "right",
+        },
+        '& .MuiOutlinedInput-root': {
+          justifyContent: "flex-end",
+        },
+        '& .MuiSvgIcon-root': {
+          left: 16,
+          right: "auto",
+        },
+      }}
+      slotProps={{
+        inputLabel: { sx: { direction: "rtl" } },
+      }}
+    />
+  )}
+  PaperComponent={(props) => (
+    <Paper {...props} sx={{ direction: "rtl", textAlign: "right" }} />
+  )}
+/>
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Button
@@ -593,11 +702,32 @@ Swal.fire({
                 onChange={e => handleChange('fullAddress', e.target.value)}
                 error={!!errors.fullAddress}
                 placeholder="آدرس دقیق را وارد کنید (خیابان، کوچه، نشانی و...)"
-                sx={{
-                  direction: 'rtl',
-                  '& input': { textAlign: 'right' },
-                  '& label': { right: 54, left: 'auto', transformOrigin: 'top right' },
-                }}
+                 sx={{
+    direction: 'rtl',
+    '& input': {
+      textAlign: 'right',
+    },
+    '& label': {
+      right: 54,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiInputLabel-shrink': {
+      right: 30,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-root': {
+      justifyContent: 'flex-end',
+    },
+    '& .MuiSvgIcon-root': {
+      left: 16,
+      right: 'auto',
+    },
+  }}
                 InputLabelProps={{ sx: { direction: 'rtl' } }}
               />
             </Grid>
@@ -858,8 +988,90 @@ Swal.fire({
           </Button>
         )}
       </Box>
+      <style>
+    {`
+      .form-group {
+  position: relative;
+  direction: rtl;
+  margin-top: 4px;
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+.form-group select {
+  width: 100%;
+  height: 59px; /* هماهنگ با MUI TextField */
+  padding: 16.5px 14px;
+  font-size: 16px;
+  border: 1px solid #c4c4c4;
+  border-radius: 4px;
+  outline: none;
+  background: white;
+  appearance: none;
+  font-family: 'Vazir', sans-serif;
+  box-sizing: border-box;
+}
+
+.form-group label {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 0 4px;
+  font-size: 16px;
+  color: #888;
+  pointer-events: none;
+  font-family: 'Vazir', sans-serif;
+  transition: 0.2s ease all;
+}
+
+.form-group select:focus + label,
+.form-group select:valid + label {
+  top: -8px;
+  font-size: 13px;
+  color: #007E33;
+  transform: none;
+}
+
+    `}
+  </style>
       <CropDialog imageSrc={rawImage} open={cropDialogOpen} onClose={() => setCropDialogOpen(false)} onCropComplete={handleCropComplete} />
+
+       {isValidating && (
+  <Backdrop
+    open
+    sx={{
+      zIndex: (theme) => theme.zIndex.drawer + 1,
+      backdropFilter: 'blur(3px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <Box
+      sx={{
+        bgcolor: 'rgba(255, 255, 255, 0.95)',
+        px: 4,
+        py: 3,
+        borderRadius: 2,
+        boxShadow: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        minWidth: 300
+      }}
+    >
+      <CircularProgress color="success" />
+      <Typography sx={{ mt: 2, fontSize: 16, color: '#333', textAlign: 'center' }}>
+        در حال اعتبارسنجی گزارش با سامانه هوشمند...
+      </Typography>
     </Box>
+  </Backdrop>
+)}
+
+    </Box>
+    
   );
 };
 
