@@ -574,21 +574,55 @@ const AuthPage = () => {
                     {isSignup && (
                       <>
                         <TextField
-                          fullWidth
-                          label="نام کامل"
-                          name="FullName"
-                          value={formData.FullName}
-                          onChange={handleChange}
-                          margin="normal"
-                          required
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <Person />
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
+  fullWidth
+  placeholder="نام کامل"
+  name="FullName"
+  value={formData.FullName}
+  onChange={handleChange}
+  margin="normal"
+  required
+  dir="rtl"
+  inputProps={{
+    style: {
+      textAlign: "right",
+      fontFamily: "inherit",
+    },
+  }}
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <Person />
+      </InputAdornment>
+    ),
+    sx: {
+      flexDirection: "row-reverse",
+    },
+  }}
+  sx={{
+    direction: "rtl",
+    "& .MuiOutlinedInput-root": {
+      flexDirection: "row-reverse",
+      "& input": {
+        textAlign: "right",
+      },
+      "& fieldset": {
+        borderColor: "#ccc !important",
+      },
+      "&:hover fieldset": {
+        borderColor: "#aaa !important",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#ccc !important",
+        boxShadow: "none !important",
+      },
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: "0 0 0px 1000px white inset !important",
+      backgroundColor: "white !important",
+    },
+  }}
+/>
+
                         <FormControlLabel
                           control={
                             <Checkbox
