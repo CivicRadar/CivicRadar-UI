@@ -1,29 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-  MenuItem,
-  Autocomplete,
-  CircularProgress
+  Box, Typography, TextField, Button, Grid, Paper, Dialog, DialogTitle, DialogContent, DialogActions,
+  IconButton, useMediaQuery, useTheme, MenuItem, Autocomplete, CircularProgress
 } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import Swal from "sweetalert2";
 import CropDialog from './CropDialog';
-
-import { MyLocation, Delete as DeleteIcon, AddPhotoAlternate, VideoLibrary,Close,Place } from '@mui/icons-material';
+import { MyLocation, Delete as DeleteIcon, AddPhotoAlternate, VideoLibrary, Close, Place } from '@mui/icons-material';
 import NeshanMap from 'react-neshan-map-leaflet';
-import {getProvince , getCity} from '../services/admin-api'
+import { getProvince, getCity } from '../services/admin-api';
+
 const MAP_API_KEY = "web.2705e42e6fd74f8796b16a52b4a0b2aa";
 const SERVICE_API_KEY = "service.368ec1865d634daaaeac06a233800da6";
 
@@ -32,7 +18,6 @@ const steps = [
   { label: 'ثبت مکان', number: 2 },
   { label: 'ثبت مستندات', number: 3 }
 ];
-
 const greenPalette = {
   light: '#81c784',
   main: '#4caf50',
@@ -40,10 +25,7 @@ const greenPalette = {
   darkest: '#00661c',
   contrastText: '#fff',
 };
-const toPersianDigits = (num) => {
-  return String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
-};
-
+const toPersianDigits = num => String(num).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
 const ReportForm = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -57,39 +39,12 @@ const ReportForm = () => {
   const [userLocation, setUserLocation] = useState(null);
   const mapDialogRef = useRef(null);
   const [mapLoading, setMapLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(null); // null یا عدد بین 0 تا 100
+  const [uploadProgress, setUploadProgress] = useState(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [rawImage, setRawImage] = useState(null);
-const imageInputRef = useRef(null);
-const videoInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
-
-useEffect(() => {
-  // When the component unmounts or activeStep changes, reset the map view
-  return () => {
-    if (mapRef.current?.map) {
-      mapRef.current.map.remove();
-      mapRef.current = null;
-    }
-    setShowMap(false);
-    setTimeout(() => setShowMap(true), 100); // Re-render with fresh state
-  };
-}, [activeStep]);
-
-// Add this to handle window resizing
-useEffect(() => {
-  const handleResize = () => {
-    if (mapRef.current?.map) {
-      setTimeout(() => {
-        mapRef.current.map.invalidateSize();
-      }, 100);
-    }
-  };
-
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
-}, []);
-  
   const [formData, setFormData] = useState({
     reportSubject: '',
     reportTitle: '',
@@ -107,12 +62,9 @@ useEffect(() => {
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
 
-  // Initialize map only once when component mounts
   useEffect(() => {
     setMapInitialized(true);
-    
     return () => {
-      // Cleanup only when component unmounts
       if (mapRef.current?.map) {
         mapRef.current.map.remove();
         mapRef.current = null;
@@ -120,37 +72,80 @@ useEffect(() => {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (mapRef.current?.map) {
+        mapRef.current.map.remove();
+        mapRef.current = null;
+      }
+      setShowMap(false);
+      setTimeout(() => setShowMap(true), 100);
+    };
+  }, [activeStep]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current?.map) {
+        setTimeout(() => {
+          mapRef.current.map.invalidateSize();
+        }, 100);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const fetchProvince = async () => {
+      try {
+        const response = await getProvince();
+        setProvinces(response);
+      } catch {
+        setErrors(prev => ({
+          ...prev,
+          province: "خطا در دریافت استان‌ها"
+        }));
+      }
+    };
+    fetchProvince();
+  }, []);
+
+  useEffect(() => {
+    const fetchCity = async () => {
+      try {
+        if (formData.province) {
+          const response = await getCity(formData.province.id);
+          setCities(response);
+        }
+      } catch {
+        setErrors(prev => ({
+          ...prev,
+          city: "خطا در دریافت شهرها"
+        }));
+      }
+    };
+    fetchCity();
+  }, [formData.province]);
+
   const handleMapInit = (L, map) => {
     if (mapRef.current?.map) {
-      mapRef.current.map.remove(); // Remove the existing map instance
+      mapRef.current.map.remove();
       mapRef.current = null;
     }
-  
     const marker = L.marker([formData.lat, formData.lng]).addTo(map);
     map.on('click', async (e) => {
       const { lat, lng } = e.latlng;
       updateMapPosition(lat, lng);
       fetchAddress(lat, lng);
     });
-  
     mapRef.current = { L, map, marker };
   };
-  
 
-  const handleOpenMapDialog = () => {
-    setMapDialogOpen(true);
-    setUserLocation(null);
-  };
-
-  const handleCloseMapDialog = () => {
-    setMapDialogOpen(false);
-  };
-
+  const handleOpenMapDialog = () => { setMapDialogOpen(true); setUserLocation(null); };
+  const handleCloseMapDialog = () => setMapDialogOpen(false);
   const handleMapDialogInit = (L, map) => {
     mapDialogRef.current = { L, map, marker: null };
     setMapLoading(false);
-    
-    // Click handler for manual location selection
     map.on('click', (e) => {
       const { lat, lng } = e.latlng;
       updateMarkerPosition(lat, lng);
@@ -160,16 +155,12 @@ useEffect(() => {
   const updateMarkerPosition = (lat, lng) => {
     if (mapDialogRef.current) {
       const { L, map, marker } = mapDialogRef.current;
-      if (marker) {
-        marker.setLatLng([lat, lng]);
-      } else {
-        mapDialogRef.current.marker = L.marker([lat, lng]).addTo(mapDialogRef.current.map);
-      }
+      if (marker) marker.setLatLng([lat, lng]);
+      else mapDialogRef.current.marker = L.marker([lat, lng]).addTo(mapDialogRef.current.map);
       mapDialogRef.current.map.setView([lat, lng], 15);
       setUserLocation({ lat, lng });
     }
   };
-
   const confirmMapLocation = () => {
     if (userLocation) {
       handleChange('lat', userLocation.lat);
@@ -178,8 +169,6 @@ useEffect(() => {
     }
     handleCloseMapDialog();
   };
-  
-
   const updateMapPosition = (lat, lng) => {
     if (mapRef.current) {
       const { marker, map } = mapRef.current;
@@ -188,13 +177,9 @@ useEffect(() => {
     }
     setFormData(prev => ({ ...prev, lat, lng }));
   };
-
   const fetchAddress = async (lat, lng) => {
     try {
-      const response = await fetch(
-        `https://api.neshan.org/v5/reverse?lat=${lat}&lng=${lng}`,
-        { headers: { "Api-Key": SERVICE_API_KEY } }
-      );
+      const response = await fetch(`https://api.neshan.org/v5/reverse?lat=${lat}&lng=${lng}`, { headers: { "Api-Key": SERVICE_API_KEY } });
       const data = await response.json();
       const address = data.formatted_address || "آدرسی یافت نشد";
       setFormData(prev => ({
@@ -202,8 +187,7 @@ useEffect(() => {
         mapAddress: address,
         fullAddress: address
       }));
-    } catch (err) {
-      console.error("Error fetching address:", err);
+    } catch {
       setFormData(prev => ({
         ...prev,
         fullAddress: "خطا در دریافت آدرس"
@@ -220,54 +204,21 @@ useEffect(() => {
           updateMarkerPosition(latitude, longitude);
           setMapLoading(false);
         },
-        (error) => {
-          console.error("Geolocation error:", error);
+        () => {
           setMapLoading(false);
-          Swal.fire({
-            icon: "error",
-            title: "خطا",
-            text: "دریافت موقعیت مکانی با خطا مواجه شد ❌",
-            confirmButtonText: "باشه",
-            customClass: {
-              confirmButton: 'swal-confirm-btn',
-              title: 'swal-title',
-            }
-          });
-          
+          Swal.fire({ icon: "error", title: "خطا", text: "دریافت موقعیت مکانی با خطا مواجه شد ❌", confirmButtonText: "باشه" });
         }
       );
     } else {
-      Swal.fire({
-        icon: "error",
-        title: "خطا",
-        text: "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند ❌",
-        confirmButtonText: "باشه",
-        customClass: {
-          confirmButton: 'swal-confirm-btn',
-          title: 'swal-title',
-        }
-      });
-      
+      Swal.fire({ icon: "error", title: "خطا", text: "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند ❌", confirmButtonText: "باشه" });
       setMapLoading(false);
     }
   };
-
   const getUserLocation = () => {
     if (!navigator.geolocation) {
-      Swal.fire({
-        icon: "error",
-        title: "خطا",
-        text: "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند ❌",
-        confirmButtonText: "باشه",
-        customClass: {
-          confirmButton: 'swal-confirm-btn',
-          title: 'swal-title',
-        }
-      });
-      
+      Swal.fire({ icon: "error", title: "خطا", text: "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند ❌", confirmButtonText: "باشه" });
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -275,31 +226,18 @@ useEffect(() => {
         fetchAddress(latitude, longitude);
       },
       () => {
-        Swal.fire({
-          icon: "error",
-          title: "خطا",
-          text: "دریافت موقعیت مکانی با مشکل مواجه شد ❌",
-          confirmButtonText: "باشه",
-          customClass: {
-            confirmButton: 'swal-confirm-btn',
-            title: 'swal-title',
-          }
-        });
+        Swal.fire({ icon: "error", title: "خطا", text: "دریافت موقعیت مکانی با مشکل مواجه شد ❌", confirmButtonText: "باشه" });
       }
     );
-    
   };
 
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const validateCurrentStep = () => {
     const newErrors = {};
-    
     if (activeStep === 0) {
       if (!formData.reportSubject) newErrors.reportSubject = 'لطفاً موضوع گزارش را انتخاب کنید';
       if (!formData.reportTitle) newErrors.reportTitle = 'لطفاً عنوان گزارش را وارد کنید';
@@ -314,365 +252,259 @@ useEffect(() => {
       if (!formData.image) newErrors.image = 'لطفاً عکس را اضافه کنید';
       if (!formData.video) newErrors.video = 'لطفاً فیلم را اضافه کنید';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    if (validateCurrentStep()) {
-      setActiveStep(prev => prev + 1);
+  const handleNext = () => { if (validateCurrentStep()) setActiveStep(prev => prev + 1); };
+  const handleBack = () => setActiveStep(prev => prev - 1);
+
+  const handleCropComplete = (croppedImageUrl) => { handleChange("image", croppedImageUrl); };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      setRawImage(null);
+      setTimeout(() => {
+        setRawImage(fileURL);
+        setCropDialogOpen(true);
+      }, 0);
+      if (imageInputRef.current) imageInputRef.current.value = '';
     }
   };
-
-  const handleBack = () => {
-    setActiveStep(prev => prev - 1);
-  };
-
-  const handleCropComplete = (croppedImageUrl) => {
-    handleChange("image", croppedImageUrl);
-  };
-
-const handleImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const fileURL = URL.createObjectURL(file);
-
-    // برای اطمینان از re-render حتی اگر فایل تکراریه
-    setRawImage(null);
-    setTimeout(() => {
-      setRawImage(fileURL);
-      setCropDialogOpen(true);
-    }, 0);
-
-    // ریست input بعد از انتخاب
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-  }
-};
-
 
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      handleChange('video', URL.createObjectURL(file));
+    if (file) handleChange('video', URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (imageInputRef.current) imageInputRef.current.blur();
+    handleChange('image', null);
+  };
+  const handleRemoveVideo = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (videoInputRef.current) {
+      videoInputRef.current.value = "";
+      videoInputRef.current.blur();
+    }
+    handleChange('video', null);
+  };
+
+  // تابع اعتبارسنجی با AI
+  const validateReportWithAI = async (info, image) => {
+    const formDataAI = new FormData();
+    formDataAI.append("Information", info);
+    if (image) {
+      const imageRes = await fetch(image);
+      const imageBlob = await imageRes.blob();
+      formDataAI.append("Picture", imageBlob, "image.jpg");
+    }
+    const res = await fetch(
+      `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/crpai-validation/`,
+      {
+        method: "POST",
+        credentials: "include",
+        body: formDataAI,
+      }
+    );
+    if (!res.ok) throw new Error("خطا در اعتبارسنجی AI");
+    return await res.json();
+  };
+
+  // ثبت نهایی با AI
+  const submitReport = async () => {
+    if (!validateCurrentStep()) return;
+
+    let aiValidationResult = null;
+    try {
+      aiValidationResult = await validateReportWithAI(
+        formData.description,
+        formData.image
+      );
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "خطا",
+        text: "خطا در ارتباط با سامانه هوشمند! لطفا مجدد تلاش کنید.",
+        confirmButtonText: "باشه"
+      });
+      return;
+    }
+
+    if (!aiValidationResult.Validity) {
+let reasons = [];
+if (Array.isArray(aiValidationResult.Reasons)) {
+  // هر آیتم باید string باشه، اگر object بود، فقط valueاش رو بردار:
+  aiValidationResult.Reasons.forEach(item => {
+    if (typeof item === "string") reasons.push(item);
+    else if (typeof item === "object" && item !== null)
+      reasons.push(...Object.values(item));
+  });
+} else if (typeof aiValidationResult.Reasons === "object" && aiValidationResult.Reasons !== null) {
+  reasons = Object.values(aiValidationResult.Reasons);
+}
+
+
+Swal.fire({
+  icon: "error",
+  title: "رد توسط سامانه هوشمند",
+  html: `<ul style="text-align:right;direction:rtl;font-size:16px;color:#b71c1c;padding:0 10px 0 0">
+    ${reasons.map(r => `<li>• ${r}</li>`).join('')}
+    </ul>`,
+  confirmButtonText: "ویرایش گزارش",
+  confirmButtonColor: "#388e3c",
+  background: "#fff",
+  iconColor: "#d32f2f",
+});
+
+      return;
+    }
+
+    // ثبت گزارش
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('CityID', formData.city?.id || '');
+      formDataToSend.append('Information', formData.description);
+      formDataToSend.append('Type', formData.reportSubject);
+      if (formData.image) {
+        const imageResponse = await fetch(formData.image);
+        const imageBlob = await imageResponse.blob();
+        formDataToSend.append('Picture', imageBlob, 'image.jpg');
+      }
+      if (formData.video) {
+        const videoResponse = await fetch(formData.video);
+        const videoBlob = await videoResponse.blob();
+        formDataToSend.append('Video', videoBlob, 'video.mp4');
+      }
+      formDataToSend.append('Longitude', formData.lng);
+      formDataToSend.append('Latitude', formData.lat);
+      formDataToSend.append('FullAdress', formData.fullAddress);
+
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percentComplete);
+        }
+      };
+      xhr.onload = () => {
+        setUploadProgress(null);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          Swal.fire({
+            icon: "success",
+            title: "ثبت موفق!",
+            text: "گزارش شما با موفقیت ثبت شد و توسط سامانه هوشمند تایید گردید ",
+            confirmButtonText: "تایید",
+             confirmButtonColor: "#388e3c",
+            background: "#fff",
+            iconColor: "#388e3c",
+          });
+          setActiveStep(0);
+          setFormData({
+            reportSubject: '',
+            reportTitle: '',
+            description: '',
+            province: null,
+            city: null,
+            fullAddress: '',
+            mapAddress: '',
+            lat: 35.699739,
+            lng: 51.338097,
+            image: null,
+            video: null
+          });
+        } else {
+          const response = JSON.parse(xhr.responseText);
+          throw new Error(response.message || 'خطا در ارسال اطلاعات');
+        }
+      };
+      xhr.onerror = () => {
+        setUploadProgress(null);
+        Swal.fire({
+          icon: "error",
+          title: "خطا",
+          text: "ارسال گزارش با خطا مواجه شد ❌",
+          confirmButtonText: "باشه"
+        });
+      };
+      xhr.open(
+        "POST",
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`,
+        true
+      );
+      xhr.withCredentials = true;
+      xhr.send(formDataToSend);
+    } catch (error) {
+      setUploadProgress(null);
+      Swal.fire({
+        icon: "error",
+        title: "خطا در ثبت گزارش",
+        text: error.message || "خطای ناشناخته ❌",
+        confirmButtonText: "باشه"
+      });
     }
   };
 
-const handleRemoveImage = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (imageInputRef.current) {
-    imageInputRef.current.blur();
-  }
-
-  handleChange('image', null);
-};
-
-
-
-const handleRemoveVideo = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (videoInputRef.current) {
-    videoInputRef.current.value = "";
-    videoInputRef.current.blur(); // جلوگیری از auto-open
-  }
-
-  handleChange('video', null);
-};
-
-
-  // Fetch provinces
-  useEffect(() => {
-    const fetchProvince = async () => {
-      try {
-        const response = await getProvince();
-        setProvinces(response);
-      } catch (error) {
-        console.error("Error fetching Provinces:", error);
-        setErrors(prev => ({
-          ...prev,
-          province: "خطا در دریافت استان‌ها"
-        }));
-      }
-    };
-    fetchProvince();
-  }, []);
-
-  // Fetch cities when province is selected
-  useEffect(() => {
-    const fetchCity = async () => {
-      try {
-        if (formData.province) {
-          const response = await getCity(formData.province.id);
-          setCities(response);
-        }
-      } catch (error) {
-        console.error("Error fetching Cities:", error);
-        setErrors(prev => ({
-          ...prev,
-          city: "خطا در دریافت شهرها"
-        }));
-      }
-    };
-    fetchCity();
-  }, [formData.province]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (mapRef.current?.map) {
-        setTimeout(() => {
-          mapRef.current.map.invalidateSize();
-        }, 100);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-
-    // Add this function to your component
-    const submitReport = async () => {
-      if (!validateCurrentStep()) return;
-    
-      try {
-        const formDataToSend = new FormData();
-        formDataToSend.append('CityID', formData.city?.id || '');
-        formDataToSend.append('Information', formData.description);
-        formDataToSend.append('Type', formData.reportSubject);
-    
-        if (formData.image) {
-          const imageResponse = await fetch(formData.image);
-          const imageBlob = await imageResponse.blob();
-          formDataToSend.append('Picture', imageBlob, 'image.jpg');
-        }
-    
-        if (formData.video) {
-          const videoResponse = await fetch(formData.video);
-          const videoBlob = await videoResponse.blob();
-          formDataToSend.append('Video', videoBlob, 'video.mp4');
-        }
-    
-        formDataToSend.append('Longitude', formData.lng);
-        formDataToSend.append('Latitude', formData.lat);
-        formDataToSend.append('FullAdress', formData.fullAddress);
-    
-        const xhr = new XMLHttpRequest();
-    
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(percentComplete);
-          }
-        };
-    
-        xhr.onload = () => {
-          setUploadProgress(null); // Reset progress
-          if (xhr.status >= 200 && xhr.status < 300) {
-            Swal.fire({
-              icon: "success",
-              title: "موفقیت‌آمیز",
-              text: "گزارش با موفقیت ثبت شد ✅",
-              confirmButtonText: "باشه",
-              customClass: {
-                confirmButton: 'swal-confirm-btn',
-                title: 'swal-title',
-              }
-            });
-            
-            setActiveStep(0);
-            setFormData({
-              reportSubject: '',
-              reportTitle: '',
-              description: '',
-              province: null,
-              city: null,
-              fullAddress: '',
-              mapAddress: '',
-              lat: 35.699739,
-              lng: 51.338097,
-              image: null,
-              video: null
-            });
-          } else {
-            const response = JSON.parse(xhr.responseText);
-            throw new Error(response.message || 'خطا در ارسال اطلاعات');
-          }
-        };
-    
-        xhr.onerror = () => {
-          setUploadProgress(null);
-          Swal.fire({
-            icon: "error",
-            title: "خطا",
-            text: "ارسال گزارش با خطا مواجه شد ❌",
-            confirmButtonText: "باشه",
-            customClass: {
-              confirmButton: 'swal-confirm-btn',
-              title: 'swal-title',
-            }
-          });
-          
-        };
-    
-        xhr.open(
-          "POST",
-          `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`,
-          true
-        );
-        xhr.withCredentials = true;
-        xhr.send(formDataToSend);
-      } catch (error) {
-        setUploadProgress(null);
-        console.error("Error:", error);
-        Swal.fire({
-          icon: "error",
-          title: "خطا در ثبت گزارش",
-          text: error.message || "خطای ناشناخته ❌",
-          confirmButtonText: "باشه",
-          customClass: {
-            confirmButton: 'swal-confirm-btn',
-            title: 'swal-title',
-          }
-        });
-        
-      }
-    };
-    
+  // UI همانند نسخه قبلی — فقط submitReport جدید را استفاده کن
   return (
-    <Box sx={{ 
-      maxWidth: 1000, 
-      margin: 'auto', 
-      p: 3, 
-      border: '1px solid #e0e0e0', 
-      borderRadius: 2,
-      backgroundColor: 'white'
-    }}>
+    <Box sx={{ maxWidth: 1000, margin: 'auto', p: 3, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: 'white' }}>
       {/* Stepper */}
-      <Box sx={{ 
-        width: '100%',
-        mb: 4,
-        position: 'relative',
-        '& .step-connector': {
-          position: 'absolute',
-          top: '20px',
-          height: '2px',
-          backgroundColor: '#e0e0e0',
-          '&.active': {
-            backgroundColor: '#9fe0b1'
-          }
-        }
-      }}>
-        <Box sx={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          position: 'relative',
-          zIndex: 1
-        }}>
+      <Box sx={{ width: '100%', mb: 4, position: 'relative' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
           {steps.map((step, index) => (
-            <Box key={index} sx={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              flex: 1
-            }}>
+            <Box key={index} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
               <Box sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
+                width: 40, height: 40, borderRadius: '50%',
                 backgroundColor: activeStep >= index ? '#278240' : '#e0e0e0',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 1
+                color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1
               }}>
-                 {toPersianDigits(step.number)}
+                {toPersianDigits(step.number)}
               </Box>
-              <Typography variant="body2" sx={{ 
-                fontWeight: activeStep === index ? 'bold' : 'normal',
-                textAlign: 'center'
-              }}>
+              <Typography variant="body2" sx={{ fontWeight: activeStep === index ? 'bold' : 'normal', textAlign: 'center' }}>
                 {step.label}
               </Typography>
             </Box>
           ))}
         </Box>
-        
-        {/* Connector lines */}
-        <Box className={`step-connector ${activeStep >= 1 ? 'active' : ''}`} 
-          sx={{ left: '16.66%', right: '16.66%' }} />
-        <Box className={`step-connector ${activeStep >= 2 ? 'active' : ''}`} 
-          sx={{ left: '49.99%', right: '49.99%' }} />
       </Box>
 
-      {/* Current Step Content */}
-      <Box sx={{ my: 3,  display: 'flex', flexDirection: 'column' }}>
+      {/* مراحل */}
+      <Box sx={{ my: 3, display: 'flex', flexDirection: 'column' }}>
         {activeStep === 0 && (
           <>
             <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6}>
-  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-    موضوع گزارش:
-  </Typography>
-  <TextField
-  select
-  fullWidth
-  value={formData.reportSubject}
-  onChange={(e) => handleChange('reportSubject', e.target.value)}
-  error={!!errors.reportSubject}
-  label="موضوع گزارش"
-  sx={{
-    direction: 'rtl',
-    '& input': {
-      textAlign: 'right',
-    },
-    '& label': {
-      right: 54,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiOutlinedInput-root': {
-      justifyContent: 'flex-end',
-    },
-    '& .MuiSvgIcon-root': {
-      left: 16,
-      right: 'auto',
-    },
-  }}
-  InputLabelProps={{ sx: { direction: 'rtl' } }}
->
-  <MenuItem value="Lighting" sx={{ direction: 'rtl', textAlign: 'right' }}>نور</MenuItem>
-  <MenuItem value="Street" sx={{ direction: 'rtl', textAlign: 'right' }}>خیابان</MenuItem>
-  <MenuItem value="Garbage" sx={{ direction: 'rtl', textAlign: 'right' }}>زباله</MenuItem>
-  <MenuItem value="Other" sx={{ direction: 'rtl', textAlign: 'right' }}>سایر</MenuItem>
-</TextField>
-
-</Grid>
-
               <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" gutterBottom     sx={{ fontWeight: 'bold', mb: 2 /* معادل 16px */ }}
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  موضوع گزارش:
+                </Typography>
+                <TextField
+                  select fullWidth value={formData.reportSubject}
+                  onChange={e => handleChange('reportSubject', e.target.value)}
+                  error={!!errors.reportSubject}
+                  label="موضوع گزارش"
+                  sx={{
+                    direction: 'rtl',
+                    '& input': { textAlign: 'right' },
+                    '& label': { right: 54, left: 'auto', transformOrigin: 'top right' },
+                  }}
+                  InputLabelProps={{ sx: { direction: 'rtl' } }}
                 >
+                  <MenuItem value="Lighting" sx={{ direction: 'rtl', textAlign: 'right' }}>نور</MenuItem>
+                  <MenuItem value="Street" sx={{ direction: 'rtl', textAlign: 'right' }}>خیابان</MenuItem>
+                  <MenuItem value="Garbage" sx={{ direction: 'rtl', textAlign: 'right' }}>زباله</MenuItem>
+                  <MenuItem value="Other" sx={{ direction: 'rtl', textAlign: 'right' }}>سایر</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
                   عنوان گزارش:
                 </Typography>
                 <TextField
-                  fullWidth
-                  value={formData.reportTitle}
-                  onChange={(e) => handleChange('reportTitle', e.target.value)}
+                  fullWidth value={formData.reportTitle}
+                  onChange={e => handleChange('reportTitle', e.target.value)}
                   error={!!errors.reportTitle}
                   placeholder="عنوان گزارش را وارد کنید"
                 />
@@ -682,12 +514,10 @@ const handleRemoveVideo = (e) => {
               توضیحات:
             </Typography>
             <TextField
-              multiline
-              rows={8}
+              multiline rows={8}
               placeholder="توضیحات خود را وارد کنید..."
-              fullWidth
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
+              fullWidth value={formData.description}
+              onChange={e => handleChange('description', e.target.value)}
               error={!!errors.description}
               sx={{ flex: 1 }}
             />
@@ -697,690 +527,338 @@ const handleRemoveVideo = (e) => {
         {activeStep === 1 && (
           <Grid container spacing={3} sx={{ flex: 1 }}>
             <Grid item xs={12} md={6}>
-         <Box sx={{ mb: 3 }}>
-  <Autocomplete
-    options={provinces}
-    getOptionLabel={(option) => option.Name}
-    value={formData.province}
-    onChange={(e, newValue) => handleChange('province', newValue)}
-    PaperComponent={(props) => (
-      <Paper
-        {...props}
-        sx={{
-          direction: 'rtl',
-          textAlign: 'right',
-        }}
-      />
-    )}
-    slotProps={{
-      inputLabel: {
-        sx: { direction: 'rtl' },
-      },
-    }}
-      noOptionsText="هیچ گزینه‌ای یافت نشد" 
-
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="استان"
-        error={!!errors.province}
-        sx={{
-          direction: 'rtl',
-          '& input': {
-            textAlign: 'right',
-          },
-          '& label': {
-            right: 54,
-            left: 'auto',
-            transformOrigin: 'top right',
-          },
-          '& .MuiInputLabel-shrink': {
-            right: 30,
-            left: 'auto',
-            transformOrigin: 'top right',
-          },
-          '& legend': {
-            textAlign: 'right',
-          },
-          '& .MuiOutlinedInput-root': {
-            justifyContent: 'flex-end',
-          },
-          '& .MuiSvgIcon-root': {
-            left: 12,
-            right: 'auto',
-          },
-        }}
-      />
-    )}
-  />
-</Box>
-
-
-
-<Box sx={{ mb: 3 }}>
-  <Autocomplete
-  options={cities}
-  getOptionLabel={(option) => option?.Name || ""}
-  value={formData.city}
-  onChange={(e, newValue) => handleChange("city", newValue)}
-  disabled={!formData.province}
-  noOptionsText="هیچ شهری یافت نشد"
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="شهر"
-      error={!!errors.city}
-      sx={{
-        direction: "rtl",
-        '& input': {
-          textAlign: "right",
-        },
-        '& label': {
-          right: 54,
-          left: "auto",
-          transformOrigin: "top right",
-        },
-        '& .MuiInputLabel-shrink': {
-          right: 30,
-          left: "auto",
-          transformOrigin: "top right",
-        },
-        '& legend': {
-          textAlign: "right",
-        },
-        '& .MuiOutlinedInput-root': {
-          justifyContent: "flex-end",
-        },
-        '& .MuiSvgIcon-root': {
-          left: 16,
-          right: "auto",
-        },
-      }}
-      slotProps={{
-        inputLabel: { sx: { direction: "rtl" } },
-      }}
-    />
-  )}
-  PaperComponent={(props) => (
-    <Paper {...props} sx={{ direction: "rtl", textAlign: "right" }} />
-  )}
-/>
-
-</Box>
-
-
-
-              <Box sx={{ mb: 2 }}>
-                <Button 
-  variant="contained" 
-  onClick={isMobile ? handleOpenMapDialog : getUserLocation}
-  startIcon={<MyLocation />}
-  fullWidth
-  sx={{
-    direction: "rtl", // مهم برای راست‌چینی درست
-    gap: 1.2,         // فاصله بین آیکون و متن
-    color: 'white',
-    bgcolor: greenPalette.dark,
-    '&:hover': {
-      color: greenPalette.dark,
-      backgroundColor: '#e8f5e9'
-    }
-  }}
->
-  {isMobile ? 'انتخاب از روی نقشه' : 'موقعیت فعلی من'}
-</Button>
-
+              <Box sx={{ mb: 3 }}>
+                <Autocomplete
+                  options={provinces}
+                  getOptionLabel={option => option.Name}
+                  value={formData.province}
+                  onChange={(e, newValue) => handleChange('province', newValue)}
+                  PaperComponent={props => (
+                    <Paper {...props} sx={{ direction: 'rtl', textAlign: 'right' }} />
+                  )}
+                  slotProps={{ inputLabel: { sx: { direction: 'rtl' } } }}
+                  noOptionsText="هیچ گزینه‌ای یافت نشد"
+                  renderInput={params => (
+                    <TextField {...params} label="استان" error={!!errors.province}
+                      sx={{
+                        direction: 'rtl',
+                        '& input': { textAlign: 'right' },
+                        '& label': { right: 54, left: 'auto', transformOrigin: 'top right' },
+                      }}
+                      InputLabelProps={{ sx: { direction: 'rtl' } }}
+                    />
+                  )}
+                />
               </Box>
-
+              <Box sx={{ mb: 3 }}>
+                <Autocomplete
+                  options={cities}
+                  getOptionLabel={option => option?.Name || ""}
+                  value={formData.city}
+                  onChange={(e, newValue) => handleChange("city", newValue)}
+                  disabled={!formData.province}
+                  noOptionsText="هیچ شهری یافت نشد"
+                  renderInput={params => (
+                    <TextField {...params} label="شهر" error={!!errors.city}
+                      sx={{
+                        direction: "rtl",
+                        '& input': { textAlign: "right" },
+                        '& label': { right: 54, left: "auto", transformOrigin: "top right" },
+                      }}
+                      InputLabelProps={{ sx: { direction: "rtl" } }}
+                    />
+                  )}
+                  PaperComponent={props => (
+                    <Paper {...props} sx={{ direction: "rtl", textAlign: "right" }} />
+                  )}
+                />
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={isMobile ? handleOpenMapDialog : getUserLocation}
+                  startIcon={<MyLocation />}
+                  fullWidth
+                  sx={{
+                    direction: "rtl", gap: 1.2, color: 'white', bgcolor: greenPalette.dark,
+                    '&:hover': { color: greenPalette.dark, backgroundColor: '#e8f5e9' }
+                  }}
+                >
+                  {isMobile ? 'انتخاب از روی نقشه' : 'موقعیت فعلی من'}
+                </Button>
+              </Box>
               <TextField
-  label="آدرس کامل"
-  variant="outlined"
-  fullWidth
-  multiline
-  rows={8}
-  value={formData.fullAddress}
-  onChange={(e) => handleChange('fullAddress', e.target.value)}
-  error={!!errors.fullAddress}
-  placeholder="آدرس دقیق را وارد کنید (خیابان، کوچه، نشانی و...)"
-  sx={{
-    direction: 'rtl',
-    '& input': {
-      textAlign: 'right',
-    },
-    '& label': {
-      right: 54,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& .MuiInputLabel-shrink': {
-      right: 30,
-      left: 'auto',
-      transformOrigin: 'top right',
-    },
-    '& legend': {
-      textAlign: 'right',
-    },
-    '& .MuiOutlinedInput-root': {
-      justifyContent: 'flex-end',
-    },
-    '& .MuiSvgIcon-root': {
-      left: 16,
-      right: 'auto',
-    },
-  }}
-  InputLabelProps={{ sx: { direction: 'rtl' } }}
-/>
-
-
+                label="آدرس کامل" variant="outlined" fullWidth multiline rows={8}
+                value={formData.fullAddress}
+                onChange={e => handleChange('fullAddress', e.target.value)}
+                error={!!errors.fullAddress}
+                placeholder="آدرس دقیق را وارد کنید (خیابان، کوچه، نشانی و...)"
+                sx={{
+                  direction: 'rtl',
+                  '& input': { textAlign: 'right' },
+                  '& label': { right: 54, left: 'auto', transformOrigin: 'top right' },
+                }}
+                InputLabelProps={{ sx: { direction: 'rtl' } }}
+              />
             </Grid>
-
             {!isMobile && (
-
-  <Grid item xs={12} md={6}>
-    
-    <Box sx={{ height: '100%', position: 'relative' }}>
-      {mapInitialized && (
-        <NeshanMap
-          key="neshan-map-static"
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: '4px',
-          }}
-          options={{
-            key: MAP_API_KEY,
-            center: [formData.lat, formData.lng],
-            zoom: 13,
-          }}
-          onInit={handleMapInit}
-        />
-      )}
-      {formData.mapAddress && (
-        <Paper elevation={1} sx={{
-          position: 'absolute',
-          bottom: 16,
-          right: 16,
-          left: { xs: 16, md: 'auto' },
-          width: { xs: 'calc(100% - 32px)', md: 'auto' },
-          p: 1,
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        }}>
-          <Typography variant="body2" sx={{ px: 1 }}>
-            {formData.mapAddress}
-          </Typography>
-        </Paper>
-      )}
-      
-    </Box>
-  </Grid>
-)}
-<Dialog
-  open={mapDialogOpen}
-  onClose={handleCloseMapDialog}
-  fullScreen={false} // حالا false می‌ذاریم حتی برای موبایل
-  maxWidth="sm"
-  fullWidth
-  sx={{
-    '& .MuiDialog-container': {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    '& .MuiDialog-paper': {
-      margin: 1.55,
-      width: '100%',
-      height: '85vh',
-      maxHeight: '85vh',
-      borderRadius: 3, // گوشه‌ها گرد
-    }
-  }}
->
-
-
-        <DialogTitle sx={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          bgcolor: 'background.paper',
-          borderBottom: '1px solid #e0e0e0',
-          p: 2
-        }}>
-          <Typography variant="h6">انتخاب موقعیت روی نقشه</Typography>
-          <IconButton onClick={handleCloseMapDialog} size="small">
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        
-        <DialogContent
-  sx={{
-    p: 0,
-    flex: 1,
-    overflow: 'hidden',
-    position: 'relative',
-    height: isMobile ? 'calc(100vh - 110px)' : '100%', // برای موبایل فضای دکمه‌ها رو کم می‌کنیم
-  }}
->
-
-          {mapLoading && (
-            <Box sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'rgba(255,255,255,0.7)',
-              zIndex: 1
-            }}>
-              <CircularProgress />
-            </Box>
-          )}
-          
-          <NeshanMap
-            key="neshan-map-dialog"
-            style={{ 
-              width: "100%", 
-              height: "100%",
-              position: 'absolute',
-              top: 0,
-              left: 0
-            }}
-            options={{
-              key: MAP_API_KEY,
-              center: userLocation || [35.699739, 51.338097],
-              zoom: 13,
-              touchZoom: true,
-              zoomControl: true
-            }}
-            onInit={handleMapDialogInit}
-          />
-        </DialogContent>
-        
-        <DialogActions sx={{ 
-          bgcolor: 'background.paper',
-          borderTop: '1px solid #e0e0e0',
-          p: 1,
-          justifyContent: 'space-between'
-        }}>
-          <Button 
-            startIcon={<MyLocation />}
-            onClick={getCurrentLocation}
-            disabled={mapLoading}
-            size="small"
-            sx={{
-              color: greenPalette.dark,
-            }}
-          >
-            موقعیت فعلی من
-          </Button>
-          
-          <Box>
-            <Button 
-              onClick={handleCloseMapDialog}
-              color="inherit"
-              size="small"
-              sx={{ mx: 1 }}
-            >
-              بستن
-            </Button>
-            <Button 
-              onClick={confirmMapLocation}
-              variant="contained"
-              disabled={!userLocation}
-              size="small"
-              startIcon={<Place />}
+              <Grid item xs={12} md={6}>
+                <Box sx={{ height: '100%', position: 'relative' }}>
+                  {mapInitialized && (
+                    <NeshanMap
+                      key="neshan-map-static"
+                      style={{ width: '100%', height: '100%', borderRadius: '4px' }}
+                      options={{ key: MAP_API_KEY, center: [formData.lat, formData.lng], zoom: 13 }}
+                      onInit={handleMapInit}
+                    />
+                  )}
+                  {formData.mapAddress && (
+                    <Paper elevation={1} sx={{
+                      position: 'absolute', bottom: 16, right: 16, left: { xs: 16, md: 'auto' },
+                      width: { xs: 'calc(100% - 32px)', md: 'auto' }, p: 1,
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    }}>
+                      <Typography variant="body2" sx={{ px: 1 }}>{formData.mapAddress}</Typography>
+                    </Paper>
+                  )}
+                </Box>
+              </Grid>
+            )}
+            <Dialog
+              open={mapDialogOpen}
+              onClose={handleCloseMapDialog}
+              fullScreen={false}
+              maxWidth="sm"
+              fullWidth
               sx={{
-                color: 'white',
-                bgcolor: greenPalette.dark,
-                '&:hover': {
-                  color: greenPalette.dark,
-                  backgroundColor: '#e8f5e9' // light green background
-                }
-              }}
-            >
-              ثبت موقعیت
-            </Button>
-          </Box>
-        </DialogActions>
-      </Dialog>
-
+                '& .MuiDialog-container': { justifyContent: 'center', alignItems: 'center' },
+                '& .MuiDialog-paper': { margin: 1.55, width: '100%', height: '85vh', maxHeight: '85vh', borderRadius: 3 }
+              }}>
+              <DialogTitle sx={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                bgcolor: 'background.paper', borderBottom: '1px solid #e0e0e0', p: 2
+              }}>
+                <Typography variant="h6">انتخاب موقعیت روی نقشه</Typography>
+                <IconButton onClick={handleCloseMapDialog} size="small"><Close /></IconButton>
+              </DialogTitle>
+              <DialogContent sx={{
+                p: 0, flex: 1, overflow: 'hidden', position: 'relative',
+                height: isMobile ? 'calc(100vh - 110px)' : '100%',
+              }}>
+                {mapLoading && (
+                  <Box sx={{
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    bgcolor: 'rgba(255,255,255,0.7)', zIndex: 1
+                  }}>
+                    <CircularProgress />
+                  </Box>
+                )}
+                <NeshanMap
+                  key="neshan-map-dialog"
+                  style={{ width: "100%", height: "100%", position: 'absolute', top: 0, left: 0 }}
+                  options={{
+                    key: MAP_API_KEY,
+                    center: userLocation || [35.699739, 51.338097],
+                    zoom: 13, touchZoom: true, zoomControl: true
+                  }}
+                  onInit={handleMapDialogInit}
+                />
+              </DialogContent>
+              <DialogActions sx={{
+                bgcolor: 'background.paper',
+                borderTop: '1px solid #e0e0e0',
+                p: 1,
+                justifyContent: 'space-between'
+              }}>
+                <Button
+                  startIcon={<MyLocation />}
+                  onClick={getCurrentLocation}
+                  disabled={mapLoading}
+                  size="small"
+                  sx={{ color: greenPalette.dark }}>
+                  موقعیت فعلی من
+                </Button>
+                <Box>
+                  <Button onClick={handleCloseMapDialog} color="inherit" size="small" sx={{ mx: 1 }}>بستن</Button>
+                  <Button
+                    onClick={confirmMapLocation}
+                    variant="contained"
+                    disabled={!userLocation}
+                    size="small"
+                    startIcon={<Place />}
+                    sx={{
+                      color: 'white', bgcolor: greenPalette.dark,
+                      '&:hover': { color: greenPalette.dark, backgroundColor: '#e8f5e9' }
+                    }}
+                  >ثبت موقعیت</Button>
+                </Box>
+              </DialogActions>
+            </Dialog>
           </Grid>
         )}
 
-{activeStep === 2 && (
-  <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-      مستندات گزارش
-    </Typography>
-
-    <Grid container spacing={3}>
-      {/* عکس */}
-      <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
-        <Box
-          sx={{
-            minHeight: 250,
-            maxHeight: 320,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            flexGrow: 1,
-          }}
-        >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            style={{ display: 'none' }}
-            id="image-upload"
-            ref={imageInputRef}
-          />
-          <label htmlFor="image-upload">
-            <Button
-              variant="outlined"
-              component="span"
-              fullWidth
-              sx={{
-                minHeight: 220,
-                maxHeight: 320,
-                display: 'flex',
-                color: greenPalette.darkest,
-                borderColor: greenPalette.light,
-                '&:hover': {
-                  borderColor: greenPalette.main,
-                },
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderStyle: formData.image ? 'solid' : 'dashed',
-                position: 'relative',
-                overflow: 'hidden',
-                height: '100%',
-              }}
-            >
-              {formData.image ? (
-                <>
-                  <Box
-                    component="img"
-                    src={formData.image}
-                    alt="Uploaded"
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                 <IconButton
-  onClick={handleRemoveImage}
-  sx={{
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    bgcolor: 'white',
-    boxShadow: 1,
-    '&:hover': {
-      bgcolor: 'error.light',
-    }
-  }}
->
-  <DeleteIcon color="error" />
-</IconButton>
-
-                </>
-              ) : (
-                <>
-                  <AddPhotoAlternate fontSize="large" />
-                  <Typography sx={{ mt: 1 }}>عکس برای این گزارش اضافه کنید</Typography>
-                </>
-              )}
-            </Button>
-          </label>
-          {errors.image && (
-            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-              {errors.image}
-            </Typography>
-          )}
-        </Box>
-      </Grid>
-
-      {/* ویدیو */}
-      <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
-        <Box
-          sx={{
-            minHeight: 250,
-            maxHeight: 320,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            flexGrow: 1,
-          }}
-        >
-          <input
-            type="file"
-            accept="video/*"
-            onChange={handleVideoUpload}
-            style={{ display: 'none' }}
-            id="video-upload"
-            ref={videoInputRef}
-          />
-          <label htmlFor="video-upload">
-            <Button
-              variant="outlined"
-              component="span"
-              fullWidth
-              sx={{
-                minHeight: 220,
-                maxHeight: 320,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderStyle: formData.video ? 'solid' : 'dashed',
-                position: 'relative',
-                overflow: 'hidden',
-                color: greenPalette.darkest,
-                borderColor: greenPalette.light,
-                '&:hover': {
-                  borderColor: greenPalette.main,
-                },
-                height: '100%',
-              }}
-            >
-              {formData.video ? (
-                <>
-                  <Box
-                    component="video"
-                    src={formData.video}
-                    controls
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                  <IconButton
-  onClick={handleRemoveVideo}
-  sx={{
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    bgcolor: 'white',
-    boxShadow: 1,
-    '&:hover': {
-      bgcolor: 'error.light',
-    }
-  }}
->
-  <DeleteIcon color="error" />
-</IconButton>
-
-                </>
-              ) : (
-                <>
-                  <VideoLibrary fontSize="large" />
-                  <Typography sx={{ mt: 1 }}>فیلمی برای این گزارش اضافه کنید</Typography>
-                </>
-              )}
-            </Button>
-          </label>
-          {errors.video && (
-            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-              {errors.video}
-            </Typography>
-          )}
-        </Box>
-      </Grid>
-    </Grid>
-  </Box>
-)}
-
-
+        {activeStep === 2 && (
+          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>مستندات گزارش</Typography>
+            <Grid container spacing={3}>
+              {/* عکس */}
+              <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+                <Box sx={{
+                  minHeight: 250, maxHeight: 320, display: 'flex',
+                  flexDirection: 'column', justifyContent: 'center', flexGrow: 1
+                }}>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="image-upload" ref={imageInputRef} />
+                  <label htmlFor="image-upload">
+                    <Button variant="outlined" component="span" fullWidth
+                      sx={{
+                        minHeight: 220, maxHeight: 320, display: 'flex', color: greenPalette.darkest, borderColor: greenPalette.light,
+                        '&:hover': { borderColor: greenPalette.main }, flexDirection: 'column', alignItems: 'center',
+                        justifyContent: 'center', borderStyle: formData.image ? 'solid' : 'dashed', position: 'relative',
+                        overflow: 'hidden', height: '100%'
+                      }}>
+                      {formData.image ? (
+                        <>
+                          <Box component="img" src={formData.image} alt="Uploaded"
+                            sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <IconButton onClick={handleRemoveImage}
+                            sx={{
+                              position: 'absolute', top: 8, left: 8, bgcolor: 'white', boxShadow: 1,
+                              '&:hover': { bgcolor: 'error.light' }
+                            }}>
+                            <DeleteIcon color="error" />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <AddPhotoAlternate fontSize="large" />
+                          <Typography sx={{ mt: 1 }}>عکس برای این گزارش اضافه کنید</Typography>
+                        </>
+                      )}
+                    </Button>
+                  </label>
+                  {errors.image && (
+                    <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                      {errors.image}
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+              {/* ویدیو */}
+              <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+                <Box sx={{
+                  minHeight: 250, maxHeight: 320, display: 'flex',
+                  flexDirection: 'column', justifyContent: 'center', flexGrow: 1
+                }}>
+                  <input type="file" accept="video/*" onChange={handleVideoUpload} style={{ display: 'none' }} id="video-upload" ref={videoInputRef} />
+                  <label htmlFor="video-upload">
+                    <Button variant="outlined" component="span" fullWidth
+                      sx={{
+                        minHeight: 220, maxHeight: 320, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                        justifyContent: 'center', borderStyle: formData.video ? 'solid' : 'dashed', position: 'relative',
+                        overflow: 'hidden', color: greenPalette.darkest, borderColor: greenPalette.light,
+                        '&:hover': { borderColor: greenPalette.main }, height: '100%'
+                      }}>
+                      {formData.video ? (
+                        <>
+                          <Box component="video" src={formData.video} controls
+                            sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <IconButton onClick={handleRemoveVideo}
+                            sx={{
+                              position: 'absolute', top: 8, left: 8, bgcolor: 'white', boxShadow: 1,
+                              '&:hover': { bgcolor: 'error.light' }
+                            }}>
+                            <DeleteIcon color="error" />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <VideoLibrary fontSize="large" />
+                          <Typography sx={{ mt: 1 }}>فیلمی برای این گزارش اضافه کنید</Typography>
+                        </>
+                      )}
+                    </Button>
+                  </label>
+                  {errors.video && (
+                    <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                      {errors.video}
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        )}
       </Box>
 
-      {/* Upload Progress Bar */}
-{uploadProgress !== null && (
-  <Box sx={{ my: 2 }}>
-    <Typography variant="body2" align="center" sx={{ mb: 1 }}>
-      در حال ارسال فایل‌ها... {uploadProgress}٪
-    </Typography>
-    <LinearProgress
-  variant="determinate"
-  value={uploadProgress}
-  sx={{
-    height: 8,
-    borderRadius: 5,
-    backgroundColor: '#e0f2f1',
-    '& .MuiLinearProgress-bar': {
-      backgroundColor: greenPalette.dark
-    }
-  }}
-/>
-
-  </Box>
-)}
+      {/* Progress Bar */}
+      {uploadProgress !== null && (
+        <Box sx={{ my: 2 }}>
+          <Typography variant="body2" align="center" sx={{ mb: 1 }}>
+            در حال ارسال فایل‌ها... {uploadProgress}٪
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={uploadProgress}
+            sx={{
+              height: 8,
+              borderRadius: 5,
+              backgroundColor: '#e0f2f1',
+              '& .MuiLinearProgress-bar': { backgroundColor: greenPalette.dark }
+            }}
+          />
+        </Box>
+      )}
 
       {/* Navigation Buttons */}
-      <Box
-  sx={{
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: { xs: 'column', sm: 'row' }, // دکمه‌ها زیر هم در موبایل
-    gap: 2,
-    mt: 3,
-    pt: 2,
-    borderTop: '1px solid #f0f0f0',
-  }}
->
-  {/* دکمه قبلی */}
-  <Button
-    variant="outlined"
-    onClick={handleBack}
-    disabled={activeStep === 0}
-    sx={{
-      borderColor: greenPalette.light,
-      color: greenPalette.dark,
-      '&:hover': {
-        borderColor: greenPalette.main,
-      },
-      minWidth: 120,
-      width: { xs: '100%', sm: 'auto' }, // تمام عرض در موبایل
-    }}
-  >
-    قبلی
-  </Button>
-
-  {/* دکمه ثبت یا مرحله بعدی */}
-  {activeStep < steps.length - 1 ? (
-    <Button
-      variant="contained"
-      onClick={handleNext}
-      sx={{
-        backgroundColor: greenPalette.main,
-        '&:hover': {
-          backgroundColor: greenPalette.dark,
-        },
-        minWidth: 120,
-        width: { xs: '100%', sm: 'auto' },
-      }}
-    >
-      مرحله بعدی
-    </Button>
-  ) : (
-    <Button
-      variant="contained"
-      color="success"
-      onClick={() => {
-        if (validateCurrentStep()) {
-          submitReport();
-        }
-      }}
-      sx={{
-        backgroundColor: greenPalette.dark,
-        '&:hover': {
-          backgroundColor: '#2e7d32',
-        },
-        minWidth: 120,
-        width: { xs: '100%', sm: 'auto' },
-      }}
-    >
-      ثبت نهایی
-    </Button>
-  )}
-</Box>
-<style>
-    {`
-      .form-group {
-  position: relative;
-  direction: rtl;
-  margin-top: 4px;
-  font-family: 'Vazirmatn', sans-serif;
-}
-
-.form-group select {
-  width: 100%;
-  height: 59px; /* هماهنگ با MUI TextField */
-  padding: 16.5px 14px;
-  font-size: 16px;
-  border: 1px solid #c4c4c4;
-  border-radius: 4px;
-  outline: none;
-  background: white;
-  appearance: none;
-  font-family: 'Vazir', sans-serif;
-  box-sizing: border-box;
-}
-
-.form-group label {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: white;
-  padding: 0 4px;
-  font-size: 16px;
-  color: #888;
-  pointer-events: none;
-  font-family: 'Vazir', sans-serif;
-  transition: 0.2s ease all;
-}
-
-.form-group select:focus + label,
-.form-group select:valid + label {
-  top: -8px;
-  font-size: 13px;
-  color: #007E33;
-  transform: none;
-}
-
-    `}
-  </style>
-  <CropDialog
-  imageSrc={rawImage}
-  open={cropDialogOpen}
-  onClose={() => setCropDialogOpen(false)}
-  onCropComplete={handleCropComplete}
-/>
-
+      <Box sx={{
+        display: 'flex', justifyContent: 'space-between',
+        flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mt: 3, pt: 2, borderTop: '1px solid #f0f0f0',
+      }}>
+        <Button
+          variant="outlined"
+          onClick={handleBack}
+          disabled={activeStep === 0}
+          sx={{
+            borderColor: greenPalette.light,
+            color: greenPalette.dark,
+            '&:hover': { borderColor: greenPalette.main },
+            minWidth: 120,
+            width: { xs: '100%', sm: 'auto' }
+          }}
+        >
+          قبلی
+        </Button>
+        {activeStep < steps.length - 1 ? (
+          <Button
+            variant="contained"
+            onClick={handleNext}
+            sx={{
+              backgroundColor: greenPalette.main,
+              '&:hover': { backgroundColor: greenPalette.dark },
+              minWidth: 120,
+              width: { xs: '100%', sm: 'auto' }
+            }}
+          >
+            مرحله بعدی
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={submitReport}
+            sx={{
+              backgroundColor: greenPalette.dark,
+              '&:hover': { backgroundColor: '#2e7d32' },
+              minWidth: 120,
+              width: { xs: '100%', sm: 'auto' }
+            }}
+          >
+            ثبت نهایی
+          </Button>
+        )}
+      </Box>
+      <CropDialog imageSrc={rawImage} open={cropDialogOpen} onClose={() => setCropDialogOpen(false)} onCropComplete={handleCropComplete} />
     </Box>
   );
 };

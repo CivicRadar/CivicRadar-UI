@@ -22,7 +22,7 @@ import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import SortIcon from "@mui/icons-material/Sort"; 
 import CheckIcon from "@mui/icons-material/Check";
 import { ListItemIcon, ListItemText } from "@mui/material";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function IranMapSection() {
   const wrapperRef = useRef(null);
@@ -36,27 +36,26 @@ export default function IranMapSection() {
   const [citySearch, setCitySearch] = useState('');
   const [loadingMap, setLoadingMap] = useState(true);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [sortMode, setSortMode] = useState('alphabetical'); // یا 'count'
+  const [sortMode, setSortMode] = useState('alphabetical');
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-const toPersianDigits = num =>
-  num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const toPersianDigits = num =>
+    num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-const handleMenuClick = (event) => {
-  setAnchorEl(event.currentTarget);
-};
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
-const handleMenuClose = () => {
-  setAnchorEl(null);
-};
-
-const handleSortSelect = (mode) => {
-  setSortMode(mode);
-  handleMenuClose();
-};
+  const handleSortSelect = (mode) => {
+    setSortMode(mode);
+    handleMenuClose();
+  };
 
   useLayoutEffect(() => {
     if (!loadingMap && wrapperRef.current) {
@@ -69,7 +68,6 @@ const handleSortSelect = (mode) => {
     fetchProvincesData();
   }, []);
   
-
   const provinceNameMapping = {
     "اردبیل": "ardabil", "اصفهان": "isfahan", "البرز": "alborz", "ایلام": "ilam",
     "آذربایجان شرقی": "eastAzerbaijan", "آذربایجان غربی": "westAzerbaijan", "بوشهر": "bushehr", "تهران": "tehran",
@@ -145,8 +143,14 @@ const handleSortSelect = (mode) => {
 
   return (
     <Box sx={{ fontFamily: 'Vazir', direction: 'rtl', p: isMobile ? 1 : 4 }}>
-
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: 'stretch', maxWidth: 1000, mx: 'auto' }}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: 2,
+        alignItems: 'stretch',
+        maxWidth: 1000,
+        mx: 'auto'
+      }}>
         {/* نقشه */}
         <Box
           ref={wrapperRef}
@@ -181,135 +185,129 @@ const handleSortSelect = (mode) => {
           }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
-          <motion.div
-            layout
-            style={{
-              padding: 16,
-              borderRadius: 8,
-              backgroundColor: '#e6f4ea',
-              border: '1px solid #3bcc6d',
-              color: '#2e7d32',
-              fontWeight: 'bold',
-              boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-            animate={{
-              height: selectedProvince ? mapHeight : "auto",
-              transition: { duration: 0.5, ease: "easeInOut" }
-            }}
-          >
-            <Typography variant={isMobile ? 'subtitle1' : 'h6'} fontWeight="bold" mb={2} textAlign="center">
-{selectedProvince.label} – {toPersianDigits(selectedProvince.count)} گزارش
-            </Typography>
-
-            <TextField
-              placeholder="جستجوی شهر..."
-              size="small"
-              fullWidth
-              sx={{ mb: 1.5, bgcolor: 'white', borderRadius: 1 }}
-              value={citySearch}
-              onChange={e => setCitySearch(e.target.value)}
-            />
-
-<Tooltip title="مرتب‌سازی">
-  <IconButton
-    onClick={handleMenuClick}
-    sx={{
-      alignSelf: "flex-end",
-      mb: 2,
-      color: "#388e3c",
-      border: "1px solid #388e3c",
-      borderRadius: 2,
-      p: 1
-    }}
-  >
-    <SortIcon />
-  </IconButton>
-</Tooltip>
-
-<Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-  <MenuItem onClick={() => handleSortSelect("alphabetical")} sx={{ direction: "rtl" }}>
-    {sortMode === "alphabetical" && (
-      <ListItemIcon sx={{ minWidth: 0, ml: 1 }}>
-        <CheckIcon sx={{ color: "#388e3c" }} />
-      </ListItemIcon>
-    )}
-    <ListItemText
-      primary="مرتب‌سازی الفبایی"
-      sx={{
-        textAlign: "right",
-        color: sortMode === "alphabetical" ? "#388e3c" : "inherit",
-        fontWeight: sortMode === "alphabetical" ? "bold" : "normal"
-      }}
-    />
-  </MenuItem>
-
-  <MenuItem onClick={() => handleSortSelect("count")} sx={{ direction: "rtl" }}>
-    {sortMode === "count" && (
-      <ListItemIcon sx={{ minWidth: 0, ml: 1 }}>
-        <CheckIcon sx={{ color: "#388e3c" }} />
-      </ListItemIcon>
-    )}
-    <ListItemText
-      primary="بر اساس تعداد گزارش"
-      sx={{
-        textAlign: "right",
-        color: sortMode === "count" ? "#388e3c" : "inherit",
-        fontWeight: sortMode === "count" ? "bold" : "normal"
-      }}
-    />
-  </MenuItem>
-</Menu>
-
-
-
-
-            {/* لیست شهرها */}
-            <Box
-              component="ul"
-              sx={{
-                listStyle: 'none',
-                p: 0,
-                m: 0,
-                flexGrow: 1,
-                overflowY: 'auto',
-                fontSize: 14,
-                color: '#1b5e20'
+          {selectedProvince && (
+            <motion.div
+              layout
+              style={{
+                padding: 16,
+                borderRadius: 8,
+                backgroundColor: '#e6f4ea',
+                border: '1px solid #3bcc6d',
+                color: '#2e7d32',
+                fontWeight: 'bold',
+                boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+              animate={{
+                height: selectedProvince ? mapHeight : "auto",
+                transition: { duration: 0.5, ease: "easeInOut" }
               }}
             >
-              {loadingCities ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <CircularProgress size={30} />
-                </Box>
-              ) : (() => {
-                const filtered = Object.entries(selectedProvince.cities)
-                  .filter(([city, count]) => count > 0 && city.includes(citySearch));
+              <Typography variant={isMobile ? 'subtitle1' : 'h6'} fontWeight="bold" mb={2} textAlign="center">
+                {selectedProvince.label} – {toPersianDigits(selectedProvince.count)} گزارش
+              </Typography>
 
-                const sorted = [...filtered].sort((a, b) =>
-                  sortMode === 'alphabetical'
-                    ? a[0].localeCompare(b[0], 'fa')
-                    : b[1] - a[1]
-                );
+              <TextField
+                placeholder="جستجوی شهر..."
+                size="small"
+                fullWidth
+                sx={{ mb: 1.5, bgcolor: 'white', borderRadius: 1 }}
+                value={citySearch}
+                onChange={e => setCitySearch(e.target.value)}
+              />
 
-                return sorted.length > 0 ? (
-                  sorted.map(([city, count]) => (
-           <li key={city} style={{ marginBottom: 8, fontSize: isMobile ? '14px' : '16px' }}>
-  • {city} – {toPersianDigits(count)} گزارش
-</li>
+              <Tooltip title="مرتب‌سازی">
+                <IconButton
+                  onClick={handleMenuClick}
+                  sx={{
+                    alignSelf: "flex-end",
+                    mb: 2,
+                    color: "#388e3c",
+                    border: "1px solid #388e3c",
+                    borderRadius: 2,
+                    p: 1
+                  }}
+                >
+                  <SortIcon />
+                </IconButton>
+              </Tooltip>
 
+              <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+                <MenuItem onClick={() => handleSortSelect("alphabetical")} sx={{ direction: "rtl" }}>
+                  {sortMode === "alphabetical" && (
+                    <ListItemIcon sx={{ minWidth: 0, ml: 1 }}>
+                      <CheckIcon sx={{ color: "#388e3c" }} />
+                    </ListItemIcon>
+                  )}
+                  <ListItemText
+                    primary="مرتب‌سازی الفبایی"
+                    sx={{
+                      textAlign: "right",
+                      color: sortMode === "alphabetical" ? "#388e3c" : "inherit",
+                      fontWeight: sortMode === "alphabetical" ? "bold" : "normal"
+                    }}
+                  />
+                </MenuItem>
+                <MenuItem onClick={() => handleSortSelect("count")} sx={{ direction: "rtl" }}>
+                  {sortMode === "count" && (
+                    <ListItemIcon sx={{ minWidth: 0, ml: 1 }}>
+                      <CheckIcon sx={{ color: "#388e3c" }} />
+                    </ListItemIcon>
+                  )}
+                  <ListItemText
+                    primary="بر اساس تعداد گزارش"
+                    sx={{
+                      textAlign: "right",
+                      color: sortMode === "count" ? "#388e3c" : "inherit",
+                      fontWeight: sortMode === "count" ? "bold" : "normal"
+                    }}
+                  />
+                </MenuItem>
+              </Menu>
 
-                  ))
-                ) : (
-                  <Typography align="center" color="text.secondary" mt={2}>
-                    گزارشی ثبت نشده است.
-                  </Typography>
-                );
-              })()}
-            </Box>
-          </Box>
-        )}
+              {/* لیست شهرها */}
+              <Box
+                component="ul"
+                sx={{
+                  listStyle: 'none',
+                  p: 0,
+                  m: 0,
+                  flexGrow: 1,
+                  overflowY: 'auto',
+                  fontSize: 14,
+                  color: '#1b5e20'
+                }}
+              >
+                {loadingCities ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    <CircularProgress size={30} />
+                  </Box>
+                ) : (() => {
+                  const filtered = Object.entries(selectedProvince.cities)
+                    .filter(([city, count]) => count > 0 && city.includes(citySearch));
+                  const sorted = [...filtered].sort((a, b) =>
+                    sortMode === 'alphabetical'
+                      ? a[0].localeCompare(b[0], 'fa')
+                      : b[1] - a[1]
+                  );
+                  return sorted.length > 0 ? (
+                    sorted.map(([city, count]) => (
+                      <li key={city} style={{ marginBottom: 8, fontSize: isMobile ? '14px' : '16px' }}>
+                        • {city} – {toPersianDigits(count)} گزارش
+                      </li>
+                    ))
+                  ) : (
+                    <Typography align="center" color="text.secondary" mt={2}>
+                      گزارشی ثبت نشده است.
+                    </Typography>
+                  );
+                })()}
+              </Box>
+            </motion.div>
+          )}
+        </motion.div>
       </Box>
     </Box>
   );
