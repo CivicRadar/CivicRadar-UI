@@ -42,6 +42,8 @@ const theme = createTheme({
 const About = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -55,8 +57,8 @@ const About = () => {
         <Box sx={{ 
           minHeight: '100vh', 
           bgcolor: '#f5f5f5', 
-          pt: 8, 
-          pb: 12,
+          pt: { xs: 12, sm: 16, md: 20 }, 
+          pb: { xs: 8, sm: 12, md: 16 },
           fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
         }}>
           <Container maxWidth="lg">
@@ -66,14 +68,14 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <Box sx={{ textAlign: 'center', mb: 8 }}>
+              <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 8 } }}>
                 <Typography
                   variant="h2"
                   sx={{
                     color: '#023',
                     fontWeight: 'bold',
-                    mb: 3,
-                    fontSize: { xs: '2rem', md: '3rem' },
+                    mb: { xs: 2, md: 3 },
+                    fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -83,9 +85,10 @@ const About = () => {
                   variant="h5"
                   sx={{
                     color: '#666',
-                    maxWidth: '800px',
+                    maxWidth: { xs: '100%', md: '800px' },
                     mx: 'auto',
                     lineHeight: 1.8,
+                    fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -100,14 +103,15 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <Box sx={{ mb: 8 }}>
+              <Box sx={{ mb: { xs: 6, md: 8 } }}>
                 <Typography
                   variant="h4"
                   sx={{
                     color: '#023',
                     fontWeight: 'bold',
-                    mb: 4,
+                    mb: { xs: 3, md: 4 },
                     textAlign: 'right',
+                    fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -119,15 +123,14 @@ const About = () => {
                     color: '#666',
                     lineHeight: 2,
                     textAlign: 'right',
-                    fontSize: '1.1rem',
+                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
                   ما در سامانه هوشمند گزارش مشکلات شهری، با هدف ایجاد پلی بین شهروندان و مسئولین شهری، 
                   بستری امن و کارآمد برای گزارش مشکلات شهری فراهم کرده‌ایم. با استفاده از تکنولوژی‌های 
                   روز و رویکردهای نوین، تلاش می‌کنیم تا مشارکت شهروندی را در بهبود محیط زندگی تقویت کنیم 
-                  و به ایجاد شهری بهتر و زندگی راحت‌تر برای همه کمک کنیم
-                  
+                  و به ایجاد شهری بهتر و زندگی راحت‌تر برای همه کمک کنیم.
                 </Typography>
               </Box>
             </motion.div>
@@ -138,14 +141,15 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <Box sx={{ mt: 8, mb: 8 }}>
+              <Box sx={{ mt: { xs: 6, md: 8 }, mb: { xs: 6, md: 8 } }}>
                 <Typography
                   variant="h4"
                   sx={{
                     color: '#023',
                     fontWeight: 'bold',
-                    mb: 4,
+                    mb: { xs: 3, md: 4 },
                     textAlign: 'center',
+                    fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -169,20 +173,23 @@ const About = () => {
                           sx={{
                             height: '100%',
                             bgcolor: 'white',
-                            borderRadius: 4,
+                            borderRadius: 8,
                             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                             transition: 'transform 0.3s ease-in-out',
                             '&:hover': {
-                              transform: 'translateY(-5px)'
-                            }
+                              transform: 'translateY(-8px)',
+                              boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+                            },
+                            p: { xs: 2, sm: 3 },
                           }}
                         >
-                          <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                          <CardContent sx={{ p: { xs: 1, sm: 2 }, textAlign: 'center' }}>
                             <Typography
                               variant="h6"
                               sx={{
                                 color: '#023',
                                 fontWeight: 'bold',
+                                fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' },
                                 fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                               }}
                             >
@@ -205,12 +212,12 @@ const About = () => {
             >
               <Box
                 sx={{
-                  mt: 8,
-                  p: 4,
+                  mt: { xs: 6, md: 8 },
+                  p: { xs: 2, sm: 3, md: 4 },
                   bgcolor: 'white',
-                  borderRadius: 4,
+                  borderRadius: 8,
                   boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                  textAlign: 'right'
+                  textAlign: 'right',
                 }}
               >
                 <Typography
@@ -218,7 +225,8 @@ const About = () => {
                   sx={{
                     color: '#023',
                     fontWeight: 'bold',
-                    mb: 3,
+                    mb: { xs: 2, md: 3 },
+                    fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -229,17 +237,19 @@ const About = () => {
                   sx={{
                     color: '#666',
                     lineHeight: 2,
-                    mb: 2,
+                    mb: { xs: 1, md: 2 },
+                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
                   برای ارتباط با ما می‌توانید از طریق راه‌های زیر اقدام کنید:
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, md: 2 } }}>
                   <Typography 
                     variant="body1" 
                     sx={{ 
                       color: '#666',
+                      fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                       fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                     }}
                   >
@@ -249,6 +259,7 @@ const About = () => {
                     variant="body1" 
                     sx={{ 
                       color: '#666',
+                      fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                       fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                     }}
                   >
@@ -258,6 +269,7 @@ const About = () => {
                     variant="body1" 
                     sx={{ 
                       color: '#666',
+                      fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                       fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                     }}
                   >
@@ -274,4 +286,4 @@ const About = () => {
   );
 };
 
-export default About; 
+export default About;

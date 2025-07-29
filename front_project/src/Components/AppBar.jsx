@@ -49,7 +49,7 @@ const AppBar = () => {
           right: 0,
           zIndex: 1000,
           direction: "ltr",
-          padding: isMobile ? '16px' : '24px',
+          padding: isMobile ? '12px' : '24px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -59,41 +59,43 @@ const AppBar = () => {
         }}
       >
         <motion.img 
-          src={logo} 
-          alt="Logo" 
-          style={{ 
-            height: "40px",
-            filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))',
-            cursor: 'pointer'
-          }}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          onClick={scrollToTop}
-          whileHover={{ scale: 1.05 }}
-        />
-        <motion.button
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            backdropFilter: "blur(10px)",
-            border: buttonBorder,
-            borderRadius: "4px",
-            padding: "8px 16px",
-            cursor: "pointer",
-            color: buttonTextColor,
-            fontSize: "1rem",
-            fontWeight: "bold",
-            transition: "all 0.3s ease",
-            fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
-          }}
-          whileHover={{
-            background: "rgba(255, 255, 255, 0.2)",
-            transform: "translateY(-2px)",
-          }}
-          onClick={() => navigate("/signuplogin")}
-        >
-          ورود / ثبت نام
-        </motion.button>
+                    src={logo} 
+                    alt="Logo" 
+                    style={{ 
+                      height: isMobile ? '40px' : '60px',
+                      filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))',
+                      cursor: 'pointer'
+                    }}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    onClick={scrollToTop}
+                    whileHover={{ scale: 1.05 }}
+                  />
+         <motion.button
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(10px)",
+              border: buttonBorder,
+              borderRadius: "6px",
+              padding: isMobile ? '8px 16px' : '10px 20px',
+              cursor: "pointer",
+              color: buttonTextColor,
+              fontSize: isMobile ? '1rem' : '1.1rem',
+              fontWeight: "bold",
+              transition: "all 0.3s ease",
+              fontFamily: "'Vazir', sans-serif",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+            }}
+            whileHover={{
+              background: "rgba(255, 255, 255, 0.2)",
+              transform: "translateY(-3px)",
+              boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+            }}
+            onClick={() => navigate("/signuplogin")}
+          >
+            ورود / ثبت نام
+          </motion.button>
       </motion.div>
     </ThemeProvider>
   );

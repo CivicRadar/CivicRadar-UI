@@ -43,6 +43,8 @@ const theme = createTheme({
 const Privacy = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -79,8 +81,8 @@ const Privacy = () => {
         <Box sx={{ 
           minHeight: '100vh', 
           bgcolor: '#f5f5f5', 
-          pt: 8, 
-          pb: 12,
+          pt: { xs: 12, sm: 16, md: 20 }, 
+          pb: { xs: 8, sm: 12, md: 16 },
           fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
         }}>
           <Container maxWidth="lg">
@@ -90,14 +92,14 @@ const Privacy = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <Box sx={{ textAlign: 'center', mb: 8 }}>
+              <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 8 } }}>
                 <Typography
                   variant="h2"
                   sx={{
                     color: '#023',
                     fontWeight: 'bold',
-                    mb: 3,
-                    fontSize: { xs: '2rem', md: '3rem' },
+                    mb: { xs: 2, md: 3 },
+                    fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -107,9 +109,10 @@ const Privacy = () => {
                   variant="h5"
                   sx={{
                     color: '#666',
-                    maxWidth: '800px',
+                    maxWidth: { xs: '100%', md: '800px' },
                     mx: 'auto',
                     lineHeight: 1.8,
+                    fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -119,15 +122,15 @@ const Privacy = () => {
             </motion.div>
 
             {/* Privacy Policy Content */}
-            <Box sx={{ mb: 8 }}>
+            <Box sx={{ mb: { xs: 6, md: 8 } }}>
               <Typography
                 variant="body1"
                 sx={{
                   color: '#666',
                   lineHeight: 2,
                   textAlign: 'right',
-                  fontSize: '1.1rem',
-                  mb: 4,
+                  fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
+                  mb: { xs: 3, md: 4 },
                   fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                 }}
               >
@@ -145,21 +148,22 @@ const Privacy = () => {
                   <Paper
                     elevation={3}
                     sx={{
-                      p: 4,
-                      mb: 4,
-                      borderRadius: 4,
+                      p: { xs: 2, sm: 3, md: 4 },
+                      mb: { xs: 3, md: 4 },
+                      borderRadius: 8,
                       bgcolor: 'white',
                       transition: 'transform 0.3s ease-in-out',
                       '&:hover': {
-                        transform: 'translateY(-5px)'
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
                       }
                     }}
                   >
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: 2, 
-                      mb: 2,
+                      gap: { xs: 1, md: 2 }, 
+                      mb: { xs: 1, md: 2 },
                       justifyContent: 'flex-start'
                     }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -170,6 +174,7 @@ const Privacy = () => {
                         sx={{
                           color: '#023',
                           fontWeight: 'bold',
+                          fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' },
                           fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                         }}
                       >
@@ -182,6 +187,7 @@ const Privacy = () => {
                         color: '#666',
                         lineHeight: 2,
                         textAlign: 'right',
+                        fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                         fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                       }}
                     >
@@ -201,10 +207,10 @@ const Privacy = () => {
               <Paper
                 elevation={3}
                 sx={{
-                  p: 4,
-                  borderRadius: 4,
+                  p: { xs: 2, sm: 3, md: 4 },
+                  borderRadius: 8,
                   bgcolor: 'white',
-                  textAlign: 'right'
+                  textAlign: 'right',
                 }}
               >
                 <Typography
@@ -212,7 +218,8 @@ const Privacy = () => {
                   sx={{
                     color: '#023',
                     fontWeight: 'bold',
-                    mb: 3,
+                    mb: { xs: 2, md: 3 },
+                    fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
@@ -223,17 +230,19 @@ const Privacy = () => {
                   sx={{
                     color: '#666',
                     lineHeight: 2,
-                    mb: 2,
+                    mb: { xs: 1, md: 2 },
+                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                     fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                   }}
                 >
                   اگر سوال یا نظری در مورد سیاست حریم خصوصی ما دارید، می‌توانید با ما تماس بگیرید:
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, md: 2 } }}>
                   <Typography 
                     variant="body1" 
                     sx={{ 
                       color: '#666',
+                      fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                       fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                     }}
                   >
@@ -243,6 +252,7 @@ const Privacy = () => {
                     variant="body1" 
                     sx={{ 
                       color: '#666',
+                      fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                       fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                     }}
                   >
@@ -252,6 +262,7 @@ const Privacy = () => {
                     variant="body1" 
                     sx={{ 
                       color: '#666',
+                      fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                       fontFamily: "Vazir, IranSans, IRANYekan, Vazirmatn, Shabnam, sans-serif",
                     }}
                   >
@@ -268,4 +279,4 @@ const Privacy = () => {
   );
 };
 
-export default Privacy; 
+export default Privacy;

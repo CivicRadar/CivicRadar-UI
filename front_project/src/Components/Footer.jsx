@@ -44,7 +44,7 @@ const Footer = () => {
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
               <Box sx={{ mb: 4, textAlign: 'right' }}>
-                <img src={logo} alt="Logo" style={{ height: '50px', marginBottom: '20px' }} />
+                <img src={logo} alt="Logo" style={{ height: '60px', marginBottom: '20px' }} />
                 <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                   سامانه هوشمند گزارش مشکلات شهری
                 </Typography>
@@ -90,7 +90,7 @@ const Footer = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-end' }}>
                   <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                    ایمیل: info@shahrsanj.ir
+                     info@shahrsanj.ir :ایمیل
                   </Typography>
                   <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                     تلفن: ۷۳۲۲۵۳۰۳-۰۲۱
