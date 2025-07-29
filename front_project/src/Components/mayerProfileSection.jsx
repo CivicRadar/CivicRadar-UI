@@ -177,21 +177,23 @@ export default function ProfileSection({
           <Divider sx={{ my: 2 }} />
 
           <Box sx={{ textAlign: "right", mb: 2, minWidth: 0 }}>
-            <Typography
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mb: 1,
-                wordBreak: "break-all",
-                overflowWrap: "break-word",
-                minWidth: 0,
-                maxWidth: "100%",
-                fontSize: { xs: "12px", sm: "16px" },
-              }}
-            >
-              <EmailIcon sx={{ ml: 1, color: "#4caf50" }} />
-              {profile?.Email || "ایمیل موجود نیست"}
-            </Typography>
+           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+    <EmailIcon sx={{ ml: 1, color: "#4caf50" }} />
+    <Typography
+      sx={{
+        direction: "ltr",          // Ensure the text is in LTR direction
+        textAlign: "left",        // Align the text to the left
+        fontSize: "1.2rem",       // Adjust font size if needed
+        maxWidth: "100%",         // Ensure it takes up available width
+        overflowX: "auto",        // Allow horizontal scroll if the text overflows
+        whiteSpace: "nowrap",     // Prevent line breaks
+        WebkitOverflowScrolling: "touch",  // Smooth scrolling for touch devices
+      }}
+    >
+      {profile?.Email || "ایمیل موجود نیست"}
+    </Typography>
+  </Box>
+
             <Typography
               sx={{
                 display: "flex",

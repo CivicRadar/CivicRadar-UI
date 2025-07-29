@@ -95,6 +95,8 @@ export default function Reports({ ReportClick }) {
   const toPersianDigits = (num) => {
   return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 };
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 6; // تعداد گزارش‌ها در هر صفحه
 
 
 const toggleSortOption = (option) => {
@@ -731,6 +733,11 @@ const toggleSortOption = (option) => {
   return new Date(a.DateTime) - new Date(b.DateTime);
 });
 
+const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+const currentReports = finalReports.slice(indexOfFirstItem, indexOfLastItem);
+const totalPages = Math.ceil(finalReports.length / itemsPerPage);
+
   useEffect(() => {
     const fullBaseUrl = `${import.meta.env.VITE_APP_HTTP_BASE}://${
       import.meta.env.VITE_APP_URL_BASE
@@ -1283,7 +1290,7 @@ const toggleSortOption = (option) => {
         className="my-masonry-grid"
         columnClassName="my-masonry-grid_column"
       >
-        {finalReports.map((report) => (
+        {currentReports.map((report) => (
           <Card
             key={report.id}
             sx={{
@@ -1704,6 +1711,113 @@ const toggleSortOption = (option) => {
           </Card>
         ))}
       </Masonry>
+
+      <Box sx={{ mt: 2, display: "flex", justifyContent: "center", gap: 1, flexWrap: "wrap" }}>
+  <Button
+    variant="contained"
+    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+    disabled={currentPage === 1}
+    sx={{ 
+      backgroundColor: "green", 
+      "&:hover": { backgroundColor: "#2e7d32" },
+      minWidth: { xs: 40, md: 50 },
+      fontSize: { xs: "0.8rem", md: "1rem" }
+    }}
+  >
+    قبلی
+  </Button>
+
+  {(() => {
+    const maxVisiblePages = 5;
+    const halfVisible = Math.floor(maxVisiblePages / 2);
+    let startPage = Math.max(1, currentPage - halfVisible);
+    let endPage = Math.min(totalPages, currentPage + halfVisible);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    if (startPage > 1) {
+      return [
+        <Button
+          key={1}
+          variant={currentPage === 1 ? "contained" : "outlined"}
+          onClick={() => setCurrentPage(1)}
+          sx={{
+            backgroundColor: currentPage === 1 ? "green" : "transparent",
+            "&:hover": { backgroundColor: "#2e7d32" },
+            minWidth: { xs: 30, md: 40 },
+            fontSize: { xs: "0.8rem", md: "1rem" }
+          }}
+        >
+          {toPersianDigits(1)}
+        </Button>,
+        startPage > 2 && <Typography key="start-ellipsis" sx={{ mx: 1, alignSelf: "center" }}>...</Typography>
+      ].concat(
+        Array.from({ length: endPage - startPage + 1 }, (_, i) => (
+          <Button
+            key={startPage + i}
+            variant={currentPage === startPage + i ? "contained" : "outlined"}
+            onClick={() => setCurrentPage(startPage + i)}
+            sx={{
+              backgroundColor: currentPage === startPage + i ? "green" : "transparent",
+              "&:hover": { backgroundColor: "#2e7d32" },
+              minWidth: { xs: 30, md: 40 },
+              fontSize: { xs: "0.8rem", md: "1rem" }
+            }}
+          >
+            {toPersianDigits(startPage + i)}
+          </Button>
+        ))
+      ).concat(
+        endPage < totalPages - 1 && <Typography key="end-ellipsis" sx={{ mx: 1, alignSelf: "center" }}>...</Typography>,
+        endPage < totalPages && (
+          <Button
+            key={totalPages}
+            variant={currentPage === totalPages ? "contained" : "outlined"}
+            onClick={() => setCurrentPage(totalPages)}
+            sx={{
+              backgroundColor: currentPage === totalPages ? "green" : "transparent",
+              "&:hover": { backgroundColor: "#2e7d32" },
+              minWidth: { xs: 30, md: 40 },
+              fontSize: { xs: "0.8rem", md: "1rem" }
+            }}
+          >
+            {toPersianDigits(totalPages)}
+          </Button>
+        )
+      );
+    }
+    return Array.from({ length: totalPages }, (_, i) => (
+      <Button
+        key={i + 1}
+        variant={currentPage === i + 1 ? "contained" : "outlined"}
+        onClick={() => setCurrentPage(i + 1)}
+        sx={{
+          backgroundColor: currentPage === i + 1 ? "green" : "transparent",
+          "&:hover": { backgroundColor: "#2e7d32" },
+          minWidth: { xs: 30, md: 40 },
+          fontSize: { xs: "0.8rem", md: "1rem" }
+        }}
+      >
+        {toPersianDigits(i + 1)}
+      </Button>
+    ));
+  })()}
+
+  <Button
+    variant="contained"
+    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+    disabled={currentPage === totalPages}
+    sx={{ 
+      backgroundColor: "green", 
+      "&:hover": { backgroundColor: "#2e7d32" },
+      minWidth: { xs: 40, md: 50 },
+      fontSize: { xs: "0.8rem", md: "1rem" }
+    }}
+  >
+    بعدی
+  </Button>
+</Box>
 
       {selectedReportForMap && (
         <MapWithClickDialog

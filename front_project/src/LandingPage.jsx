@@ -210,7 +210,7 @@ function LandingPage() {
             left: 0,
             right: 0,
             zIndex: 1000,
-            padding: isMobile ? '16px' : '24px',
+            padding: isMobile ? '12px' : '24px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -223,7 +223,7 @@ function LandingPage() {
             src={logo} 
             alt="Logo" 
             style={{ 
-              height: "40px",
+              height: isMobile ? '40px' : '60px',
               filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))',
               cursor: 'pointer'
             }}
@@ -238,17 +238,20 @@ function LandingPage() {
               background: "rgba(255, 255, 255, 0.1)",
               backdropFilter: "blur(10px)",
               border: buttonBorder,
-              borderRadius: "4px",
-              padding: "8px 16px",
+              borderRadius: "6px",
+              padding: isMobile ? '8px 16px' : '10px 20px',
               cursor: "pointer",
               color: buttonTextColor,
-              fontSize: "1rem",
+              fontSize: isMobile ? '1rem' : '1.1rem',
               fontWeight: "bold",
               transition: "all 0.3s ease",
+              fontFamily: "'Vazir', sans-serif",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
             }}
             whileHover={{
               background: "rgba(255, 255, 255, 0.2)",
-              transform: "translateY(-2px)",
+              transform: "translateY(-3px)",
+              boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
             }}
             onClick={() => navigate("/signuplogin")}
           >
@@ -1061,7 +1064,7 @@ function LandingPage() {
             <Grid container spacing={4}>
               <Grid item xs={12} md={4}>
                 <Box sx={{ mb: 4, textAlign: 'right' }}>
-                  <img src={logo} alt="Logo" style={{ height: '50px', marginBottom: '20px' }} />
+                  <img src={logo} alt="Logo" style={{ height: '60px', marginBottom: '20px' }} />
                   <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                     سامانه هوشمند گزارش مشکلات شهری
                   </Typography>
