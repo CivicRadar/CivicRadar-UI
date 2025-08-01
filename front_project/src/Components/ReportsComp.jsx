@@ -46,6 +46,7 @@ const ReportForm = () => {
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [provinceLocationLoading, setProvinceLocationLoading] = useState(false);
 
 
   const [formData, setFormData] = useState({
@@ -198,6 +199,71 @@ const ReportForm = () => {
     }
   };
 
+  // تابع دریافت اطلاعات موقعیت استان
+  const fetchProvinceLocation = async (provinceId) => {
+    setProvinceLocationLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/province-location/?Province_ID=${provinceId}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      if (!response.ok) throw new Error("خطا در دریافت اطلاعات موقعیت استان");
+      const data = await response.json();
+      setProvinceLocationLoading(false);
+      return data;
+    } catch (error) {
+      console.error("خطا در دریافت اطلاعات موقعیت استان:", error);
+      setProvinceLocationLoading(false);
+      // نمایش پیام خطا به کاربر
+      Swal.fire({
+        icon: "warning",
+        title: "هشدار",
+        text: "خطا در دریافت اطلاعات موقعیت استان. نقشه در موقعیت پیش‌فرض باقی می‌ماند.",
+        confirmButtonText: "باشه",
+        customClass: {
+          confirmButton: 'swal-confirm-btn',
+          title: 'swal-title',
+        }
+      });
+      return null;
+    }
+  };
+
+  // تابع به‌روزرسانی نقشه با اطلاعات استان
+  const updateMapWithProvinceLocation = (locationData) => {
+    if (locationData && locationData.Longitude && locationData.Latitude) {
+      const newLat = parseFloat(locationData.Latitude);
+      const newLng = parseFloat(locationData.Longitude);
+      const newZoom = 13 + (locationData.Zoom || 13); // افزایش سطح زوم برای نمایش بهتر
+
+      // به‌روزرسانی فرم
+      setFormData(prev => ({
+        ...prev,
+        lat: newLat,
+        lng: newLng
+      }));
+
+      // به‌روزرسانی نقشه اصلی
+      if (mapRef.current) {
+        const { map, marker } = mapRef.current;
+        marker.setLatLng([newLat, newLng]);
+        map.setView([newLat, newLng], newZoom);
+      }
+
+      // به‌روزرسانی نقشه در دیالوگ
+      if (mapDialogRef.current) {
+        const { map } = mapDialogRef.current;
+        map.setView([newLat, newLng], newZoom);
+      }
+
+      // دریافت آدرس جدید
+      fetchAddress(newLat, newLng);
+    }
+  };
+
   const getCurrentLocation = () => {
     setMapLoading(true);
     if (navigator.geolocation) {
@@ -237,6 +303,17 @@ const ReportForm = () => {
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
+
+    // اگر استان تغییر کرد، اطلاعات موقعیت آن را دریافت کن
+    if (name === 'province' && value) {
+      // پاک کردن شهر انتخاب شده چون شهرها برای هر استان متفاوت هستند
+      setFormData(prev => ({ ...prev, city: null }));
+      fetchProvinceLocation(value.id).then(locationData => {
+        if (locationData) {
+          updateMapWithProvinceLocation(locationData);
+        }
+      });
+    }
   };
 
   const validateCurrentStep = () => {
@@ -741,6 +818,20 @@ Swal.fire({
                       options={{ key: MAP_API_KEY, center: [formData.lat, formData.lng], zoom: 13 }}
                       onInit={handleMapInit}
                     />
+                  )}
+                  {provinceLocationLoading && (
+                    <Box sx={{
+                      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      bgcolor: 'rgba(255,255,255,0.8)', zIndex: 1, borderRadius: '4px'
+                    }}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <CircularProgress color="success" />
+                        <Typography sx={{ mt: 1, fontSize: 14, color: '#666' }}>
+                          در حال دریافت اطلاعات موقعیت استان...
+                        </Typography>
+                      </Box>
+                    </Box>
                   )}
                   {formData.mapAddress && (
                     <Paper elevation={1} sx={{
