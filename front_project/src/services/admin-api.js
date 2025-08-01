@@ -9,6 +9,12 @@ const getProvince = async () => {
         },
         credentials: "include", 
       });
+
+       if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData?.message || "Failed to fetch provinces");
@@ -32,6 +38,11 @@ export const getCity = async (ProvinceID) => {
             credentials: "include",
             body: JSON.stringify({ ProvinceID: ProvinceID }),
         });
+
+         if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -63,6 +74,11 @@ export const addMayor = async (MayorData) => {
             cities: MayorData.cities
           }),
       });
+
+       if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
       if (!response.ok) {
         const errorData = await response.json();

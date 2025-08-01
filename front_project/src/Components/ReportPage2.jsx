@@ -166,7 +166,10 @@ export default function ReportPageCon() {
         method: "DELETE",
         credentials: "include",
       });
-  
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (response.ok) {
         navigate("/signuplogin");
       } else {

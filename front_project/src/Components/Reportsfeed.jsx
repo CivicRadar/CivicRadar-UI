@@ -176,7 +176,10 @@ const itemsPerPage = 6;
         method: "GET",
         credentials: "include",
       });
-      
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (!res.ok) {
         setLoginDialogOpen(true);
         return;
@@ -214,6 +217,10 @@ for (let r of data) {
   const res = await fetch(`${BASE}/communicate/like/?CityProblemID=${r.id}`, {
     method: "GET", credentials: "include"
   });
+  if (res.status === 429) {
+    window.location.href = "/429";
+    return;
+    }
   if (res.ok) {
     const { Like } = await res.json();
     statusMap[r.id] = Like; // true|false|null
@@ -307,6 +314,11 @@ const submitViolationReport = async () => {
         Report: reportReason,
       }),
     });
+
+    if (res.status === 429) {
+      window.location.href = "/429";
+      return;
+      }
 
     if (res.ok) {
       Swal.fire({

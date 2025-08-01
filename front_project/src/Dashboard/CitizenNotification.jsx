@@ -40,6 +40,11 @@ export default function CitizenNotification() {
         credentials: 'include',
       });
 
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (response.status === 401 || response.status === 403) {
         console.error("User not authenticated, redirecting to login...");
         window.location.href = '/signuplogin';
@@ -70,6 +75,11 @@ export default function CitizenNotification() {
         credentials: 'include',
       });
 
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (response.ok) {
         const data = await response.json();
         console.log("Notification Activation State:", data);
@@ -95,6 +105,11 @@ export default function CitizenNotification() {
         credentials: 'include',
         body: JSON.stringify({ Activate: newState }),
       });
+
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
       if (response.ok) {
         await fetchNotificationActivationState();
@@ -125,6 +140,11 @@ export default function CitizenNotification() {
           credentials: 'include',
           body: JSON.stringify({ NotificationID: notif.id }),
         });
+
+        if (response.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
 
         if (!response.ok) {
           const errorText = await response.text();

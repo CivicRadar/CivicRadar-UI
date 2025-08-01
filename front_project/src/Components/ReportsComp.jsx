@@ -104,7 +104,8 @@ const ReportForm = () => {
       try {
         const response = await getProvince();
         setProvinces(response);
-      } catch {
+      } 
+      catch {
         setErrors(prev => ({
           ...prev,
           province: "خطا در دریافت استان‌ها"
@@ -390,6 +391,12 @@ const ReportForm = () => {
         body: formDataAI,
       }
     );
+
+    if (res.status === 429) {
+      window.location.href = "/429";
+      return;
+      }
+
     if (!res.ok) throw new Error("خطا در اعتبارسنجی AI");
     return await res.json();
   };

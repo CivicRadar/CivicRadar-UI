@@ -7,6 +7,10 @@ const getProfile = async () => {
         },
         credentials: "include", 
       });
+       if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData?.message || "Failed to fetch profile");

@@ -216,6 +216,11 @@ const MayorsList = () => {
         credentials: "include",
       });
 
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!response.ok) {
         throw new Error("خطا در دریافت اطلاعات مسئولین");
       }
@@ -246,6 +251,11 @@ const MayorsList = () => {
         credentials: "include",
         body: JSON.stringify({ id }),
       });
+
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
       if (!response.ok) {
         throw new Error("خطا در حذف مسئول");
@@ -350,6 +360,11 @@ const MayorsList = () => {
           Password: selectedMayor.Password,
         }),
       });
+
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
   
       if (!response.ok) {
         throw new Error("خطا در به‌روزرسانی اطلاعات مسئول");

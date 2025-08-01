@@ -140,6 +140,11 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
         `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`,
         { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
       );
+
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       
       if (!res.ok) throw new Error(res.statusText);
       const data = await res.json();
@@ -156,6 +161,11 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
             `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${c.id}`,
             { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
           );
+
+          if (rRes.status === 429) {
+            window.location.href = "/429";
+            return;
+            }
           if (!rRes.ok) throw new Error(rRes.statusText);
           const rData = await rRes.json();
           console.log("reaction", rData);
@@ -214,12 +224,23 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
           body: JSON.stringify(payload),
         }
       );
+      if (postRes.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!postRes.ok) throw new Error(postRes.statusText);
       // re-fetch comments
       const res = await fetch(
         `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment/?CityProblemID=${cityProblemId}`,
         { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
       );
+
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!res.ok) throw new Error(res.statusText);
       const data = await res.json();
       // same mapping as before
@@ -235,6 +256,13 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
             `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/comment-reaction/?CommentID=${c.id}`,
             { headers: { Authorization: `Bearer ${AUTH_TOKEN}` }, credentials: "include" }
           );
+
+          if (rRes.status === 429) {
+            window.location.href = "/429";
+            return;
+            }
+
+
           if (!rRes.ok) throw new Error(rRes.statusText);
           const rData = await rRes.json();
           return {
@@ -289,6 +317,12 @@ const isLoggedIn = Boolean(citizen || mayor || admin);
           body: JSON.stringify(payload),
         }
       );
+
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!res.ok) throw new Error(res.statusText);
   
       // ۲. بلافاصله UI رو آپدیت کن

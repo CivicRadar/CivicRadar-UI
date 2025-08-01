@@ -97,7 +97,11 @@ export default function ConfirmPassword() {
           }),
         }
       );
-
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+        
       if (response.ok) {
         const data = await response.json();
         setSuccess("رمز عبور با موفقیت تغییر یافت اکنون می‌توانید وارد شوید");

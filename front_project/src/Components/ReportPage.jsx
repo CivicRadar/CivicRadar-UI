@@ -100,6 +100,11 @@ const handleProfileClick = () => {
         FullName: response.FullName || "",
         Picture: null,
       });
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (response.Picture) {
         setImagePreview(
           `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`
@@ -180,7 +185,10 @@ const handleProfileClick = () => {
         method: "DELETE",
         credentials: "include",
       });
-  
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (response.ok) {
         navigate("/signuplogin");
       } else {

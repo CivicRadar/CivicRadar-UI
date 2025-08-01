@@ -171,6 +171,10 @@ export default function CitizenDashboard() {
         if (response.Picture) {
           setImagePreview(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`);
         }
+        if (response.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
       } catch (error) {
         console.error("Error fetching profile:", error);
         navigate("/signuplogin");
@@ -184,6 +188,10 @@ export default function CitizenDashboard() {
           method: "GET",
           credentials: "include",
         });
+        if (response.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
         if (response.ok) {
           const data = await response.json();
           setReports(data);
@@ -219,7 +227,10 @@ export default function CitizenDashboard() {
         method: "DELETE",
         credentials: "include",
       });
-
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (response.ok) {
         navigate("/signuplogin");
       } else {
@@ -288,6 +299,11 @@ export default function CitizenDashboard() {
           }),
         });
       }
+
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
       if (response.ok) {
         const updatedProfile = await response.json();

@@ -86,6 +86,10 @@ export default function EngagementSection({ reportData }) {
           body: JSON.stringify({ CityProblemID: reportData.id, Like: true }),
         }
       );
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (!res.ok) throw new Error();
       // به‌روزرسانی لوکال
       if (likeStatus === true) {
@@ -113,6 +117,11 @@ export default function EngagementSection({ reportData }) {
           body: JSON.stringify({ CityProblemID: reportData.id, Like: false }),
         }
       );
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!res.ok) throw new Error();
       // به‌روزرسانی لوکال
       if (likeStatus === false) {

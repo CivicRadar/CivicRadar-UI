@@ -197,6 +197,11 @@ const toggleSortOption = (option) => {
         }
       );
 
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       const result = await response.json();
 
       if (response.ok) {
@@ -247,6 +252,10 @@ const toggleSortOption = (option) => {
           credentials: "include", // برای ارسال اطلاعات نشست
         }
       );
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
       const result = await response.json();
 
