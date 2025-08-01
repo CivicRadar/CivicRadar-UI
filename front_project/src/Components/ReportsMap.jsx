@@ -65,6 +65,12 @@ export default function ReportsMap() {
         const response = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/mayor-prioritize/`, {
           credentials: "include",
         });
+
+        if (response.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
+          
         if (!response.ok) {
           throw new Error("Failed to fetch reports");
         }

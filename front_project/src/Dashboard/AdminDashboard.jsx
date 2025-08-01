@@ -103,6 +103,11 @@ useEffect(() => {
       const res = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/stats/counter/`, {
         credentials: "include",
       });
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (!res.ok) throw new Error("خطا در دریافت آمار");
       const data = await res.json();
       setDashboardData({
@@ -190,6 +195,10 @@ useEffect(() => {
           }
         );
       }
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
 
       if (response.ok) {
         const updatedProfile = await response.json();

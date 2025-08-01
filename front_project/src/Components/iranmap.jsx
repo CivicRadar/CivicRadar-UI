@@ -86,6 +86,11 @@ const handleSortSelect = (mode) => {
       const res = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/provinces-report-count/`, {
         credentials: 'include'
       });
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       const data = await res.json();
 
       const tempMapData = {};
@@ -121,6 +126,12 @@ const handleSortSelect = (mode) => {
       const res = await fetch(`${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/complex-report-count/?Province_ID=${id}`, {
         credentials: 'include'
       });
+
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       const citiesArr = await res.json();
       const cities = {};
       citiesArr.forEach(c => {

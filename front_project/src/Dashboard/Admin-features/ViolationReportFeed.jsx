@@ -93,6 +93,11 @@ const handleUnmarkViolation = async (id) => {
       body: JSON.stringify({ CityProblemID: id }),
     });
 
+    if (res.status === 429) {
+      window.location.href = "/429";
+      return;
+      }
+
     if (!res.ok) throw new Error("رفع وضعیت تخلف ناموفق بود");
 
     setReports((prev) => prev.filter((r) => r.id !== id));
@@ -127,6 +132,11 @@ const handleDeleteReport = async () => {
       credentials: "include",
       body: JSON.stringify({ CityProblemID: reportToDelete }),
     });
+
+    if (res.status === 429) {
+      window.location.href = "/429";
+      return;
+      }
 
     if (!res.ok) throw new Error("حذف گزارش با مشکل مواجه شد");
 
@@ -172,6 +182,12 @@ useEffect(() => {
           `${BASE}/communicate/like/?CityProblemID=${r.id}`,
           { method: 'GET', credentials: 'include' }
         );
+
+        if (res.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
+
         if (res.ok) {
           const { Like } = await res.json();
           statusMap[r.id] = Like;

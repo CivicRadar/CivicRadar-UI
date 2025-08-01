@@ -215,6 +215,10 @@ const AuthPage = () => {
           body: JSON.stringify({ Email: formData.Email, Type: "Citizen" }),
         }
       );
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       const data = await res.json();
       if (res.ok) {
         setEmailSentMessage(

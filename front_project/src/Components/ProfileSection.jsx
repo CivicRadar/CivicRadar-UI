@@ -71,6 +71,10 @@ export default function ProfileSection({
           `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/supervise/citizen-report-problem/`,
           { credentials: "include" }
         );
+        if (res.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
         if (!res.ok) throw new Error("خطا در دریافت گزارشات!");
         const data = await res.json();
         setUserReports(data);

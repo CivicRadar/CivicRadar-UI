@@ -78,7 +78,10 @@ export default function TeamRegistrationForm() {
           credentials: "include",
           body: JSON.stringify(payload),
         }
-      );
+      ); if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.detail || "خطای سرور");

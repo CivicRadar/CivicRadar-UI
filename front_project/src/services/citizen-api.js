@@ -10,6 +10,11 @@ const getReportData = async (reportID) => {
           credentials: "omit", // چون endpoint عمومی است نیازی به کوکی نیست
         }
       );
+
+       if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
   
       if (!response.ok) {
         const errorData = await response.json();

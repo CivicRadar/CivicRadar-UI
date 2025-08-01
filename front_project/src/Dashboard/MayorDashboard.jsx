@@ -119,6 +119,12 @@ export default function MayorDashboard() {
         FullName: response.FullName || "",
         Picture: null,
       });
+
+      if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
       if (response.Picture) {
         setImagePreview(
           `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}${response.Picture}`
@@ -154,10 +160,15 @@ export default function MayorDashboard() {
         `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/communicate/mayor-notifications/`,
         { credentials: "include" }
       );
+      if (res.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
       const data = await res.json();
       console.log("hi" + data);
       setNotifications(data);
-    } catch (err) {
+    }
+     catch (err) {
       console.error("خطا در دریافت نوتیفیکیشن:", err);
     }
   };
@@ -218,7 +229,12 @@ export default function MayorDashboard() {
             body: formData,
             credentials: "include",
           }
+          
         );
+        if (response.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
       } else {
         response = await fetch(
           `${import.meta.env.VITE_APP_HTTP_BASE}://${import.meta.env.VITE_APP_URL_BASE}/auth/profile/`,
@@ -229,6 +245,10 @@ export default function MayorDashboard() {
             body: JSON.stringify({ FullName: editedProfile.FullName }),
           }
         );
+        if (response.status === 429) {
+          window.location.href = "/429";
+          return;
+          }
       }
 
       if (response.ok) {

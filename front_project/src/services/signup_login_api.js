@@ -20,6 +20,12 @@ export const signupCitizen = async (citizenData) => {
             body: JSON.stringify(citizenData),
         });
 
+        if (response.status === 429) {
+         window.location.href = "../Components/TooManyReq";
+         return;
+        }
+
+
         if (!response.ok) {
             const errorData = await response.json();
             console.log("Signup Error Response:", errorData);
@@ -58,6 +64,12 @@ export const loginCitizenapi = async (loginData) => {
             credentials: "include", 
             body: JSON.stringify(loginData),
         });
+        
+            if (response.status === 429) {
+        window.location.href = "/429";
+        return;
+        }
+
 
         if (!response.ok) {
             const errorData = await response.json();

@@ -11,6 +11,7 @@ import PrivateRoute from "./Components/PrivateRoute"; // وارد کردن Priva
 import VerifyEmail from "./verifyemail";
 import ConfirmPassword from "./ConfirmPassword"; // Import the new component
 import ReportPageCon from "./Components/ReportPage";
+import Error429Page from "./Components/Error429Page";
 import ReportPageCon2 from "./Components/ReportPage2";
 import About from "./Pages/About";
 import Privacy from "./Pages/Privacy";
@@ -25,6 +26,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/signuplogin" element={<AuthPage />} />
+              <Route path="/429" element={<Error429Page />} />
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
               {/* New route for ConfirmPassword page */}
